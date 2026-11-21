@@ -1,6 +1,6 @@
 // Assert-based self-check for the dough maths. Run with `npm test`.
 import assert from 'node:assert/strict';
-import { calculateDoughRecipe, convertYeastPercent } from './doughCalculator';
+import { calculateDoughRecipe, calculateDoughBallWeight, convertYeastPercent, PIZZA_STYLES } from './doughCalculator';
 import type { DoughCalculatorInputs, PrefermentConfig } from '../types';
 
 const base: DoughCalculatorInputs = {
@@ -72,5 +72,12 @@ near(run(base.preferment).recipe.ingredients.reduce((s, i) => s + i.weight, 0), 
 assert.equal(convertYeastPercent(0.3, 'instant', 'active_dry'), 0.4);
 assert.equal(convertYeastPercent(0.3, 'instant', 'fresh'), 1.2);
 assert.equal(convertYeastPercent(0.2, 'fresh', 'instant'), 0.05);
+
+// Neapolitan preset: a 30 cm pizza gets a ball inside the AVPN range (200-280 g).
+{
+  const tf = PIZZA_STYLES.find((s) => s.id === 'neapolitan')!.defaultThicknessFactor;
+  const ball = calculateDoughBallWeight('neapolitan', 30, undefined, undefined, tf);
+  assert.ok(ball >= 200 && ball <= 280, `neapolitan ball ${ball} g`);
+}
 
 console.log('doughCalculator checks passed');

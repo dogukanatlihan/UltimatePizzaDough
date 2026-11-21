@@ -28,7 +28,8 @@ const fromInstant = (percent: number, to: YeastType) => convertYeastPercent(perc
 // These values represent the thickness factor in ounces per square inch
 const DEFAULT_INPUTS: DoughCalculatorInputs = {
   numberOfPizzas: 1,
-  ballWeight: 250,
+  // Derived from the same preset the Neapolitan card loads, so the first screen and the card agree.
+  ballWeight: calculateDoughBallWeight('neapolitan', 30, undefined, undefined, 0.08),
   pizzaStyle: 'neapolitan',
   hydration: 60,
   salt: 2.8,
@@ -38,7 +39,7 @@ const DEFAULT_INPUTS: DoughCalculatorInputs = {
   sugar: 0,
   diastaticMalt: 0,
   doughEnhancer: 0,
-  thicknessFactor: 0.06,
+  thicknessFactor: 0.08,
   pizzaDiameter: 30,
   panWidth: 30,
   panLength: 40,

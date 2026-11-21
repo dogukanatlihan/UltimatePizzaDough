@@ -44,7 +44,7 @@ export const PIZZA_STYLES: PizzaStyle[] = [
     id: 'neapolitan',
     name: 'Neapolitan',
     defaultHydration: 60, // 55.5-62.5% (AVPN standard)
-    defaultThicknessFactor: 0.06, // Thin crust in oz/in²
+    defaultThicknessFactor: 0.08, // 248 g ball at 30 cm; AVPN balls are 200-280 g
     description: 'Traditional Italian style with a thin center and puffy, airy crust.'
   },
   {
