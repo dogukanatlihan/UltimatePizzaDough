@@ -10,25 +10,22 @@ Visit the live application: [Make Better Pizza](https://makebetter.pizza)
 
 ## ✨ Features
 
-- **Multiple Pizza Styles**: Neapolitan, New York, Sicilian, Detroit, Pan, and Focaccia
-- **Shape Selection**: Focaccia can be round or rectangular
-- **Preferment Options**: None, Poolish, Biga, Sponge, and Sourdough
-- **Yeast Type Selection**: Active Dry, Instant, and Fresh yeast with automatic conversion
-- **Measurement Units**: Toggle between metric (cm) and imperial (inches)
-- **Responsive Design**: Works on desktop, tablet, and mobile devices
-- **Dark/Light Mode**: Choose your preferred theme
-- **Detailed Recipe Display**: Complete ingredient list with baker's percentages
-- **Step-by-Step Instructions**: Clear method for preparing your dough
-- **PWA Support**: Install as a standalone app on mobile devices
+- **Three steps**: choose a style, set the size, read the recipe. One step per screen on a phone, three columns on a desktop
+- **Six styles**: Neapolitan, New York, Sicilian, Detroit, Pan, and Focaccia, each with its own presets
+- **Remembers your last recipe**: a returning visitor lands on the recipe they left (saved in the browser only)
+- **Fine-tuning one tap away**: salt, yeast type and amount, oil, sugar, malt, and a preferment (poolish, biga, sponge, sourdough)
+- **Weights like a kitchen scale**: grams with ounces beside them and baker's percentages
+- **Method and baking steps** with the real weights in the text
+- **English and Turkish**, light and dark themes, centimetres or inches
+- **Installable** on a phone home screen
 
 ## 🛠️ Technology Stack
 
-- **React**: UI library
-- **TypeScript**: Type-safe JavaScript
-- **Framer Motion**: Animations and transitions
-- **Emotion + plain CSS**: Styling (`src/design/design.css` for the main UI)
-- **Vite**: Build tool
-- **Google Analytics**: User interaction tracking
+- **React + TypeScript + Vite**
+- **Plain CSS** with custom properties (`src/index.css` tokens, `src/design/design.css` components)
+- **Motion**: browser View Transitions, `@number-flow/react`, `@formkit/auto-animate`
+- **Checks**: `npm test` runs assert-based checks of the dough maths and the rules around it (`src/utils/*.check.ts`)
+- **Google Analytics**: user interaction tracking
 
 ## 📊 Analytics
 
@@ -40,9 +37,9 @@ The application includes Google Analytics to track user interactions and improve
 - Yeast type selections
 - Unit changes (inches/centimeters)
 - Theme changes (light/dark)
-- Tab views (ingredients/method)
+- Step views (style/size/recipe)
 - Recipe generations
-- Reset actions
+- Start over, copy and print actions
 - Shape toggles (round/rectangular)
 
 ## 🚀 Getting Started

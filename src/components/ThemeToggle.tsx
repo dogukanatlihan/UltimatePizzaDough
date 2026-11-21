@@ -1,105 +1,22 @@
-import React from 'react';
-import styled from '@emotion/styled';
 import { useTheme } from '../context/ThemeContext';
-import { motion } from 'framer-motion';
+import { useTranslation } from '../context/TranslationContext';
 
-interface ThemedProps {
-  theme?: string;
-}
-
-const ToggleContainer = styled.button<ThemedProps>`
-  background: ${props => props.theme === 'dark' ? 'var(--inputBackground)' : 'var(--inputBackground)'};
-  border: 1.5px solid var(--border);
-  border-radius: 30px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: 0 auto;
-  overflow: hidden;
-  padding: 3px;
-  position: relative;
-  width: 60px;
-  height: 30px;
-  transition: all 0.3s ease;
-
-  &:hover {
-    border-color: var(--border-strong);
-  }
-
-  &:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px var(--primary-soft);
-  }
-`;
-
-const Icons = styled.div<ThemedProps>`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-  pointer-events: none;
-
-  svg {
-    height: 15px;
-    width: 15px;
-    transition: all 0.3s linear;
-
-    &:first-of-type {
-      color: ${props => props.theme === 'dark' ? '#F5F3CE' : 'var(--lightText)'};
-      margin-left: 4px;
-    }
-
-    &:nth-of-type(2) {
-      color: ${props => props.theme === 'dark' ? '#F5F3CE' : '#F1C40F'};
-      margin-right: 4px;
-    }
-  }
-`;
-
-const ToggleButton = styled(motion.div)<ThemedProps>`
-  background: var(--primary);
-  border-radius: 50%;
-  height: 22px;
-  width: 22px;
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  box-shadow: 0 1px 4px var(--primary-glow);
-  z-index: 2;
-`;
-
-const ThemeToggle: React.FC = () => {
+export default function ThemeToggle() {
   const { theme, toggleTheme } = useTheme();
-
+  const { t } = useTranslation();
+  const dark = theme === 'dark';
   return (
-    <ToggleContainer
-      onClick={toggleTheme}
-      theme={theme}
-      aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-    >
-      <Icons theme={theme}>
-        {/* Moon Icon */}
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-          <path fillRule="evenodd" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z" clipRule="evenodd" />
-        </svg>
-
-        {/* Sun Icon */}
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.757a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z" />
-        </svg>
-      </Icons>
-      <ToggleButton
-        theme={theme}
-        animate={{
-          x: theme === 'dark' ? 32 : 0
-        }}
-        transition={{ type: "spring", stiffness: 700, damping: 30 }}
-      />
-    </ToggleContainer>
+    <button type="button" className="tool" onClick={toggleTheme} aria-label={t(dark ? 'theme.toLight' : 'theme.toDark')}>
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        {dark ? (
+          <>
+            <circle cx="12" cy="12" r="4" />
+            <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+          </>
+        ) : (
+          <path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7z" />
+        )}
+      </svg>
+    </button>
   );
-};
-
-export default ThemeToggle;
+}

@@ -1,14 +1,14 @@
 import { ThemeProvider } from './context/ThemeContext';
 import { TranslationProvider } from './context/TranslationContext';
 import ToastProvider from './components/ToastProvider';
-import { Workshop } from './design/Workshop';
+import { TrePassi } from './design/TrePassi';
 
 export default function App() {
   return (
     <ThemeProvider>
       <TranslationProvider>
         <ToastProvider>
-          <Workshop />
+          <TrePassi />
         </ToastProvider>
       </TranslationProvider>
     </ThemeProvider>

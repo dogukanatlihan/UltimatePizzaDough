@@ -949,4 +949,24 @@ export const translations: Record<string, Record<Language, string>> = {
     en: 'Switch to English',
     tr: 'İngilizceye geç'
   },
+  'time.poolish': {
+    en: '12–16 h',
+    tr: '12–16 sa'
+  },
+  'time.sponge': {
+    en: '3–5 h',
+    tr: '3–5 sa'
+  },
+  'time.dough': {
+    en: '30 min + proof',
+    tr: '30 dk + mayalanma'
+  },
 };
+
+// {name} placeholders are filled from `vars`. A key with no entry comes back as the key.
+export const translate = (language: Language, key: string, vars?: Record<string, string | number>): string => {
+  const text = translations[key]?.[language] || key;
+  return vars ? text.replace(/\{(\w+)\}/g, (whole, name) => (name in vars ? String(vars[name]) : whole)) : text;
+};
+
+export type Translate = (key: string, vars?: Record<string, string | number>) => string;

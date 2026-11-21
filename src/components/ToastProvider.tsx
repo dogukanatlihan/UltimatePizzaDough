@@ -1,117 +1,58 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
-import styled from '@emotion/styled';
-import { motion, AnimatePresence } from 'framer-motion';
+import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react';
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
-export interface Toast {
-  id: string;
+interface ToastOptions {
+  /** Milliseconds on screen. Default 4000. */
+  duration?: number;
+  /** One button inside the toast, for example Undo. */
+  action?: { label: string; onAction: () => void };
+}
+
+interface Toast extends ToastOptions {
+  id: number;
   message: string;
   type: ToastType;
-  duration?: number;
 }
 
 interface ToastContextType {
-  showToast: (message: string, type: ToastType, duration?: number) => void;
-  removeToast: (id: string) => void;
+  showToast: (message: string, type?: ToastType, options?: ToastOptions) => void;
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
-const ToastContainer = styled.div`
-  position: fixed;
-  top: 1rem;
-  right: 1rem;
-  z-index: 10000;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  pointer-events: none;
-  
-  @media (max-width: 768px) {
-    top: 0.5rem;
-    right: 0.5rem;
-    left: 0.5rem;
-  }
-`;
-
-const ToastItem = styled(motion.div)<{ type: ToastType }>`
-  background-color: ${props => {
-    switch (props.type) {
-      case 'success': return 'var(--success, #34c759)';
-      case 'error': return 'var(--error, #ff3b30)';
-      case 'warning': return 'var(--warning, #ff9500)';
-      case 'info':
-      default: return 'var(--primary, #0071e3)';
-    }
-  }};
-  color: white;
-  padding: 1rem 1.5rem;
-  border-radius: 14px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  font-size: 0.9rem;
-  font-weight: 500;
-  max-width: 400px;
-  min-width: 250px;
-  pointer-events: auto;
-  cursor: pointer;
-  
-  @media (max-width: 768px) {
-    min-width: auto;
-    max-width: none;
-  }
-`;
-
-const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export default function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const nextId = useRef(1);
 
-  const showToast = useCallback((message: string, type: ToastType, duration = 4000) => {
-    const id = Math.random().toString(36).substr(2, 9);
-    const newToast: Toast = { id, message, type, duration };
-    
-    setToasts(prev => [...prev, newToast]);
+  const remove = useCallback((id: number) => setToasts((list) => list.filter((toast) => toast.id !== id)), []);
 
-    if (duration > 0) {
-      setTimeout(() => {
-        removeToast(id);
-      }, duration);
-    }
-  }, []);
-
-  const removeToast = useCallback((id: string) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
-  }, []);
+  const showToast = useCallback<ToastContextType['showToast']>((message, type = 'info', options = {}) => {
+    const id = nextId.current++;
+    // One message at a time: a new toast replaces the old one, so they never stack over the controls.
+    setToasts([{ id, message, type, ...options }]);
+    setTimeout(() => remove(id), options.duration ?? 4000);
+  }, [remove]);
 
   return (
-    <ToastContext.Provider value={{ showToast, removeToast }}>
+    <ToastContext.Provider value={{ showToast }}>
       {children}
-      <ToastContainer>
-        <AnimatePresence>
-          {toasts.map(toast => (
-            <ToastItem
-              key={toast.id}
-              type={toast.type}
-              initial={{ x: '100%', opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: '100%', opacity: 0 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              onClick={() => removeToast(toast.id)}
-            >
-              {toast.message}
-            </ToastItem>
-          ))}
-        </AnimatePresence>
-      </ToastContainer>
+      <div className="toasts" role="status" aria-live="polite">
+        {toasts.map((toast) => (
+          <div key={toast.id} className={`toast toast-${toast.type}`}>
+            <span>{toast.message}</span>
+            {toast.action && (
+              <button type="button" onClick={() => { toast.action?.onAction(); remove(toast.id); }}>{toast.action.label}</button>
+            )}
+          </div>
+        ))}
+      </div>
     </ToastContext.Provider>
   );
-};
+}
 
 export const useToast = () => {
   const context = useContext(ToastContext);
-  if (!context) {
-    throw new Error('useToast must be used within a ToastProvider');
-  }
+  if (!context) throw new Error('useToast must be used within a ToastProvider');
   return context;
 };
-
-export default ToastProvider;

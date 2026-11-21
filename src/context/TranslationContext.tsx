@@ -1,11 +1,11 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 
-import { translations, type Language } from './translations';
+import { translate, type Language, type Translate } from './translations';
 
 interface TranslationContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: (key: string, vars?: Record<string, string | number>) => string;
+  t: Translate;
 }
 
 const TranslationContext = createContext<TranslationContextType | undefined>(undefined);
@@ -25,11 +25,7 @@ export const TranslationProvider: React.FC<{ children: React.ReactNode }> = ({ c
     document.documentElement.setAttribute('lang', language);
   }, [language]);
 
-  // {name} placeholders are filled from `vars`.
-  const t = (key: string, vars?: Record<string, string | number>): string => {
-    const text = translations[key]?.[language] || key;
-    return vars ? text.replace(/\{(\w+)\}/g, (whole, name) => (name in vars ? String(vars[name]) : whole)) : text;
-  };
+  const t: Translate = (key, vars) => translate(language, key, vars);
 
   return (
     <TranslationContext.Provider value={{ language, setLanguage, t }}>

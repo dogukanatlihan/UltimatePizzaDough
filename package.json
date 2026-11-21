@@ -25,19 +25,14 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "test": "esbuild src/utils/all.check.ts --bundle --platform=node --log-level=error --outfile=node_modules/.tmp/all.check.cjs && node node_modules/.tmp/all.check.cjs",
+    "test": "esbuild src/utils/all.check.ts --bundle --platform=node --loader:.webp=empty --log-level=error --outfile=node_modules/.tmp/all.check.cjs && node node_modules/.tmp/all.check.cjs",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.0",
     "@formkit/auto-animate": "^0.10.2",
     "@number-flow/react": "^0.6.2",
-    "@types/styled-components": "^5.1.34",
-    "framer-motion": "10.16.4",
     "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "styled-components": "^6.1.15"
+    "react-dom": "18.2.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",

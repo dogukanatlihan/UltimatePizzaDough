@@ -4,7 +4,10 @@ import type { DoughCalculatorInputs } from '../types';
 import { sizeBounds, usualBatch } from './ranges';
 import { formatGrams, formatOunces } from './format';
 import { parseSavedInputs, loadSavedInputs, saveInputs, clearSavedInputs } from './savedRecipe';
-import { translations } from '../context/translations';
+import { translations, translate } from '../context/translations';
+import { calculateDoughRecipe } from './doughCalculator';
+import { gramsNumber, formatPercent } from './format';
+import { methodStages, bakeInfo, copyText, sizeText } from '../design/recipeText';
 
 // ---- Weights read like a kitchen scale
 assert.equal(formatGrams(457.3), '457 g');
@@ -96,6 +99,50 @@ const placeholders = (text: string) => (text.match(/\{\w+\}/g) ?? []).sort().joi
 for (const [key, pair] of Object.entries(translations)) {
   assert.ok(pair.en.trim() && pair.tr.trim(), `empty string: ${key}`);
   assert.equal(placeholders(pair.en), placeholders(pair.tr), `placeholders differ: ${key}`);
+}
+
+// ---- Percent: English writes 60%, Turkish writes %60
+assert.equal(formatPercent(60), '60%');
+assert.equal(formatPercent(2.25, 'tr'), '%2,25');
+assert.equal(formatPercent(0.05), '0.05%');
+
+// ---- Recipe in words: one formatter for the card, the method and the copied text
+const tEn = (key: string, vars?: Record<string, string | number>) => translate('en', key, vars);
+const tTr = (key: string, vars?: Record<string, string | number>) => translate('tr', key, vars);
+const ny = { ...good, numberOfPizzas: 4 };
+const nyPoolish = { ...ny, yeast: 0.3, preferment: { type: 'poolish' as const, percentage: 40, hydration: 100 } };
+{
+  const rec = calculateDoughRecipe(nyPoolish);
+  for (const [t, locale] of [[tEn, 'en'], [tTr, 'tr']] as const) {
+    const stages = methodStages(rec, t, locale);
+    assert.equal(stages.length, 2);
+    for (const stage of stages) {
+      assert.ok(stage.title && stage.time);
+      for (const step of stage.steps) assert.ok(!step.includes('{'), `unfilled placeholder: ${step}`);
+    }
+  }
+  // The method states the same flour weight the card shows.
+  assert.ok(methodStages(rec, tEn, 'en')[1].steps[1].includes(`${gramsNumber(rec.mainDough!.flour)}g`));
+  assert.ok(copyText(rec, nyPoolish, tEn, 'en').includes('Poolish'));
+}
+{
+  const rec = calculateDoughRecipe(ny);
+  assert.equal(methodStages(rec, tEn, 'en').length, 1);
+  const lines = copyText(rec, ny, tEn, 'en').split('\n');
+  assert.equal(lines[0], 'New York — 4 × 558 g (45 cm)');
+  assert.equal(lines[1], 'Hydration 65%');
+  assert.ok(lines.includes(`• Flour: ${gramsNumber(rec.totalFlour)} g (100%)`));
+}
+assert.equal(sizeText(ny, 'en'), '45 cm');
+assert.equal(sizeText({ ...ny, useInches: true, pizzaDiameter: 17.7 }, 'en'), '17.7″');
+assert.equal(sizeText({ ...ny, isRectangular: true, panWidth: 25, panLength: 36 }, 'tr'), '25 × 36 cm');
+{
+  const bake = bakeInfo('neapolitan', tEn);
+  assert.equal(bake.time, '60–90 s');
+  assert.equal(bake.temp, '500°C / 932°F');
+  assert.equal(bake.steps.length, 4);
+  assert.ok(bake.flour);
+  assert.equal(bakeInfo('ny', tTr).time, '8–10 dk');
 }
 
 console.log('rules checks passed');
