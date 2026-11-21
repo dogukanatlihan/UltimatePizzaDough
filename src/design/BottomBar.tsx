@@ -10,7 +10,7 @@ interface Props {
 }
 
 /** Phones only: the result and the next step, always in reach. */
-export function BottomBar({ line1, line2, primary, onPrimary, onBack }: Props) {
+export function BottomBar({ line1, line2, primary, onPrimary, onBack }: Readonly<Props>) {
   const { t } = useTranslation();
   return (
     <div className="bar">

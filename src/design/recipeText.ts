@@ -24,8 +24,8 @@ const sentenceCase = (text: string) => text.charAt(0) + text.slice(1).toLowerCas
 
 const yeastLabel = (recipe: DoughRecipe, t: Translate): string => {
   const name = recipe.ingredients.find((i) => ingredientKey(i.name) === 'yeast')?.name.toLowerCase() ?? '';
-  const type = name.includes('fresh') ? 'form.fresh' : name.includes('active') ? 'form.active' : 'form.instant';
-  return sentenceCase(`${t(type)} ${t('ingredient.yeast')}`);
+  const type = ['fresh', 'active'].find((kind) => name.includes(kind)) ?? 'instant';
+  return sentenceCase([t(`form.${type}`), t('ingredient.yeast')].join(' '));
 };
 
 const label = (key: IngredientKey, recipe: DoughRecipe, t: Translate) =>
@@ -68,17 +68,18 @@ export const sizeText = (inputs: DoughCalculatorInputs, locale: string): string 
 // First key that has a string: a style's own wording, then the shared one.
 const pick = (t: Translate, ...keys: string[]): string => t(keys.find((key) => t(key) !== key) ?? keys[keys.length - 1]);
 
-const IN_PAN = ['sicilian', 'detroit', 'pan', 'focaccia'];
+const IN_PAN = new Set(['sicilian', 'detroit', 'pan', 'focaccia']);
 
 // How each style goes from mixed dough to oven-ready, as its sources prescribe:
 // Neapolitan — AVPN/EU direct method, risen at room temperature, no refrigerator.
 // New York — Lehmann: balled straight after mixing, then 1-3 days cold.
 // Pan styles — one piece per pan, cold ferment, then a final rise in the oiled pan.
-const finishKeys = (styleId: string): string[] =>
-  styleId === 'neapolitan' ? ['knead', 'rest', 'balls', 'proof'].map((k) => `method.neapolitan.${k}`)
-  : styleId === 'ny' ? ['knead', 'balls', 'cold', 'temper'].map((k) => `method.ny.${k}`)
-  : IN_PAN.includes(styleId) ? ['mainDough.step4', 'mainDough.step5', 'method.pan.piece', 'method.pan.cold', `method.pan.proof.${styleId}`]
-  : [4, 5, 6, 7, 8].map((n) => `mainDough.step${n}`);
+const finishKeys = (styleId: string): string[] => {
+  if (styleId === 'neapolitan') return ['knead', 'rest', 'balls', 'proof'].map((k) => `method.neapolitan.${k}`);
+  if (styleId === 'ny') return ['knead', 'balls', 'cold', 'temper'].map((k) => `method.ny.${k}`);
+  if (IN_PAN.has(styleId)) return ['mainDough.step4', 'mainDough.step5', 'method.pan.piece', 'method.pan.cold', `method.pan.proof.${styleId}`];
+  return [4, 5, 6, 7, 8].map((n) => `mainDough.step${n}`);
+};
 
 export const methodStages = (recipe: DoughRecipe, t: Translate, locale: string, styleId = ''): Stage[] => {
   // {flour} and {flourOz} style placeholders: the strings already carry the "g" and "oz" units.
@@ -137,23 +138,26 @@ export const bakeInfo = (styleId: string, t: Translate): { temp: string; time: s
   const time = BAKE_TIME[styleId];
   return {
     temp: BAKE_TEMP[styleId] ?? '',
-    time: time ? `${time.from}–${time.to} ${t(`unit.${time.unit}`)}` : '',
+    time: time ? [`${time.from}–${time.to}`, t(`unit.${time.unit}`)].join(' ') : '',
     flour: has(`flour.${styleId}`) ? t(`flour.${styleId}`) : null,
     // A style's own step, then the step shared by the styles that rise in their pan, then the general one.
-    steps: [1, 2, 3, 4].map((n) => pick(t, `baking.step${n}.${styleId}`, ...(IN_PAN.includes(styleId) ? [`baking.step${n}.inPan`] : []), `baking.step${n}`)),
+    steps: [1, 2, 3, 4].map((n) => pick(t, `baking.step${n}.${styleId}`, ...(IN_PAN.has(styleId) ? [`baking.step${n}.inPan`] : []), `baking.step${n}`)),
   };
 };
 
 export const copyText = (recipe: DoughRecipe, inputs: DoughCalculatorInputs, t: Translate, locale: string): string => {
-  const line = (r: Row) => `• ${r.label}: ${formatGrams(r.g, { yeast: r.key === 'yeast', locale })}${r.pct === undefined ? '' : ` (${formatPercent(r.pct, locale)})`}`;
+  const line = (r: Row) => {
+    const weight = formatGrams(r.g, { yeast: r.key === 'yeast', locale });
+    return r.pct === undefined ? `• ${r.label}: ${weight}` : `• ${r.label}: ${weight} (${formatPercent(r.pct, locale)})`;
+  };
   const stages = stageRows(recipe, t);
   return [
-    `${t(`style.${inputs.pizzaStyle}`)} — ${inputs.numberOfPizzas} × ${formatGrams(inputs.ballWeight, { locale })} (${sizeText(inputs, locale)})`,
+    [t(`style.${inputs.pizzaStyle}`), '—', inputs.numberOfPizzas, '×', formatGrams(inputs.ballWeight, { locale }), `(${sizeText(inputs, locale)})`].join(' '),
     t('copy.hydration', { pct: formatPercent(inputs.hydration, locale) }),
     '',
     ...ingredientRows(recipe, t).map(line),
     '',
-    `${t('recipe.totalDough')}: ${formatGrams(totalDough(recipe), { locale })}`,
+    [`${t('recipe.totalDough')}:`, formatGrams(totalDough(recipe), { locale })].join(' '),
     ...(stages ? ['', t('stage.dayBefore', { name: stages.name }), ...stages.first.map(line), '', t('stage.bakingDay'), ...stages.main.map(line)] : []),
   ].join('\n');
 };

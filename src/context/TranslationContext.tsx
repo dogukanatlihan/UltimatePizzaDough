@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useMemo } from 'react';
 
 import { translate, type Language, type Translate } from './translations';
 
@@ -25,10 +25,14 @@ export const TranslationProvider: React.FC<{ children: React.ReactNode }> = ({ c
     document.documentElement.setAttribute('lang', language);
   }, [language]);
 
-  const t: Translate = (key, vars) => translate(language, key, vars);
+  // One object per language, so consumers re-render only when the language changes.
+  const value = useMemo(() => {
+    const t: Translate = (key, vars) => translate(language, key, vars);
+    return { language, setLanguage, t };
+  }, [language]);
 
   return (
-    <TranslationContext.Provider value={{ language, setLanguage, t }}>
+    <TranslationContext.Provider value={value}>
       {children}
     </TranslationContext.Provider>
   );

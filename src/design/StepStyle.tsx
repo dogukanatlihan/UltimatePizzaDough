@@ -9,7 +9,7 @@ interface Props {
   morphId: string;
 }
 
-export function StepStyle({ value, onPick, morphId }: Props) {
+export function StepStyle({ value, onPick, morphId }: Readonly<Props>) {
   const { t } = useTranslation();
   return (
     <div className="pick">

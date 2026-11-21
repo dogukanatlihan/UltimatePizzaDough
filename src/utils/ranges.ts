@@ -21,8 +21,8 @@ export const RANGES = {
 } as const satisfies Record<string, Range>;
 
 // The yeast slider's range follows the yeast type, so an amount converted to another type still fits.
-export const yeastRange = (type: YeastType): Range =>
-  type === 'fresh' ? RANGES.yeastFresh : type === 'active_dry' ? RANGES.yeastActiveDry : RANGES.yeast;
+const YEAST_RANGE: Record<YeastType, Range> = { instant: RANGES.yeast, active_dry: RANGES.yeastActiveDry, fresh: RANGES.yeastFresh };
+export const yeastRange = (type: YeastType): Range => YEAST_RANGE[type] ?? RANGES.yeast;
 
 // Sizes are kept in the unit on screen, so the bounds depend on it: 15–60cm ≈ 6–24″, 10–60cm ≈ 4–24″.
 export const sizeBounds = (useInches: boolean) =>

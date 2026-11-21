@@ -11,12 +11,12 @@
   display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "brand tools" "tabs tabs"; align-items: center; gap: 8px 12px; }
 .brand { grid-area: brand; font: 800 19px/1.1 var(--font-display); letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .top-tools { grid-area: tools; display: flex; gap: 6px; }
-.tool { display: grid; place-items: center; min-width: 44px; height: 44px; padding: 0; border: 0; border-radius: 12px; background: rgba(255, 255, 255, .12); color: #fff; }
+.tool { display: grid; place-items: center; min-width: 44px; height: 44px; padding: 0; border: 0; border-radius: 12px; background: var(--header-tool); color: #fff; }
 .tool-text { padding: 0 10px; font: 700 14px/1 var(--font-display); letter-spacing: .04em; }
 .top :focus-visible { outline-color: #fff; }
 .tabs { grid-area: tabs; display: flex; gap: 6px; }
 .tab { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 10px 0 6px; border: 0; border-radius: 999px;
-  background: rgba(255, 255, 255, .1); color: #D3E5D7; font-weight: 600; font-size: 14px; }
+  background: var(--header-tab); color: #D3E5D7; font-weight: 600; font-size: 14px; }
 .tab-n { display: grid; place-items: center; flex: none; width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid currentColor; font: 700 13px/1 var(--font-display); }
 .tab[aria-current="step"] { background: var(--card); color: var(--ink); }
 .tab[aria-current="step"] .tab-n { background: var(--basil); border-color: var(--basil); color: var(--on-basil); }
@@ -62,7 +62,8 @@
 .pair { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
 @media (min-width: 480px) { .pair { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; } }
 .field { min-width: 0; }
-.field-label { display: block; font-weight: 600; }
+fieldset.field { margin: 0; padding: 0; border: 0; }
+.field-label { display: block; padding: 0; font-weight: 600; }
 .field-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .field-value { font: 700 18px/1.2 var(--font-display); letter-spacing: -.01em; text-align: right; white-space: nowrap; }
 .field-note { margin-top: 6px; font-size: 14px; color: var(--ink-2); }
@@ -189,76 +190,82 @@ input[type="range"]::-moz-range-thumb { width: 24px; height: 24px; border-radius
 
 /* ============ Motion ============
    Rules: interactions 200ms or less, transitions 300ms or less, ease-out; transform and opacity only
-   (the disclosure panel is the one exception); never from a slider; reduced motion leaves short fades. */
+   (the disclosure panel is the one exception); never from a slider. All of it is declared only for visitors
+   who have not asked for reduced motion, so nothing has to be switched off again. */
 
-/* Photos fade in over their average colour. */
-.photo img { opacity: 0; transition: opacity 250ms ease-out; }
-.photo img[data-loaded="true"] { opacity: 1; }
+@media (prefers-reduced-motion: no-preference) {
+  /* Photos fade in over their average colour. */
+  .photo img { opacity: 0; transition: opacity 250ms ease-out; }
+  .photo img[data-loaded="true"] { opacity: 1; }
 
-/* Press feedback. */
-.btn, .style-card, .counter button, .seg button, .tab, .tool, .chip, .bar-back, .disc-head button {
-  transition: transform 120ms var(--ease-out), background-color 150ms ease-out, border-color 150ms ease-out, color 150ms ease-out, box-shadow 150ms ease-out; }
-.btn:active, .style-card:active, .counter button:active:not(:disabled), .seg button:active, .tab:active, .tool:active, .chip:active, .bar-back:active { transform: scale(.97); }
+  /* Press feedback. */
+  .btn, .style-card, .counter button, .seg button, .tab, .tool, .chip, .bar-back, .disc-head button {
+    transition: transform 120ms var(--ease-out), background-color 150ms ease-out, border-color 150ms ease-out, color 150ms ease-out, box-shadow 150ms ease-out; }
+  .btn:active, .style-card:active, .counter button:active:not(:disabled), .seg button:active, .tab:active, .tool:active, .chip:active, .bar-back:active { transform: scale(.97); }
 
-/* The check on the chosen style. */
-.style-check { display: grid; opacity: 0; transform: scale(.9); transition: opacity 180ms var(--ease-out), transform 180ms var(--ease-out); }
-.style-card[aria-pressed="true"] .style-check { opacity: 1; transform: none; }
+  /* The check on the chosen style. */
+  .style-check { display: grid; opacity: 0; transform: scale(.9); transition: opacity 180ms var(--ease-out), transform 180ms var(--ease-out); }
+  .style-card[aria-pressed="true"] .style-check { opacity: 1; transform: none; }
 
-/* Selection pill. */
-.seg-pill[data-slide="true"] { transition: transform 250ms var(--spring), width 250ms var(--ease-out), height 250ms var(--ease-out); }
+  /* Selection pill. */
+  .seg-pill[data-slide="true"] { transition: transform 250ms var(--spring), width 250ms var(--ease-out), height 250ms var(--ease-out); }
 
-/* Disclosure: the row grows from 0 to its content height. */
-.disc-panel { transition: grid-template-rows 250ms var(--ease-out); }
-.disc-clip { transition: visibility 0s linear 250ms; }
-.disc[data-open="true"] .disc-clip { transition-delay: 0s; }
-.disc-icon::after { transition: transform 200ms var(--ease-out); }
+  /* Disclosure: the row grows from 0 to its content height. */
+  .disc-panel { transition: grid-template-rows 250ms var(--ease-out); }
+  .disc-clip { transition: visibility 0s linear 250ms; }
+  .disc[data-open="true"] .disc-clip { transition-delay: 0s; }
+  .disc-icon::after { transition: transform 200ms var(--ease-out); }
 
-/* Copy: the check draws itself. */
-.draw path { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 260ms var(--ease-out) forwards; }
-@keyframes draw { to { stroke-dashoffset: 0; } }
+  /* Copy: the check draws itself. */
+  .draw path { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 260ms var(--ease-out) forwards; }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
 
-/* Toast enters from below; its exit is a Web Animation in ToastProvider. */
-.toast { transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out); }
-@starting-style { .toast { opacity: 0; transform: translateY(12px); } }
+  /* Toast enters from below; its exit is a Web Animation in ToastProvider. */
+  .toast { transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out); }
+  @starting-style { .toast { opacity: 0; transform: translateY(12px); } }
 
-/* Step changes on phones (View Transitions; browsers without them change step at once).
-   The header and the bottom bar keep their place; the page slides a little and fades; the style photo travels. */
-.top { view-transition-name: top-bar; }
-.bar { view-transition-name: bottom-bar; }
-@media (max-width: 1039px) {
-  .steps[data-step="2"] .chip-photo, .steps[data-step="3"] .recipe-photo { view-transition-name: style-photo; }
+  /* Step changes on phones (View Transitions; browsers without them change step at once).
+     The header and the bottom bar keep their place; the page slides a little and fades; the style photo travels. */
+  .top { view-transition-name: top-bar; }
+  .bar { view-transition-name: bottom-bar; }
+  @media (max-width: 1039px) {
+    .steps[data-step="2"] .chip-photo, .steps[data-step="3"] .recipe-photo { view-transition-name: style-photo; }
+  }
+  ::view-transition-old(root), ::view-transition-new(root) { animation-duration: 250ms; animation-timing-function: cubic-bezier(.22, 1, .36, 1); }
+  html[data-dir="forward"]::view-transition-old(root) { animation-name: vt-fade-out, vt-out-left; }
+  html[data-dir="forward"]::view-transition-new(root) { animation-name: vt-fade-in, vt-in-right; }
+  html[data-dir="back"]::view-transition-old(root) { animation-name: vt-fade-out, vt-out-right; }
+  html[data-dir="back"]::view-transition-new(root) { animation-name: vt-fade-in, vt-in-left; }
+  ::view-transition-group(style-photo) { animation-duration: 280ms; animation-timing-function: cubic-bezier(.22, 1, .36, 1); }
+  ::view-transition-old(style-photo), ::view-transition-new(style-photo) { height: 100%; object-fit: cover; }
+  @keyframes vt-fade-out { to { opacity: 0; } }
+  @keyframes vt-fade-in { from { opacity: 0; } }
+  @keyframes vt-out-left { to { transform: translateX(-28px); } }
+  @keyframes vt-in-right { from { transform: translateX(28px); } }
+  @keyframes vt-out-right { to { transform: translateX(28px); } }
+  @keyframes vt-in-left { from { transform: translateX(-28px); } }
 }
-::view-transition-old(root), ::view-transition-new(root) { animation-duration: 250ms; animation-timing-function: cubic-bezier(.22, 1, .36, 1); }
-html[data-dir="forward"]::view-transition-old(root) { animation-name: vt-fade-out, vt-out-left; }
-html[data-dir="forward"]::view-transition-new(root) { animation-name: vt-fade-in, vt-in-right; }
-html[data-dir="back"]::view-transition-old(root) { animation-name: vt-fade-out, vt-out-right; }
-html[data-dir="back"]::view-transition-new(root) { animation-name: vt-fade-in, vt-in-left; }
-::view-transition-group(style-photo) { animation-duration: 280ms; animation-timing-function: cubic-bezier(.22, 1, .36, 1); }
-::view-transition-old(style-photo), ::view-transition-new(style-photo) { height: 100%; object-fit: cover; }
-@keyframes vt-fade-out { to { opacity: 0; } }
-@keyframes vt-fade-in { from { opacity: 0; } }
-@keyframes vt-out-left { to { transform: translateX(-28px); } }
-@keyframes vt-in-right { from { transform: translateX(28px); } }
-@keyframes vt-out-right { to { transform: translateX(28px); } }
-@keyframes vt-in-left { from { transform: translateX(-28px); } }
 
+/* Reduced motion: nothing moves. Photos and toasts keep a short fade. */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation: none !important; transition-property: opacity, visibility !important; transition-duration: 120ms !important; }
-  .btn:active, .style-card:active, .counter button:active, .seg button:active, .tab:active, .tool:active, .chip:active, .bar-back:active { transform: none; }
-  .draw path { stroke-dashoffset: 0; }
-  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+  .photo img { opacity: 0; transition: opacity 120ms ease-out; }
+  .photo img[data-loaded="true"] { opacity: 1; }
+  .toast { transition: opacity 120ms ease-out; }
+  @starting-style { .toast { opacity: 0; } }
 }
 
 /* ---- Print: the recipe and how to make it, nothing else */
 @media print {
-  .top, .bar, .foot, .toasts, #s1, #s2, #tune, .actions, .kicker, .disc-icon { display: none !important; }
+  /* These repeat the screen selectors, so they win by coming later in the file. */
+  .top, .bar, .foot, .toasts, .actions, .kicker, .disc-icon { display: none; }
+  .steps[data-step] #s1, .steps[data-step] #s2, .steps[data-step] #tune { display: none; }
   .app { padding: 0; }
   /* Always print dark on white, whatever theme is on screen. */
   :root, [data-theme="dark"] { --ground: #fff; --card: #fff; --ink: #000; --ink-2: #333; --line: #999; --basil: #1C5A3A; --basil-tint: #eee; --warn-bg: #fff; --warn-ink: #8A2114; }
   .steps { display: block; max-width: none; padding: 0; }
-  #card, #guide { display: block !important; max-height: none; overflow: visible; position: static; }
+  .steps[data-step] #card, .steps[data-step] #guide { display: block; max-height: none; overflow: visible; position: static; }
   .recipe, .disc { box-shadow: none; border: 1px solid #999; margin-bottom: 12px; break-inside: avoid; }
   .recipe-head { background: none; color: #000; } .recipe-sub { color: #333; }
-  .disc-panel { grid-template-rows: 1fr !important; }
-  .disc-clip { visibility: visible !important; }
+  .disc-panel { grid-template-rows: 1fr; }
+  .disc-clip { visibility: visible; }
 }

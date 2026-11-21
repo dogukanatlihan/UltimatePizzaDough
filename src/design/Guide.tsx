@@ -12,7 +12,7 @@ interface Props {
   onPrint: () => void;
 }
 
-export function Guide({ recipe, styleId, onCopy, onPrint }: Props) {
+export function Guide({ recipe, styleId, onCopy, onPrint }: Readonly<Props>) {
   const { t, language } = useTranslation();
   const [copied, setCopied] = useState(false);
   const stages = methodStages(recipe, t, language, styleId);
@@ -31,7 +31,7 @@ export function Guide({ recipe, styleId, onCopy, onPrint }: Props) {
         {stages.map((stage) => (
           <div className="how" key={stage.title}>
             <h4>{stage.title}<span>{stage.time}</span></h4>
-            <ol>{stage.steps.map((step, i) => <li key={i}>{step}</li>)}</ol>
+            <ol>{stage.steps.map((step) => <li key={step}>{step}</li>)}</ol>
           </div>
         ))}
       </Disclosure>
@@ -42,7 +42,7 @@ export function Guide({ recipe, styleId, onCopy, onPrint }: Props) {
           <div><dt>{t('bake.time')}</dt><dd className="num">{bake.time}</dd></div>
         </dl>
         {bake.flour && <p className="tip">{bake.flour}</p>}
-        <div className="how"><ol>{bake.steps.map((step, i) => <li key={i}>{step}</li>)}</ol></div>
+        <div className="how"><ol>{bake.steps.map((step) => <li key={step}>{step}</li>)}</ol></div>
       </Disclosure>
 
       <div className="actions">

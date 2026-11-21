@@ -11,7 +11,7 @@ interface Props {
   inputs: DoughCalculatorInputs;
 }
 
-export function RecipeCard({ recipe, inputs }: Props) {
+export function RecipeCard({ recipe, inputs }: Readonly<Props>) {
   const { t, language } = useTranslation();
   const stages = stageRows(recipe, t);
   const total = totalDough(recipe);

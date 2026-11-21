@@ -15,17 +15,16 @@ interface CounterProps {
 }
 
 /** − value + for whole steps (pizzas, sizes). */
-export function Counter({ label, text, onLess, onMore, lessLabel, moreLabel, lessDisabled, moreDisabled }: CounterProps) {
-  const id = useId();
+export function Counter({ label, text, onLess, onMore, lessLabel, moreLabel, lessDisabled, moreDisabled }: Readonly<CounterProps>) {
   return (
-    <div className="field">
-      <span className="field-label" id={id}>{label}</span>
-      <div className="counter" role="group" aria-labelledby={id}>
+    <fieldset className="field">
+      <legend className="field-label">{label}</legend>
+      <div className="counter">
         <button type="button" onClick={onLess} disabled={lessDisabled} aria-label={lessLabel}>−</button>
         <output className="num" aria-live="polite">{text}</output>
         <button type="button" onClick={onMore} disabled={moreDisabled} aria-label={moreLabel}>+</button>
       </div>
-    </div>
+    </fieldset>
   );
 }
 
@@ -40,7 +39,7 @@ interface RangeFieldProps {
   note?: ReactNode;
 }
 
-export function RangeField({ label, value, range: [min, max, step], onChange, valueText, ends, note }: RangeFieldProps) {
+export function RangeField({ label, value, range: [min, max, step], onChange, valueText, ends, note }: Readonly<RangeFieldProps>) {
   const id = useId();
   const shown = clamp(value, min, max);
   return (
@@ -78,8 +77,7 @@ interface SegmentedProps<T extends string> {
 
 interface Pill { x: number; y: number; w: number; h: number; slide: boolean }
 
-export function Segmented<T extends string>({ label, value, options, onChange }: SegmentedProps<T>) {
-  const id = useId();
+export function Segmented<T extends string>({ label, value, options, onChange }: Readonly<SegmentedProps<T>>) {
   const box = useRef<HTMLDivElement>(null);
   const [pill, setPill] = useState<Pill | null>(null);
   const labels = options.map((o) => o.label).join('|');
@@ -100,9 +98,9 @@ export function Segmented<T extends string>({ label, value, options, onChange }:
   }, [value, labels]);
 
   return (
-    <div className="field">
-      <span className="field-label" id={id}>{label}</span>
-      <div className="seg" role="group" aria-labelledby={id} ref={box}>
+    <fieldset className="field">
+      <legend className="field-label">{label}</legend>
+      <div className="seg" ref={box}>
         {pill && <span className="seg-pill" data-slide={pill.slide} aria-hidden="true" style={{ transform: `translate(${pill.x}px, ${pill.y}px)`, width: pill.w, height: pill.h }} />}
         {options.map((o) => (
           // Pressing the chosen option changes nothing; some handlers reload presets on every call.
@@ -111,7 +109,7 @@ export function Segmented<T extends string>({ label, value, options, onChange }:
           </button>
         ))}
       </div>
-    </div>
+    </fieldset>
   );
 }
 
@@ -123,7 +121,7 @@ interface DisclosureProps {
 }
 
 /** A section that folds. Built from a button and a panel (not <details>) so the height can animate in every browser. */
-export function Disclosure({ title, subtitle, defaultOpen = false, children }: DisclosureProps) {
+export function Disclosure({ title, subtitle, defaultOpen = false, children }: Readonly<DisclosureProps>) {
   const id = useId();
   const [open, setOpen] = useState(defaultOpen);
   return (

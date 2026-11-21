@@ -11,7 +11,10 @@ const number = (value: number, maximumFractionDigits: number, locale = 'en'): st
 };
 
 // Weights the way a kitchen scale reads: whole grams from 10 g, one decimal below, two below 1 g and for yeast.
-export const gramsDigits = (g: number, yeast = false): number => (yeast || Math.abs(g) < 1 ? 2 : Math.abs(g) < 10 ? 1 : 0);
+export const gramsDigits = (g: number, yeast = false): number => {
+  if (yeast || Math.abs(g) < 1) return 2;
+  return Math.abs(g) < 10 ? 1 : 0;
+};
 
 export const gramsNumber = (g: number, { yeast = false, locale }: WeightOptions = {}): string =>
   Number.isFinite(g) ? number(g, gramsDigits(g, yeast), locale) : '0';
@@ -21,7 +24,8 @@ export const formatGrams = (g: number, opts?: WeightOptions): string => `${grams
 export const ouncesNumber = (g: number, locale?: string): string => {
   const oz = Number.isFinite(g) ? gramsToOunces(g) : 0;
   // Under a tenth of an ounce (a pinch of yeast) two decimals round to 0: show three.
-  return number(oz, Math.abs(oz) < 0.1 ? 3 : Math.abs(oz) < 1 ? 2 : 1, locale);
+  if (Math.abs(oz) < 0.1) return number(oz, 3, locale);
+  return number(oz, Math.abs(oz) < 1 ? 2 : 1, locale);
 };
 
 export const formatOunces = (g: number, locale?: string): string => `${ouncesNumber(g, locale)} oz`;

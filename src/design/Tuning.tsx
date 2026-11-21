@@ -6,11 +6,14 @@ import type { Calc } from './TrePassi';
 import { Disclosure, RangeField, Segmented } from './controls';
 import { prefermentName, weightOf, type IngredientKey } from './recipeText';
 
-const feelKey = (hydration: number) =>
-  hydration < 60 ? 'water.feel.firm' : hydration <= 68 ? 'water.feel.classic' : hydration <= 75 ? 'water.feel.soft' : 'water.feel.wet';
+const feelKey = (hydration: number) => {
+  if (hydration < 60) return 'water.feel.firm';
+  if (hydration <= 68) return 'water.feel.classic';
+  return hydration <= 75 ? 'water.feel.soft' : 'water.feel.wet';
+};
 
 /** Water, fine-tuning and preferment. Every slider shows the weight it produces, so its effect is on screen while it moves. */
-export function Tuning({ calc, recipe }: { calc: Calc; recipe: DoughRecipe }) {
+export function Tuning({ calc, recipe }: Readonly<{ calc: Calc; recipe: DoughRecipe }>) {
   const { t, language } = useTranslation();
   const { inputs } = calc;
   const pct = (v: number) => formatPercent(v, language);

@@ -1,8 +1,5 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useMemo } from 'react';
 import { trackThemeChange } from '../utils/analytics';
-
-// Named export to fix fast refresh warning
-export const ThemeContextExport = 'ThemeContext';
 
 type ThemeType = 'light' | 'dark';
 
@@ -23,16 +20,14 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     } catch { /* no saved choice */ }
     
     // Check system preference
-    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches 
-      ? 'dark' 
-      : 'light';
+    return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   };
 
   const [theme, setTheme] = useState<ThemeType>(getInitialTheme);
 
   // Apply theme to document
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.dataset.theme = theme;
     try { localStorage.setItem('theme', theme); } catch { /* not remembered */ }
     
     // Update color-scheme meta tag to inform browser plugins like Dark Reader
@@ -48,20 +43,21 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     document.documentElement.style.colorScheme = theme;
     
     // Track theme change, but only after initial render
-    const isInitialRender = document.documentElement.getAttribute('data-analytics-tracked') !== 'true';
-    if (!isInitialRender) {
+    if (document.documentElement.dataset.analyticsTracked === 'true') {
       trackThemeChange(theme);
     } else {
-      document.documentElement.setAttribute('data-analytics-tracked', 'true');
+      document.documentElement.dataset.analyticsTracked = 'true';
     }
   }, [theme]);
 
-  const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
-  };
+  // One object per theme, so consumers re-render only when the theme changes.
+  const value = useMemo(() => ({
+    theme,
+    toggleTheme: () => setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light')
+  }), [theme]);
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContext.Provider value={value}>
       {children}
     </ThemeContext.Provider>
   );

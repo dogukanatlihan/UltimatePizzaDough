@@ -6,7 +6,7 @@ export type Step = 1 | 2 | 3;
 export const STEP_KEYS: Record<Step, string> = { 1: 'step.style', 2: 'step.size', 3: 'step.recipe' };
 
 /** `step` is null when all three steps are on screen (wide layout): then no tab is the current one. */
-export function Header({ step, onStep }: { step: Step | null; onStep: (step: Step) => void }) {
+export function Header({ step, onStep }: Readonly<{ step: Step | null; onStep: (step: Step) => void }>) {
   const { t } = useTranslation();
   return (
     <header className="top">

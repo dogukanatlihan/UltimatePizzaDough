@@ -7,9 +7,13 @@ import { Counter, RangeField, Segmented } from './controls';
 import { Num } from './Num';
 
 // Neapolitan 0.08 reads thin, New York 0.10 medium, Detroit 0.13 thick, Sicilian 0.16 and focaccia 0.20 extra thick.
-export const crustKey = (tf: number) => (tf <= 0.08 ? 'crust.thin' : tf <= 0.11 ? 'crust.medium' : tf <= 0.15 ? 'crust.thick' : 'crust.extraThick');
+export const crustKey = (tf: number) => {
+  if (tf <= 0.08) return 'crust.thin';
+  if (tf <= 0.11) return 'crust.medium';
+  return tf <= 0.15 ? 'crust.thick' : 'crust.extraThick';
+};
 
-export function StepSize({ calc }: { calc: Calc }) {
+export function StepSize({ calc }: Readonly<{ calc: Calc }>) {
   const { t, language } = useTranslation();
   const { inputs } = calc;
   const style = PIZZA_STYLES.find((s) => s.id === inputs.pizzaStyle);

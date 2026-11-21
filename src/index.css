@@ -13,6 +13,8 @@
   --basil-deep: #113D27;
   --basil-tint: #E3EEE4;
   --header: #1C5A3A;
+  --header-tool: #376E52;  /* the header with 12% white: solid, so its contrast can be checked */
+  --header-tab: #336B4E;   /* the header with 10% white */
   --on-basil: #FFFFFF;
   --tomato: #D43D2B;      /* the one primary action per screen, and the warning */
   --on-tomato: #FFFFFF;
@@ -45,6 +47,8 @@
   --basil-deep: #0C2A1B;
   --basil-tint: #1E3327;
   --header: #0C2A1B;
+  --header-tool: #294436;
+  --header-tab: #243F32;
   --on-basil: #07130C;
   --tomato: #D43D2B;      /* white on the lighter #E5553F was 3.68:1; this is 4.67:1 */
   --on-tomato: #FFFFFF;
@@ -67,8 +71,6 @@ input { touch-action: manipulation; }
 img { display: block; max-width: 100%; }
 .num { font-variant-numeric: tabular-nums; }
 :focus-visible { outline: 3px solid var(--tomato); outline-offset: 2px; border-radius: 4px; }
-[hidden] { display: none !important; }
-.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 @media print {
   body { background: #fff; color: #000; }

@@ -10,7 +10,7 @@ interface Props {
 }
 
 /** A style photo that fades in over its average colour, so nothing pops. Decorative: the name is always in text beside it. */
-export function Photo({ styleId, className, eager = false, transitionName }: Props) {
+export function Photo({ styleId, className, eager = false, transitionName }: Readonly<Props>) {
   const [loaded, setLoaded] = useState(false);
   return (
     <span className={`photo ${className}`} style={{ background: STYLE_TINT[styleId], viewTransitionName: transitionName }}>

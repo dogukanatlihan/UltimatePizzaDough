@@ -1,4 +1,4 @@
-import { DoughCalculatorInputs, DoughRecipe, DoughIngredient, PizzaStyle, YeastType } from '../types';
+import { DoughCalculatorInputs, DoughRecipe, DoughIngredient, PizzaStyle, PrefermentType, YeastType } from '../types';
 
 // Conversion constants
 const OUNCES_TO_GRAMS = 28.349523125; // exact: the international avoirdupois ounce
@@ -112,11 +112,6 @@ export const styleSize = (styleId: string, useInches: boolean): { diameter: numb
   return { diameter, panWidth, panLength };
 };
 
-// Calculate the total dough weight
-const calculateTotalDoughWeight = (numberOfPizzas: number, ballWeight: number): number => {
-  return numberOfPizzas * ballWeight;
-};
-
 // Calculate thickness factor based on dough ball weight and pizza dimensions
 // TF = Dough ball weight in ounces/(3.14159 × R × R), where R is the radius in inches
 export const calculateThicknessFactor = (
@@ -185,233 +180,84 @@ export const calculateDoughBallWeight = (
   }
 };
 
-// Calculate flour weight based on total dough weight and baker's percentages
-const calculateFlourWeight = (
-  totalDoughWeight: number,
-  hydration: number,
-  salt: number,
-  yeast: number,
-  oil: number,
-  sugar: number,
-  diastaticMalt: number,
-  doughEnhancer: number
-): number => {
-  // Convert percentages to decimals
-  const hydrationDecimal = hydration / 100;
-  const saltDecimal = salt / 100;
-  const yeastDecimal = yeast / 100;
-  const oilDecimal = oil / 100;
-  const sugarDecimal = sugar / 100;
-  const diastaticMaltDecimal = diastaticMalt / 100;
-  const doughEnhancerDecimal = doughEnhancer / 100;
+/** The dough weight for the shape and size in use: the pan when the shape is rectangular, the diameter when round. */
+export const ballWeightOf = (
+  i: Pick<DoughCalculatorInputs, 'pizzaStyle' | 'pizzaDiameter' | 'panWidth' | 'panLength' | 'thicknessFactor' | 'useInches' | 'isRectangular'>
+): number =>
+  i.isRectangular && i.panWidth && i.panLength
+    ? calculateDoughBallWeight(i.pizzaStyle, 0, i.panWidth, i.panLength, i.thicknessFactor, i.useInches)
+    : calculateDoughBallWeight(i.pizzaStyle, i.pizzaDiameter, undefined, undefined, i.thicknessFactor, i.useInches);
 
-  // Calculate flour weight using baker's percentage formula
-  // Flour is always 100%, so we divide by the sum of all percentages
-  return totalDoughWeight / (1 + hydrationDecimal + saltDecimal + yeastDecimal + oilDecimal + sugarDecimal + diastaticMaltDecimal + doughEnhancerDecimal);
+// The shape in use, in cm. The user's choice wins over the style, so a focaccia set to round is round.
+const pizzaShape = ({ pizzaStyle, pizzaDiameter, panWidth, panLength, useInches, isRectangular }: DoughCalculatorInputs) => {
+  const cm = (length: number) => (useInches ? inchesToCm(length) : length);
+  const rectangular = isRectangular ?? PIZZA_STYLES.find(style => style.id === pizzaStyle)?.isRectangular;
+  if (rectangular && panWidth && panLength) {
+    return { area: cm(panWidth) * cm(panLength), panWidth: cm(panWidth), panLength: cm(panLength) };
+  }
+  const diameter = cm(pizzaDiameter);
+  return { area: Math.PI * (diameter / 2) ** 2, diameter };
 };
 
-// Calculate preferment amounts
-const calculatePreferment = (
-  flourWeight: number,
-  prefermentPercentage: number,
-  prefermentHydration: number,
-  yeastType: YeastType
-) => {
-  const prefermentFlour = (flourWeight * prefermentPercentage) / 100;
-  const prefermentWater = (prefermentFlour * prefermentHydration) / 100;
-
+// Yeast for the first stage.
+const prefermentYeast = (type: PrefermentType, prefermentFlour: number, totalYeast: number, yeastType: YeastType): number => {
+  // Sourdough takes no commercial yeast. A sponge takes all of it (sponge-and-dough method, BAKERpedia).
+  if (type === 'sourdough') return 0;
+  if (type === 'sponge') return totalYeast;
   // Poolish and biga: 0.1% instant yeast on the preferment's own flour, the amount for about 12 hours at
   // room temperature (King Arthur Pro: "as little as 0.1% of the biga flour"; Modernist Bread: 0.1-0.2% for 12 h).
-  const prefermentYeast = prefermentFlour * 0.001 * YEAST_CONVERSION_FACTORS[yeastType] / YEAST_CONVERSION_FACTORS.instant;
+  // Never more than the recipe total, so the two stages always add up to the ingredient list.
+  return Math.min(prefermentFlour * 0.001 * YEAST_CONVERSION_FACTORS[yeastType] / YEAST_CONVERSION_FACTORS.instant, totalYeast);
+};
 
+// The two stages of a dough made with a preferment.
+const splitStages = (inputs: DoughCalculatorInputs, totalFlour: number): Pick<DoughRecipe, 'prefermentType' | 'preferment' | 'mainDough'> => {
+  const { preferment, yeastType } = inputs;
+  const grams = (percentage: number) => (totalFlour * percentage) / 100;
+  const whenUsed = (percentage: number) => (percentage > 0 ? grams(percentage) : undefined);
+  const flour = grams(preferment.percentage);
+  const water = (flour * preferment.hydration) / 100;
+  const yeast = prefermentYeast(preferment.type, flour, grams(inputs.yeast), yeastType);
   return {
-    flour: prefermentFlour,
-    water: prefermentWater,
-    yeast: prefermentYeast
+    prefermentType: preferment.type,
+    preferment: { flour, water, yeast: preferment.type === 'sourdough' ? undefined : yeast },
+    mainDough: {
+      flour: totalFlour - flour,
+      water: grams(inputs.hydration) - water,
+      salt: grams(inputs.salt),
+      yeast: grams(inputs.yeast) - yeast,
+      oil: whenUsed(inputs.oil),
+      sugar: whenUsed(inputs.sugar),
+      diastaticMalt: whenUsed(inputs.diastaticMalt),
+      doughEnhancer: whenUsed(inputs.doughEnhancer)
+    }
   };
 };
 
 // Calculate the main dough ingredients
 export const calculateDoughRecipe = (inputs: DoughCalculatorInputs): DoughRecipe => {
-  const {
-    numberOfPizzas,
-    ballWeight,
-    pizzaStyle,
-    hydration,
-    salt,
-    yeast,
-    yeastType,
-    oil,
-    sugar,
-    diastaticMalt,
-    doughEnhancer,
-    thicknessFactor,
-    pizzaDiameter,
-    panWidth,
-    panLength,
-    preferment,
-    useInches,
-    isRectangular: isRect
-  } = inputs;
+  const { numberOfPizzas, ballWeight, hydration, salt, yeast, yeastType, oil, sugar, diastaticMalt, doughEnhancer, thicknessFactor, preferment, useInches } = inputs;
 
-  // Calculate total dough weight
-  const totalDoughWeight = calculateTotalDoughWeight(numberOfPizzas, ballWeight);
+  // Baker's percentages: flour is 100%, so the dough weighs flour x (1 + the sum of every other percentage).
+  const totalFlour = (numberOfPizzas * ballWeight) / (1 + (hydration + salt + yeast + oil + sugar + diastaticMalt + doughEnhancer) / 100);
+  const ingredient = (name: string, percentage: number): DoughIngredient => ({ name, weight: (totalFlour * percentage) / 100, percentage, unit: 'g' });
 
-  // Calculate flour weight
-  const totalFlour = calculateFlourWeight(totalDoughWeight, hydration, salt, yeast, oil, sugar, diastaticMalt, doughEnhancer);
-
-  // Calculate ingredient weights
-  const waterWeight = (totalFlour * hydration) / 100;
-  const saltWeight = (totalFlour * salt) / 100;
-
-  // The yeast % is an amount of the selected yeast type: what the slider says is what gets weighed.
-  const yeastWeight = (totalFlour * yeast) / 100;
-
-  const oilWeight = (totalFlour * oil) / 100;
-  const sugarWeight = (totalFlour * sugar) / 100;
-  const diastaticMaltWeight = (totalFlour * diastaticMalt) / 100;
-  const doughEnhancerWeight = (totalFlour * doughEnhancer) / 100;
-
-  // Use the user's actual shape choice from inputs, not the style definition
-  // This ensures that when a 'both' style (like Focaccia) is set to round, we use round calculation
-  const selectedStyle = PIZZA_STYLES.find(style => style.id === pizzaStyle);
-  const isRectangular = isRect !== undefined ? isRect : selectedStyle?.isRectangular;
-
-  // Calculate pizza area
-  let area: number;
-  if (isRectangular && panWidth && panLength) {
-    // If dimensions are in inches, convert to cm for area calculation in cm²
-    const widthCm = useInches ? inchesToCm(panWidth) : panWidth;
-    const lengthCm = useInches ? inchesToCm(panLength) : panLength;
-    area = widthCm * lengthCm;
-  } else {
-    // If diameter is in inches, convert to cm for area calculation in cm²
-    const diameterCm = useInches ? inchesToCm(pizzaDiameter) : pizzaDiameter;
-    const radius = diameterCm / 2;
-    area = Math.PI * radius * radius;
-  }
-
-  // Initialize ingredients array
-  const ingredients: DoughIngredient[] = [
-    {
-      name: 'Flour',
-      weight: totalFlour,
-      percentage: 100,
-      unit: 'g'
-    },
-    {
-      name: 'Water',
-      weight: waterWeight,
-      percentage: hydration,
-      unit: 'g'
-    },
-    {
-      name: 'Salt',
-      weight: saltWeight,
-      percentage: salt,
-      unit: 'g'
-    },
-    {
-      name: YEAST_TYPE_NAMES[yeastType],
-      weight: yeastWeight,
-      percentage: yeast,
-      unit: 'g'
-    }
-  ];
-
-  // Add optional ingredients if they exist
-  if (oil > 0) {
-    ingredients.push({
-      name: 'Oil',
-      weight: oilWeight,
-      percentage: oil,
-      unit: 'g'
-    });
-  }
-
-  if (sugar > 0) {
-    ingredients.push({
-      name: 'Sugar',
-      weight: sugarWeight,
-      percentage: sugar,
-      unit: 'g'
-    });
-  }
-
-  if (diastaticMalt > 0) {
-    ingredients.push({
-      name: 'Diastatic Malt',
-      weight: diastaticMaltWeight,
-      percentage: diastaticMalt,
-      unit: 'g'
-    });
-  }
-
-  if (doughEnhancer > 0) {
-    ingredients.push({
-      name: 'Dough Enhancer',
-      weight: doughEnhancerWeight,
-      percentage: doughEnhancer,
-      unit: 'g'
-    });
-  }
-
-  // Base recipe without preferment
   const recipe: DoughRecipe = {
     totalFlour,
-    ingredients,
-    pizzaInfo: {
-      thicknessFactor,
-      area,
-      useInches,
-      ...(isRectangular && panWidth && panLength 
-        ? { panWidth: useInches ? inchesToCm(panWidth) : panWidth, 
-            panLength: useInches ? inchesToCm(panLength) : panLength } 
-        : { diameter: useInches ? inchesToCm(pizzaDiameter) : pizzaDiameter })
-    }
+    ingredients: [
+      { ...ingredient('Flour', 100), weight: totalFlour },
+      ingredient('Water', hydration),
+      ingredient('Salt', salt),
+      // The yeast % is an amount of the selected yeast type: what the slider says is what gets weighed.
+      ingredient(YEAST_TYPE_NAMES[yeastType], yeast),
+      // Optional ingredients appear only when they are used.
+      ...[ingredient('Oil', oil), ingredient('Sugar', sugar), ingredient('Diastatic Malt', diastaticMalt), ingredient('Dough Enhancer', doughEnhancer)]
+        .filter(row => row.percentage > 0)
+    ],
+    pizzaInfo: { thicknessFactor, useInches, ...pizzaShape(inputs) }
   };
 
-  // If using a preferment, calculate the preferment and main dough
-  if (preferment.type !== 'none' && preferment.percentage > 0) {
-    const { flour: prefermentFlour, water: prefermentWater, yeast: basePrefermentYeast } = calculatePreferment(
-      totalFlour,
-      preferment.percentage,
-      preferment.hydration,
-      yeastType
-    );
-
-    // Sourdough takes no commercial yeast. A sponge takes all of it (sponge-and-dough method, BAKERpedia).
-    // Poolish and biga never take more than the recipe total, so the two stages always add up to the ingredient list.
-    const prefermentYeast = preferment.type === 'sourdough' ? 0
-      : preferment.type === 'sponge' ? yeastWeight
-      : Math.min(basePrefermentYeast, yeastWeight);
-
-    // Add preferment type to the recipe
-    recipe.prefermentType = preferment.type;
-
-    // Calculate main dough ingredients
-    const mainDoughFlour = totalFlour - prefermentFlour;
-    const mainDoughWater = waterWeight - prefermentWater;
-    const mainDoughYeast = yeastWeight - prefermentYeast;
-
-    recipe.preferment = {
-      flour: prefermentFlour,
-      water: prefermentWater,
-      yeast: preferment.type !== 'sourdough' ? prefermentYeast : undefined
-    };
-
-    recipe.mainDough = {
-      flour: mainDoughFlour,
-      water: mainDoughWater,
-      salt: saltWeight,
-      yeast: mainDoughYeast,
-      oil: oilWeight > 0 ? oilWeight : undefined,
-      sugar: sugarWeight > 0 ? sugarWeight : undefined,
-      diastaticMalt: diastaticMaltWeight > 0 ? diastaticMaltWeight : undefined,
-      doughEnhancer: doughEnhancerWeight > 0 ? doughEnhancerWeight : undefined
-    };
-  }
-
+  if (preferment.type !== 'none' && preferment.percentage > 0) Object.assign(recipe, splitStages(inputs, totalFlour));
   return recipe;
 };
 

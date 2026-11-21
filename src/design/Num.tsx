@@ -14,7 +14,7 @@ interface NumProps {
 }
 
 /** A number that rolls to its new value, except while a slider is moving: then it follows the finger. */
-export function Num({ value, digits = 0, suffix }: NumProps) {
+export function Num({ value, digits = 0, suffix }: Readonly<NumProps>) {
   const { language } = useTranslation();
   const sliding = useSliding();
   const rounded = Number.isFinite(value) ? +value.toFixed(digits) : 0;
@@ -33,6 +33,6 @@ export function Num({ value, digits = 0, suffix }: NumProps) {
 }
 
 /** A weight, rounded by the same rule as formatGrams. */
-export function Grams({ g, yeast = false }: { g: number; yeast?: boolean }) {
+export function Grams({ g, yeast = false }: Readonly<{ g: number; yeast?: boolean }>) {
   return <Num value={g} digits={gramsDigits(g, yeast)} suffix=" g" />;
 }

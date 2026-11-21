@@ -1,5 +1,5 @@
 import type { DoughCalculatorInputs, PrefermentType, YeastType } from '../types';
-import { PIZZA_STYLES, calculateDoughBallWeight } from './doughCalculator';
+import { PIZZA_STYLES, ballWeightOf } from './doughCalculator';
 import { RANGES, clamp, storedSizeBounds, yeastRange } from './ranges';
 
 // Raise the version whenever a style preset or a conversion changes: a saved recipe carries the old numbers,
@@ -67,9 +67,7 @@ export const parseSavedInputs = (raw: string | null): DoughCalculatorInputs | nu
     isRectangular: style.isRectangular === 'both' ? r.isRectangular : style.isRectangular === true,
   };
   // The ball weight is a result, not an input: work it out again so it always fits the sizes above.
-  inputs.ballWeight = inputs.isRectangular
-    ? calculateDoughBallWeight(inputs.pizzaStyle, 0, inputs.panWidth, inputs.panLength, inputs.thicknessFactor, inputs.useInches)
-    : calculateDoughBallWeight(inputs.pizzaStyle, inputs.pizzaDiameter, undefined, undefined, inputs.thicknessFactor, inputs.useInches);
+  inputs.ballWeight = ballWeightOf(inputs);
   return ok ? inputs : null;
 };
 

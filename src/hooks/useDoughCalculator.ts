@@ -6,6 +6,7 @@ import {
   calculateThicknessFactor,
   convertYeastPercent,
   styleSize,
+  ballWeightOf,
   cmToInches,
   inchesToCm
 } from '../utils/doughCalculator';
@@ -70,21 +71,7 @@ export const useDoughCalculator = () => {
     
     // Track recipe generation (debounced to avoid excessive events)
     const timer = setTimeout(() => {
-      trackRecipeGenerated(
-        inputs.pizzaStyle,
-        inputs.numberOfPizzas,
-        inputs.hydration,
-        inputs.preferment.type,
-        inputs.salt,
-        inputs.yeast,
-        inputs.yeastType,
-        inputs.oil,
-        inputs.sugar,
-        inputs.diastaticMalt,
-        inputs.doughEnhancer,
-        inputs.isRectangular,
-        inputs.ballWeight
-      );
+      trackRecipeGenerated(inputs);
     }, 1000);
     
     return () => clearTimeout(timer);
@@ -176,9 +163,7 @@ export const useDoughCalculator = () => {
           pizzaStyle: styleId,
           hydration: selectedStyle.defaultHydration,
           thicknessFactor: selectedStyle.defaultThicknessFactor,
-          ballWeight: isRectangular
-            ? calculateDoughBallWeight(styleId, 0, size.panWidth, size.panLength, selectedStyle.defaultThicknessFactor, prev.useInches)
-            : calculateDoughBallWeight(styleId, size.diameter, undefined, undefined, selectedStyle.defaultThicknessFactor, prev.useInches),
+          ballWeight: ballWeightOf({ pizzaStyle: styleId, ...size, pizzaDiameter: size.diameter, thicknessFactor: selectedStyle.defaultThicknessFactor, useInches: prev.useInches, isRectangular }),
           isRectangular,
           pizzaDiameter: size.diameter,
           panWidth: size.panWidth,
@@ -197,61 +182,25 @@ export const useDoughCalculator = () => {
     }
   };
 
-  // Handle shape toggle for custom style
+  // Handle shape toggle (styles that can be round or rectangular)
   const handleShapeToggle = (isRectangular: boolean) => {
     setInputs(prev => {
-      // Preserve all existing values
-      const newInputs = { ...prev, isRectangular };
-      const styleDimensions = styleSize(prev.pizzaStyle, prev.useInches);
+      const size = styleSize(prev.pizzaStyle, prev.useInches);
+      // Keep the sizes the user set; a size that was never set takes the style's own.
+      const newInputs = {
+        ...prev,
+        isRectangular,
+        pizzaDiameter: prev.pizzaDiameter || size.diameter,
+        panWidth: prev.panWidth || size.panWidth,
+        panLength: prev.panLength || size.panLength,
+        thicknessFactor: prev.thicknessFactor || 0.08
+      };
+      // A weight of zero would empty the recipe: keep the weight there was.
+      newInputs.ballWeight = ballWeightOf(newInputs) || prev.ballWeight || 250;
 
-      if (isRectangular) {
-        // Set to rectangular shape with style-specific defaults
-        newInputs.panWidth = prev.panWidth || styleDimensions.panWidth;
-        newInputs.panLength = prev.panLength || styleDimensions.panLength;
-        
-        // Ensure thickness factor is not zero
-        const thicknessFactor = prev.thicknessFactor || 0.08; // Default to medium thickness if zero
-        
-        // Recalculate ball weight
-        newInputs.ballWeight = calculateDoughBallWeight(
-          prev.pizzaStyle,
-          0,
-          newInputs.panWidth,
-          newInputs.panLength,
-          thicknessFactor,
-          prev.useInches
-        );
-        
-        // Ensure ball weight is not zero
-        if (newInputs.ballWeight <= 0) {
-          newInputs.ballWeight = prev.ballWeight || 250; // Keep previous value or use default
-        }
-      } else {
-        // Set to round shape with style-specific default
-        newInputs.pizzaDiameter = prev.pizzaDiameter || styleDimensions.diameter;
-        
-        // Ensure thickness factor is not zero
-        const thicknessFactor = prev.thicknessFactor || 0.08; // Default to medium thickness if zero
-        
-        // Recalculate ball weight
-        newInputs.ballWeight = calculateDoughBallWeight(
-          prev.pizzaStyle,
-          newInputs.pizzaDiameter,
-          undefined,
-          undefined,
-          thicknessFactor,
-          prev.useInches
-        );
-        
-        // Ensure ball weight is not zero
-        if (newInputs.ballWeight <= 0) {
-          newInputs.ballWeight = prev.ballWeight || 250; // Keep previous value or use default
-        }
-      }
-      
       // Track shape toggle
       trackShapeToggled(isRectangular ? 'rectangular' : 'round');
-      
+
       return newInputs;
     });
   };
@@ -287,29 +236,8 @@ export const useDoughCalculator = () => {
         thicknessFactor: factor
       };
 
-      // Recalculate ball weight based on new thickness factor
-      // Use the user's actual shape choice (isRectangular state), not the style definition
-      const { pizzaStyle, pizzaDiameter, panWidth, panLength, useInches, isRectangular: isRect } = newInputs;
-
-      if (isRect && panWidth && panLength) {
-        newInputs.ballWeight = calculateDoughBallWeight(
-          pizzaStyle,
-          pizzaDiameter,
-          panWidth,
-          panLength,
-          factor,
-          useInches
-        );
-      } else {
-        newInputs.ballWeight = calculateDoughBallWeight(
-          pizzaStyle,
-          pizzaDiameter,
-          undefined,
-          undefined,
-          factor,
-          useInches
-        );
-      }
+      // Recalculate ball weight for the shape in use (the user's choice, not the style definition)
+      newInputs.ballWeight = ballWeightOf(newInputs);
 
       return newInputs;
     });
@@ -342,26 +270,17 @@ export const useDoughCalculator = () => {
   // Handle useInches toggle
   const handleUseInchesChange = (useInches: boolean) => {
     setInputs((prevInputs) => {
-      const newInputs = {
+      // Same pizza, other unit. A size that was never set stays unset.
+      const convert = useInches ? cmToInches : inchesToCm;
+      const other = (length: number | undefined) => (length ? convert(length) : length);
+      const newInputs = useInches === prevInputs.useInches ? prevInputs : {
         ...prevInputs,
-        useInches
+        useInches,
+        pizzaDiameter: convert(prevInputs.pizzaDiameter),
+        panWidth: other(prevInputs.panWidth),
+        panLength: other(prevInputs.panLength)
       };
 
-      // Convert measurements if needed
-      if (useInches !== prevInputs.useInches) {
-        if (useInches) {
-          // Convert from cm to inches
-          newInputs.pizzaDiameter = cmToInches(prevInputs.pizzaDiameter);
-          if (prevInputs.panWidth) newInputs.panWidth = cmToInches(prevInputs.panWidth);
-          if (prevInputs.panLength) newInputs.panLength = cmToInches(prevInputs.panLength);
-        } else {
-          // Convert from inches to cm
-          newInputs.pizzaDiameter = inchesToCm(prevInputs.pizzaDiameter);
-          if (prevInputs.panWidth) newInputs.panWidth = inchesToCm(prevInputs.panWidth);
-          if (prevInputs.panLength) newInputs.panLength = inchesToCm(prevInputs.panLength);
-        }
-      }
-      
       // Track the unit change
       trackUnitChange(useInches);
       
@@ -447,25 +366,6 @@ export const useDoughCalculator = () => {
           percentage = styleDefaults.percentage;
           hydration = styleDefaults.hydration;
           yeast = styleDefaults.yeast;
-        } else {
-          // Generic fallbacks for custom style (standard baker ranges)
-          if (type === 'poolish') {
-            percentage = 40; // Standard: 30-50% of flour
-            hydration = 100;
-            yeast = 0.3;
-          } else if (type === 'biga') {
-            percentage = 50; // Standard: 40-60% of flour
-            hydration = 60;
-            yeast = 0.3;
-          } else if (type === 'sponge') {
-            percentage = 60; // Standard: 50-75% of flour
-            hydration = 60;
-            yeast = 0.5;
-          } else if (type === 'sourdough') {
-            percentage = 25; // Standard: 20-35% of flour
-            hydration = 100;
-            yeast = 0;
-          }
         }
       }
 

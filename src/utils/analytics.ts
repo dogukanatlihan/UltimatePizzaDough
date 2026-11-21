@@ -1,3 +1,5 @@
+import type { DoughCalculatorInputs } from '../types';
+
 // Define the gtag function type to avoid TypeScript errors
 declare global {
   interface Window {
@@ -57,35 +59,21 @@ export const trackThemeChange = (theme: string): void => {
   trackEvent('change_theme', { theme });
 };
 
-export const trackRecipeGenerated = (
-  pizzaStyle: string,
-  numberOfPizzas: number,
-  hydration: number,
-  prefermentType: string,
-  salt?: number,
-  yeast?: number,
-  yeastType?: string,
-  oil?: number,
-  sugar?: number,
-  diastaticMalt?: number,
-  doughEnhancer?: number,
-  isRectangular?: boolean,
-  ballWeight?: number
-): void => {
+export const trackRecipeGenerated = (inputs: DoughCalculatorInputs): void => {
   trackEvent('generate_recipe', {
-    pizza_style: pizzaStyle,
-    number_of_pizzas: numberOfPizzas,
-    hydration: hydration,
-    preferment_type: prefermentType,
-    salt: salt,
-    yeast: yeast,
-    yeast_type: yeastType,
-    oil: oil,
-    sugar: sugar,
-    diastatic_malt: diastaticMalt,
-    dough_enhancer: doughEnhancer,
-    shape: isRectangular ? 'rectangular' : 'round',
-    ball_weight: ballWeight
+    pizza_style: inputs.pizzaStyle,
+    number_of_pizzas: inputs.numberOfPizzas,
+    hydration: inputs.hydration,
+    preferment_type: inputs.preferment.type,
+    salt: inputs.salt,
+    yeast: inputs.yeast,
+    yeast_type: inputs.yeastType,
+    oil: inputs.oil,
+    sugar: inputs.sugar,
+    diastatic_malt: inputs.diastaticMalt,
+    dough_enhancer: inputs.doughEnhancer,
+    shape: inputs.isRectangular ? 'rectangular' : 'round',
+    ball_weight: inputs.ballWeight
   });
 };
 
