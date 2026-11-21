@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { DoughRecipe } from '../types';
 import { roundToOneDecimal, roundToTwoDecimals, gramsToOunces } from '../utils/doughCalculator';
 import { useTranslation } from '../context/TranslationContext';
+import { useToast } from '../components/ToastProvider';
 import { Icons } from './Icons';
 import { BAKE_TEMP, BAKE_TIME } from './styleMeta';
 
@@ -15,7 +16,11 @@ interface Props {
   hydration: number;
 }
 
-const gToOz = (g: number) => gramsToOunces(g).toFixed(1);
+// Under 1oz, one decimal rounds yeast and salt down to a useless "0.0oz".
+const gToOz = (g: number) => {
+  const oz = gramsToOunces(g);
+  return oz.toFixed(Math.abs(oz) < 1 ? 2 : 1);
+};
 
 const ingredientSwatch = (name: string): string => {
   const n = name.toLowerCase();
@@ -44,6 +49,7 @@ const prefermentLabel = (type: string | undefined, t: (k: string) => string): st
 
 export function RecipePanel({ recipe, styleId, numberOfPizzas, ballWeight, hydration }: Props) {
   const { t } = useTranslation();
+  const { showToast } = useToast();
   const [tab, setTab] = useState<Tab>('ingredients');
 
   const total = recipe.ingredients.reduce((s, i) => s + i.weight, 0);
@@ -71,7 +77,13 @@ export function RecipePanel({ recipe, styleId, numberOfPizzas, ballWeight, hydra
       '',
       `Total: ${roundToOneDecimal(total)}g`,
     ];
-    navigator.clipboard?.writeText(lines.join('\n'));
+    // Clipboard is missing on insecure origins and can be denied; tell the user either way.
+    Promise.resolve()
+      .then(() => navigator.clipboard.writeText(lines.join('\n')))
+      .then(
+        () => showToast(t('recipe.copied'), 'success'),
+        () => showToast(t('recipe.copyFailed'), 'error'),
+      );
   };
 
   const hasPreferment = !!(recipe.preferment && recipe.mainDough);
@@ -105,6 +117,10 @@ export function RecipePanel({ recipe, styleId, numberOfPizzas, ballWeight, hydra
           <div className="v">{hydration}<small>%</small></div>
         </div>
       </div>
+
+      {recipe.mainDough && recipe.mainDough.water < 0 && (
+        <div className="bp-info" style={{ margin: '16px 28px 0' }}>{t('preferment.waterWarning')}</div>
+      )}
 
       <div className="bp-tabs">
         <button type="button" className={'bp-tab ' + (tab === 'ingredients' ? 'on' : '')} onClick={() => setTab('ingredients')}>
@@ -190,14 +206,20 @@ export function RecipePanel({ recipe, styleId, numberOfPizzas, ballWeight, hydra
                     <div className="wt">{roundToOneDecimal(recipe.mainDough.salt)}g</div>
                     <div className="pct">—</div>
                   </div>
-                  {recipe.mainDough.oil !== undefined && (
-                    <div className="bp-ing-row">
-                      <span className="swatch">O</span>
-                      <div className="name">{t('ingredient.oil')}</div>
-                      <div className="wt">{roundToOneDecimal(recipe.mainDough.oil)}g</div>
+                  {([
+                    ['Y', t('ingredient.yeast'), recipe.mainDough.yeast, roundToTwoDecimals],
+                    ['O', t('ingredient.oil'), recipe.mainDough.oil, roundToOneDecimal],
+                    ['Sg', t('ingredient.sugar'), recipe.mainDough.sugar, roundToOneDecimal],
+                    ['M', t('ingredient.diastaticMalt'), recipe.mainDough.diastaticMalt, roundToOneDecimal],
+                    ['E', t('ingredient.doughEnhancer'), recipe.mainDough.doughEnhancer, roundToOneDecimal],
+                  ] as const).map(([swatch, name, wt, round]) => wt !== undefined && wt > 0 && (
+                    <div className="bp-ing-row" key={swatch}>
+                      <span className="swatch">{swatch}</span>
+                      <div className="name">{name}</div>
+                      <div className="wt">{round(wt)}g</div>
                       <div className="pct">—</div>
                     </div>
-                  )}
+                  ))}
                 </div>
               </div>
             </>

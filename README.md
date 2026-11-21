@@ -6,11 +6,11 @@ A modern, responsive web application for calculating perfect pizza dough recipes
 
 ## 🍕 Live Demo
 
-Visit the live application: [Ultimate Pizza Dough Calculator](https://ultimatepizzadough.xyz)
+Visit the live application: [Make Better Pizza](https://makebetter.pizza)
 
 ## ✨ Features
 
-- **Multiple Pizza Styles**: Neapolitan, New York, Sicilian, Detroit, Focaccia, and Custom
+- **Multiple Pizza Styles**: Neapolitan, New York, Sicilian, Detroit, Pan, and Focaccia
 - **Custom Templates**: Save, apply, and manage your favorite custom dough settings
 - **Shape Selection**: Choose between round or rectangular shapes for custom styles
 - **Preferment Options**: None, Poolish, Biga, Sponge, and Sourdough
@@ -27,7 +27,7 @@ Visit the live application: [Ultimate Pizza Dough Calculator](https://ultimatepi
 - **React**: UI library
 - **TypeScript**: Type-safe JavaScript
 - **Framer Motion**: Animations and transitions
-- **Styled Components**: Styling solution
+- **Emotion + plain CSS**: Styling (`src/design/design.css` for the main UI)
 - **Vite**: Build tool
 - **Google Analytics**: User interaction tracking
 
@@ -104,12 +104,21 @@ The build artifacts will be stored in the `dist/` directory.
 
 This project uses:
 - **GitHub** for version control
-- **GitHub Actions** for CI/CD
-- **Netlify** for hosting and deployment
+- **GitHub Actions** for CI (build + lint only, `.github/workflows/ci.yml`)
+- **Cloudflare Workers** (static assets, built by Workers Builds) for hosting at https://makebetter.pizza
 
-For deployment instructions, see:
+Config lives in `wrangler.jsonc`; security headers in `public/_headers`. Cloudflare rejects
+`public/_redirects`, so strip it from `dist/` before a deploy:
+
+```bash
+npm run build && rm -f dist/_redirects
+```
+
+Full details: [docs/cloudflare-migration.md](docs/cloudflare-migration.md).
+
+The Netlify guides below are historical. The Netlify site is no longer live:
 - [NETLIFY_PUBLISHING.md](NETLIFY_PUBLISHING.md) - Manual Netlify deployment
-- [GITHUB_NETLIFY_SETUP.md](GITHUB_NETLIFY_SETUP.md) - GitHub Actions integration with Netlify
+- [GITHUB_NETLIFY_SETUP.md](GITHUB_NETLIFY_SETUP.md) - GitHub Actions integration with Netlify (its workflow was deleted)
 
 ## 📱 PWA Features
 
@@ -117,7 +126,6 @@ The application is configured as a Progressive Web App (PWA), allowing users to 
 
 - Home screen icons
 - Splash screens
-- Offline support
 - Full-screen mode
 
 ## 🤝 Contributing

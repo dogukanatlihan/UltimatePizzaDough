@@ -75,7 +75,11 @@ const ThemeToggle: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <ToggleContainer onClick={toggleTheme} theme={theme}>
+    <ToggleContainer
+      onClick={toggleTheme}
+      theme={theme}
+      aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+    >
       <Icons theme={theme}>
         {/* Moon Icon */}
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">

@@ -237,8 +237,9 @@ export const calculateDoughRecipe = (inputs: DoughCalculatorInputs): DoughRecipe
   // Calculate total dough weight
   const totalDoughWeight = calculateTotalDoughWeight(numberOfPizzas, ballWeight);
 
-  // Calculate flour weight
-  const totalFlour = calculateFlourWeight(totalDoughWeight, hydration, salt, yeast, oil, sugar, diastaticMalt, doughEnhancer);
+  // Calculate flour weight. Use the yeast share that is really weighed out (after the yeast-type
+  // conversion below), otherwise the ingredients do not add up to the requested dough weight.
+  const totalFlour = calculateFlourWeight(totalDoughWeight, hydration, salt, yeast * YEAST_CONVERSION_FACTORS[yeastType], oil, sugar, diastaticMalt, doughEnhancer);
 
   // Calculate ingredient weights
   const waterWeight = (totalFlour * hydration) / 100;
@@ -356,7 +357,7 @@ export const calculateDoughRecipe = (inputs: DoughCalculatorInputs): DoughRecipe
 
   // If using a preferment, calculate the preferment and main dough
   if (preferment.type !== 'none' && preferment.percentage > 0) {
-    const { flour: prefermentFlour, water: prefermentWater, yeast: prefermentYeast } = calculatePreferment(
+    const { flour: prefermentFlour, water: prefermentWater, yeast: basePrefermentYeast } = calculatePreferment(
       totalFlour,
       preferment.percentage,
       preferment.hydration,
@@ -364,13 +365,17 @@ export const calculateDoughRecipe = (inputs: DoughCalculatorInputs): DoughRecipe
       yeastType
     );
 
+    // Sourdough takes no commercial yeast. Other preferments never take more than the recipe total,
+    // so the two stages always add up to the ingredient list.
+    const prefermentYeast = preferment.type === 'sourdough' ? 0 : Math.min(basePrefermentYeast, yeastWeight);
+
     // Add preferment type to the recipe
     recipe.prefermentType = preferment.type;
 
     // Calculate main dough ingredients
     const mainDoughFlour = totalFlour - prefermentFlour;
     const mainDoughWater = waterWeight - prefermentWater;
-    const mainDoughYeast = preferment.type === 'sourdough' ? 0 : yeastWeight - prefermentYeast;
+    const mainDoughYeast = yeastWeight - prefermentYeast;
 
     recipe.preferment = {
       flour: prefermentFlour,

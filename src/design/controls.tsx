@@ -63,6 +63,11 @@ export function Stepper({ value, min, max, step = 1, onChange }: StepperProps) {
           const v = parseFloat(e.target.value);
           if (!isNaN(v)) onChange(v);
         }}
+        // Typing is free-form so partial values like "2" for "25" work; enforce bounds once the user leaves the field.
+        onBlur={() => {
+          const clamped = Math.min(max, Math.max(min, value));
+          if (clamped !== value) onChange(clamped);
+        }}
       />
       <button type="button" onClick={() => onChange(Math.min(max, value + step))}>+</button>
     </div>

@@ -40,6 +40,11 @@ export function Workshop() {
     ? `${inputs.pizzaDiameter.toFixed(1)}″ · ${inchesToCm(inputs.pizzaDiameter).toFixed(1)}cm`
     : `${inputs.pizzaDiameter}cm · ${cmToInches(inputs.pizzaDiameter).toFixed(1)}″`;
 
+  // Stepper bounds follow the active unit: 15–60cm ≈ 6–24″, 10–60cm ≈ 4–24″.
+  const sizeBounds = inputs.useInches
+    ? { diameterMin: 6, panMin: 4, max: 24 }
+    : { diameterMin: 15, panMin: 10, max: 60 };
+
   return (
     <div className="bp-root">
       <div className="bp-topbar">
@@ -109,14 +114,14 @@ export function Workshop() {
                       <div className="bp-row" style={{ gap: 8 }}>
                         <Stepper
                           value={inputs.panWidth ?? 25}
-                          min={10}
-                          max={60}
+                          min={sizeBounds.panMin}
+                          max={sizeBounds.max}
                           onChange={(v) => handlePanDimensionsChange(v, inputs.panLength ?? 35)}
                         />
                         <Stepper
                           value={inputs.panLength ?? 35}
-                          min={10}
-                          max={60}
+                          min={sizeBounds.panMin}
+                          max={sizeBounds.max}
                           onChange={(v) => handlePanDimensionsChange(inputs.panWidth ?? 25, v)}
                         />
                       </div>
@@ -128,8 +133,8 @@ export function Workshop() {
                       </label>
                       <Stepper
                         value={inputs.pizzaDiameter}
-                        min={15}
-                        max={60}
+                        min={sizeBounds.diameterMin}
+                        max={sizeBounds.max}
                         onChange={handlePizzaDiameterChange}
                       />
                     </div>

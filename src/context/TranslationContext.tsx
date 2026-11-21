@@ -417,6 +417,18 @@ const translations: Translations = {
     en: 'Prepare the preferment first and let it ferment before mixing with the main dough ingredients.',
     tr: 'Önce ön mayayı hazırlayın ve ana hamur malzemeleriyle karıştırmadan önce mayalanmasını bekleyin.'
   },
+  'preferment.waterWarning': {
+    en: 'The preferment holds more water than the whole dough, so the main dough water is negative. Lower the preferment % or its hydration, or raise the total hydration.',
+    tr: 'Ön maya, hamurun tamamından daha fazla su içeriyor; bu yüzden ana hamur suyu eksiye düşüyor. Ön maya yüzdesini veya hidrasyonunu düşürün ya da toplam hidrasyonu artırın.'
+  },
+  'recipe.copied': {
+    en: 'Recipe copied to clipboard',
+    tr: 'Tarif panoya kopyalandı'
+  },
+  'recipe.copyFailed': {
+    en: 'Could not copy the recipe',
+    tr: 'Tarif kopyalanamadı'
+  },
   'preferment.instructions': {
     en: 'Preferment Instructions',
     tr: 'Ön Maya Talimatları'

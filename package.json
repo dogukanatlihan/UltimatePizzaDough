@@ -25,6 +25,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
+    "test": "esbuild src/utils/doughCalculator.check.ts --bundle --platform=node --log-level=error --outfile=node_modules/.tmp/doughCalculator.check.cjs && node node_modules/.tmp/doughCalculator.check.cjs",
     "preview": "vite preview"
   },
   "dependencies": {

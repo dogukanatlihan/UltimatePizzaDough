@@ -1,3 +1,5 @@
+import { getTemplates } from './templateUtils';
+
 // Define the gtag function type to avoid TypeScript errors
 declare global {
   interface Window {
@@ -161,18 +163,8 @@ export const trackCustomTemplateStats = (): void => {
   // This function would be called periodically or when the app loads
   // to send aggregate data about template usage
   
-  // Get templates from local storage (you'd need to implement this)
-  const getTemplatesFromStorage = () => {
-    try {
-      const templatesJson = localStorage.getItem('pizza-calculator-templates');
-      return templatesJson ? JSON.parse(templatesJson) : [];
-    } catch (error) {
-      console.error('Error reading templates from storage:', error);
-      return [];
-    }
-  };
-  
-  const templates = getTemplatesFromStorage();
+  // Get templates from the cookie store that templateUtils writes (it already handles parse errors)
+  const templates = getTemplates();
   
   if (templates.length > 0) {
     // Calculate some statistics

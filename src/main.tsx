@@ -2,7 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
-import { initializeAnalytics, trackPageView } from './utils/analytics'
+import { initializeAnalytics } from './utils/analytics'
 
 console.log('Main.tsx is executing');
 const rootElement = document.getElementById('root');
@@ -10,8 +10,8 @@ console.log('Root element:', rootElement);
 
 // Initialize Google Analytics
 initializeAnalytics();
-// Track initial page view
-trackPageView('Make Better Pizza', '/');
+// Track initial page view: gtag('config') in index.html already sends it (GA4 default
+// send_page_view), so calling trackPageView here would count every visit twice.
 
 if (rootElement) {
   try {
