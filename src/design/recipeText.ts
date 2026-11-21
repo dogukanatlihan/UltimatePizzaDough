@@ -75,6 +75,12 @@ const IN_PAN = new Set(['sicilian', 'detroit', 'pan', 'focaccia']);
 // Neapolitan — AVPN/EU direct method, risen at room temperature, no refrigerator.
 // New York — Lehmann: balled straight after mixing, then 1-3 days cold.
 // Pan styles — folds, one piece per pan, 1-3 days cold, then a final rise in the oiled pan.
+// A sponge or a sourdough changes how fast the dough moves (a sponge carries all the yeast, 0.5%; a starter is
+// as fast as it is), so the style's clock times do not apply: the main dough goes by look, with no hours stated.
+const BY_LOOK = new Set<string | undefined>(['sponge', 'sourdough']);
+const lookKeys = (styleId: string): string[] =>
+  ['method.ny.knead', 'method.look.rise', IN_PAN.has(styleId) ? 'method.look.pan' : 'method.look.balls', 'method.look.bake'];
+
 const finishKeys = (styleId: string): string[] => {
   if (styleId === 'neapolitan') return ['knead', 'rest', 'balls', 'proof'].map((k) => `method.neapolitan.${k}`);
   if (styleId === 'ny') return ['knead', 'balls', 'cold', 'temper'].map((k) => `method.ny.${k}`);
@@ -85,8 +91,10 @@ const finishKeys = (styleId: string): string[] => {
 export const methodStages = (recipe: DoughRecipe, t: Translate, locale: string, styleId = ''): Stage[] => {
   // {flour} and {flourOz} style placeholders: the strings already carry the "g" and "oz" units.
   const w = (name: string, g: number, yeast = false) => ({ [name]: gramsNumber(g, { yeast, locale }), [`${name}Oz`]: ouncesNumber(g, locale) });
-  const finish = finishKeys(styleId).map((key) => t(key));
-  const time = pick(t, `time.dough.${styleId}`, 'time.dough');
+  const byLook = BY_LOOK.has(recipe.prefermentType);
+  // Poolish and biga keep the style's schedule (their yeast total stays in the style's range), marked as a guide.
+  const finish = (byLook ? lookKeys(styleId) : [...finishKeys(styleId), ...(recipe.prefermentType ? ['method.preferment.guide'] : [])]).map((key) => t(key));
+  const time = byLook ? t('time.look') : pick(t, `time.dough.${styleId}`, 'time.dough');
   const { preferment: first, mainDough: main } = recipe;
 
   if (!first || !main) {

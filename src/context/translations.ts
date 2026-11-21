@@ -717,6 +717,30 @@ export const translations: Record<string, Record<Language, string>> = {
     en: 'Add {flour}g ({flourOz}oz) flour a little at a time and mix until no dry flour remains.',
     tr: '{flour}g ({flourOz}oz) unu azar azar ekleyin ve kuru un kalmayana kadar karıştırın.'
   },
+  'method.look.rise': {
+    en: 'Cover and let the dough rise at room temperature until it has about doubled. Go by the dough, not the clock: how fast it moves depends on the first stage.',
+    tr: 'Üzerini örtün ve hamur yaklaşık iki katına çıkana kadar oda sıcaklığında mayalandırın. Saate değil hamura bakın: hızı ilk aşamaya bağlıdır.'
+  },
+  'method.look.balls': {
+    en: 'Divide the dough into balls, cover them, and let them rise until puffy and soft.',
+    tr: 'Hamuru toplara bölün, üzerini örtün ve kabarıp yumuşayana kadar mayalandırın.'
+  },
+  'method.look.pan': {
+    en: 'Press the dough into a well-oiled pan. If it springs back, let it rest for 20-30 minutes, then stretch it to the edges. Cover and let it rise in the pan until puffy.',
+    tr: 'Hamuru iyice yağlanmış tavaya bastırarak yayın. Geri çekiliyorsa 20-30 dakika dinlendirin, sonra kenarlara kadar açın. Üzerini örtün ve kabarana kadar tavada mayalandırın.'
+  },
+  'method.look.bake': {
+    en: 'Bake as soon as the dough is ready. Do not wait for a set time.',
+    tr: 'Hamur hazır olur olmaz pişirin. Belirli bir süre beklemeyin.'
+  },
+  'method.preferment.guide': {
+    en: 'These times are a guide. A dough made with a preferment can be ready sooner: go by how it looks.',
+    tr: 'Bu süreler yol göstericidir. Ön mayalı hamur daha erken hazır olabilir: hamurun görünümüne göre karar verin.'
+  },
+  'time.look': {
+    en: 'by look, not by clock',
+    tr: 'saate değil, hamura göre'
+  },
   'time.dough.neapolitan': {
     en: 'Same day · 6–8 h rise',
     tr: 'Aynı gün · 6–8 sa mayalanma'

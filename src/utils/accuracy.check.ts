@@ -154,6 +154,22 @@ for (const s of PIZZA_STYLES) {
     for (const stage of stagesFor(s.id, type, t)) for (const step of [stage.time, ...stage.steps]) assert.ok(step && !/[{}]|^[a-zA-Z]+\.[\w.]+$/.test(step), `${s.id} ${type}: ${step}`);
   }
 }
+// Sponge and sourdough: the style's clock times were written for its straight dough (Neapolitan with a sponge has
+// ten times the yeast), so the main dough goes by look. No hours, no days, no refrigerator.
+for (const s of PIZZA_STYLES) for (const type of ['sponge', 'sourdough'] as const) for (const t of [tEn, tTr]) {
+  const main = stagesFor(s.id, type, t)[1];
+  const text = `${main.time}\n${main.steps.join('\n')}`;
+  assert.ok(!/\d\s*(hours?|h\b|saat|sa\b|days?|gün)|refrigerat|buzdolab/i.test(text), `${s.id} ${type}: ${text}`);
+}
+// Poolish and biga keep the style's schedule (their total yeast stays in the style's range) and say it is a guide.
+for (const s of PIZZA_STYLES) for (const type of ['poolish', 'biga'] as const) {
+  assert.ok(/guide/i.test(stagesFor(s.id, type)[1].steps.at(-1)!), `${s.id} ${type}`);
+  assert.ok(/yol gösterici/i.test(stagesFor(s.id, type, tTr)[1].steps.at(-1)!), `${s.id} ${type}`);
+}
+// Pan styles still rise in the pan on every path.
+for (const id of ['sicilian', 'detroit', 'pan', 'focaccia']) for (const type of ['poolish', 'biga', 'sponge', 'sourdough'] as const) {
+  assert.ok(/rise in the pan/i.test(stagesFor(id, type)[1].steps.join('\n')), `${id} ${type}`);
+}
 // Neapolitan has no autolyse with a preferment either.
 assert.ok(!/autolyse/i.test(stagesFor('neapolitan', 'poolish').flatMap((stage) => stage.steps).join('\n')));
 // Pan styles go from the folds to the refrigerator: no 2-4 h warm rise before 1-3 days cold.
