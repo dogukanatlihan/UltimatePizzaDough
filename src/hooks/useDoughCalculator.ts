@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { DoughCalculatorInputs, DoughRecipe, PrefermentType, YeastType } from '../types';
 import { 
   calculateDoughRecipe, 
@@ -19,6 +19,8 @@ import {
   trackShapeToggled,
   trackRecipeAdjustment
 } from '../utils/analytics';
+import { loadSavedInputs, saveInputs, clearSavedInputs } from '../utils/savedRecipe';
+import { usualBatch } from '../utils/ranges';
 
 // Every yeast % in the presets below is an instant-yeast amount. The slider % means the yeast
 // type that is selected, so presets pass through fromInstant() before they reach the inputs.
@@ -27,7 +29,7 @@ const fromInstant = (percent: number, to: YeastType) => convertYeastPercent(perc
 // Update default thickness factors based on the new calculation method
 // These values represent the thickness factor in ounces per square inch
 const DEFAULT_INPUTS: DoughCalculatorInputs = {
-  numberOfPizzas: 1,
+  numberOfPizzas: 4,
   // Derived from the same preset the Neapolitan card loads, so the first screen and the card agree.
   ballWeight: calculateDoughBallWeight('neapolitan', 30, undefined, undefined, 0.08),
   pizzaStyle: 'neapolitan',
@@ -53,13 +55,24 @@ const DEFAULT_INPUTS: DoughCalculatorInputs = {
 };
 
 export const useDoughCalculator = () => {
-  const [inputs, setInputs] = useState<DoughCalculatorInputs>(DEFAULT_INPUTS);
+  // A returning visitor starts from the recipe they left (read once, validated in savedRecipe.ts).
+  const [saved] = useState(loadSavedInputs);
+  const restored = saved !== null;
+  const [inputs, setInputs] = useState<DoughCalculatorInputs>(saved ?? DEFAULT_INPUTS);
+  // Until the user sets the count themselves, a style change sets its usual batch.
+  const countTouched = useRef(restored);
+  const mounted = useRef(false);
   const [recipe, setRecipe] = useState<DoughRecipe | null>(null);
 
   // Update recipe whenever inputs change
   useEffect(() => {
     const newRecipe = calculateDoughRecipe(inputs);
     setRecipe(newRecipe);
+
+    // Save only after the first change: every change after mount comes from a user action,
+    // so a visitor who only looks does not get a saved recipe.
+    if (mounted.current) saveInputs(inputs);
+    mounted.current = true;
     
     // Track recipe generation (debounced to avoid excessive events)
     const timer = setTimeout(() => {
@@ -85,6 +98,7 @@ export const useDoughCalculator = () => {
 
   // Handle input changes
   const handleInputChange = (name: string, value: string | number) => {
+    if (name === 'numberOfPizzas') countTouched.current = true;
     // Track significant adjustments for key parameters
     const significantParameters = ['hydration', 'salt', 'yeast', 'oil', 'sugar', 'diastaticMalt', 'doughEnhancer'];
     if (significantParameters.includes(name)) {
@@ -181,6 +195,8 @@ export const useDoughCalculator = () => {
 
   // Handle pizza style selection
   const handlePizzaStyleChange = (styleId: string) => {
+    // Choosing the style that is already chosen must not wipe the user's adjustments.
+    if (styleId === inputs.pizzaStyle) return;
     const selectedStyle = PIZZA_STYLES.find(style => style.id === styleId);
 
     if (selectedStyle) {
@@ -287,9 +303,11 @@ export const useDoughCalculator = () => {
         thicknessFactor: selectedStyle.defaultThicknessFactor,
         ballWeight: newBallWeight,
         isRectangular: selectedStyle.isRectangular === true || selectedStyle.isRectangular === 'both',
-        pizzaDiameter: styleDimensions.diameter,
-        panWidth: styleDimensions.panWidth,
-        panLength: styleDimensions.panLength,
+        // Presets are in cm; sizes in state are in the unit on screen.
+        pizzaDiameter: prev.useInches ? cmToInches(styleDimensions.diameter) : styleDimensions.diameter,
+        panWidth: prev.useInches ? cmToInches(styleDimensions.panWidth) : styleDimensions.panWidth,
+        panLength: prev.useInches ? cmToInches(styleDimensions.panLength) : styleDimensions.panLength,
+        numberOfPizzas: countTouched.current ? prev.numberOfPizzas : usualBatch(styleId),
         oil,
         sugar,
         salt,
@@ -639,12 +657,25 @@ export const useDoughCalculator = () => {
     });
   };
 
-  // Reset to defaults
-  const resetToDefaults = () => {
-    setInputs(DEFAULT_INPUTS);
-    
-    // Track the reset action
+  // Start over: forget the saved recipe and go back to the defaults. Returns what was replaced, for Undo.
+  const startOver = (): DoughCalculatorInputs => {
+    const previous = inputs;
+    countTouched.current = false;
+    mounted.current = false; // the reset itself is not a recipe worth saving
+    clearSavedInputs();
+    setInputs({ ...DEFAULT_INPUTS }); // a new object, so the effect always runs and re-arms saving
     trackReset();
+    return previous;
+  };
+
+  // Put a recipe back (Undo after Start over).
+  const restore = (previous: DoughCalculatorInputs) => {
+    countTouched.current = true;
+    setInputs(previous);
+  };
+
+  const resetToDefaults = () => {
+    startOver();
   };
 
   return {
@@ -661,6 +692,9 @@ export const useDoughCalculator = () => {
     handlePrefermentHydrationChange,
     handleYeastTypeChange,
     handleShapeToggle,
-    resetToDefaults
+    resetToDefaults,
+    restored,
+    startOver,
+    restore
   };
 }; 

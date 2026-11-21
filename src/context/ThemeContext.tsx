@@ -16,8 +16,11 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Check if user has a saved preference or use system preference
   const getInitialTheme = (): ThemeType => {
-    const savedTheme = localStorage.getItem('theme') as ThemeType;
-    if (savedTheme) return savedTheme;
+    // Storage throws in some private windows; fall back to the system setting.
+    try {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'light' || savedTheme === 'dark') return savedTheme;
+    } catch { /* no saved choice */ }
     
     // Check system preference
     return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches 
@@ -30,7 +33,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Apply theme to document
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
+    try { localStorage.setItem('theme', theme); } catch { /* not remembered */ }
     
     // Update color-scheme meta tag to inform browser plugins like Dark Reader
     let colorSchemeMeta = document.querySelector('meta[name="color-scheme"]');

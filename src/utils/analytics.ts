@@ -99,6 +99,14 @@ export const trackReset = (): void => {
   trackEvent('reset_calculator');
 };
 
+export const trackCopy = (): void => {
+  trackEvent('copy_recipe');
+};
+
+export const trackPrint = (): void => {
+  trackEvent('print_recipe');
+};
+
 export const trackShapeToggled = (shape: 'round' | 'rectangular'): void => {
   trackEvent('toggle_shape', { shape });
 };

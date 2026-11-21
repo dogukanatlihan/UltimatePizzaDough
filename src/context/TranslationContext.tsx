@@ -651,12 +651,16 @@ const TranslationContext = createContext<TranslationContextType | undefined>(und
 
 export const TranslationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguage] = useState<Language>(() => {
-    const saved = localStorage.getItem('language') as Language;
-    return saved || 'en';
+    // Storage throws in some private windows; fall back to English.
+    try {
+      const saved = localStorage.getItem('language');
+      if (saved === 'en' || saved === 'tr') return saved;
+    } catch { /* no saved choice */ }
+    return 'en';
   });
 
   useEffect(() => {
-    localStorage.setItem('language', language);
+    try { localStorage.setItem('language', language); } catch { /* not remembered */ }
     document.documentElement.setAttribute('lang', language);
   }, [language]);
 
