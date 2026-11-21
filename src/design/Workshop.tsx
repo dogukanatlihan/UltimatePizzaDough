@@ -193,7 +193,7 @@ export function Workshop() {
                   label={t('form.yeast')}
                   value={inputs.yeast}
                   min={0}
-                  max={2}
+                  max={inputs.yeastType === 'fresh' ? 6 : 2} // fresh yeast needs about 3x the dry amount
                   step={0.01}
                   onChange={(v) => handleInputChange('yeast', Math.round(v * 100) / 100)}
                   display={`${inputs.yeast.toFixed(2)}%`}

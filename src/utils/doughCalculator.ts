@@ -4,12 +4,16 @@ import { DoughCalculatorInputs, DoughRecipe, DoughIngredient, PizzaStyle, YeastT
 const GRAMS_TO_OUNCES = 0.03527396;
 const OUNCES_TO_GRAMS = 28.3495;
 
-// Yeast conversion factors relative to active dry yeast
+// Yeast conversion factors relative to active dry yeast (equal leavening power)
 const YEAST_CONVERSION_FACTORS = {
   active_dry: 1,      // Base reference
   instant: 0.75,      // Use 25% less than active dry
   fresh: 3            // Use 3x more than active dry
 };
+
+// Convert a baker's % of one yeast type into the equal-strength % of another, rounded to the slider step.
+export const convertYeastPercent = (percent: number, from: YeastType, to: YeastType): number =>
+  Math.round(percent * YEAST_CONVERSION_FACTORS[to] / YEAST_CONVERSION_FACTORS[from] * 100) / 100;
 
 // Yeast display names for recipe output
 export const YEAST_TYPE_NAMES = {
@@ -80,13 +84,6 @@ export const PIZZA_STYLES: PizzaStyle[] = [
     defaultThicknessFactor: 0.14, // Very thick crust in oz/in²
     description: 'Italian flatbread with a high hydration for an open, airy crumb.',
     isRectangular: 'both'
-  },
-  {
-    id: 'custom',
-    name: 'Custom',
-    defaultHydration: 65,
-    defaultThicknessFactor: 0.08, // Medium crust in oz/in²
-    description: 'Create your own custom style with your preferred parameters.'
   }
 ];
 
@@ -237,19 +234,15 @@ export const calculateDoughRecipe = (inputs: DoughCalculatorInputs): DoughRecipe
   // Calculate total dough weight
   const totalDoughWeight = calculateTotalDoughWeight(numberOfPizzas, ballWeight);
 
-  // Calculate flour weight. Use the yeast share that is really weighed out (after the yeast-type
-  // conversion below), otherwise the ingredients do not add up to the requested dough weight.
-  const totalFlour = calculateFlourWeight(totalDoughWeight, hydration, salt, yeast * YEAST_CONVERSION_FACTORS[yeastType], oil, sugar, diastaticMalt, doughEnhancer);
+  // Calculate flour weight
+  const totalFlour = calculateFlourWeight(totalDoughWeight, hydration, salt, yeast, oil, sugar, diastaticMalt, doughEnhancer);
 
   // Calculate ingredient weights
   const waterWeight = (totalFlour * hydration) / 100;
   const saltWeight = (totalFlour * salt) / 100;
 
-  // Calculate base yeast weight (as active dry equivalent)
-  const baseYeastWeight = (totalFlour * yeast) / 100;
-
-  // Convert to the selected yeast type
-  const yeastWeight = baseYeastWeight * YEAST_CONVERSION_FACTORS[yeastType];
+  // The yeast % is an amount of the selected yeast type: what the slider says is what gets weighed.
+  const yeastWeight = (totalFlour * yeast) / 100;
 
   const oilWeight = (totalFlour * oil) / 100;
   const sugarWeight = (totalFlour * sugar) / 100;

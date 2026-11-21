@@ -1,6 +1,6 @@
 // Assert-based self-check for the dough maths. Run with `npm test`.
 import assert from 'node:assert/strict';
-import { calculateDoughRecipe } from './doughCalculator';
+import { calculateDoughRecipe, convertYeastPercent } from './doughCalculator';
 import type { DoughCalculatorInputs, PrefermentConfig } from '../types';
 
 const base: DoughCalculatorInputs = {
@@ -61,5 +61,16 @@ near(run(base.preferment).recipe.ingredients.reduce((s, i) => s + i.weight, 0), 
   near(recipe.preferment!.flour + recipe.mainDough!.flour, recipe.totalFlour);
   near(recipe.preferment!.water + recipe.mainDough!.water, recipe.totalFlour * 0.6);
 }
+
+// The yeast % is the selected yeast type: what the slider says is what gets weighed.
+{
+  const { recipe, totalYeast } = run(base.preferment, { yeast: 0.4, yeastType: 'fresh' });
+  near(totalYeast, recipe.totalFlour * 0.004);
+}
+
+// Switching yeast type keeps the leavening power (instant 0.75 : active dry 1 : fresh 3).
+assert.equal(convertYeastPercent(0.3, 'instant', 'active_dry'), 0.4);
+assert.equal(convertYeastPercent(0.3, 'instant', 'fresh'), 1.2);
+assert.equal(convertYeastPercent(0.2, 'fresh', 'instant'), 0.05);
 
 console.log('doughCalculator checks passed');

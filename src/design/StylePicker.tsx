@@ -10,11 +10,10 @@ interface Props {
 
 export function StylePicker({ value, onChange }: Props) {
   const { t } = useTranslation();
-  const styles = PIZZA_STYLES.filter((s) => s.id !== 'custom');
 
   return (
     <div className="bp-style-picker">
-      {styles.map((s) => (
+      {PIZZA_STYLES.map((s) => (
         <button
           type="button"
           key={s.id}

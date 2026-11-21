@@ -16,9 +16,7 @@
   ],
   "assets": {
     "directory": "./dist",
-    // Equivalent of the Netlify rule `/*  /index.html  200` in public/_redirects.
-    // Cloudflare rejects that rule itself as an infinite loop (error 100324), so
-    // public/_redirects must be stripped from dist before deploying.
+    // Unknown paths get index.html (SPA fallback).
     "not_found_handling": "single-page-application"
   }
 }

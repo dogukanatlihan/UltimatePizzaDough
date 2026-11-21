@@ -426,7 +426,7 @@
   padding: 10px 4px;
   font-family: var(--bp-font-mono);
   font-weight: 500;
-  font-size: 14px;
+  font-size: 16px; /* under 16px, iOS Safari zooms the page when the field gets focus */
   -moz-appearance: textfield;
   appearance: textfield;
 }

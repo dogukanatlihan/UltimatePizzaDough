@@ -95,14 +95,6 @@ const translations: Translations = {
     en: 'Italian flatbread with a high hydration for an open, airy crumb.',
     tr: 'Açık, havadar gözenek yapısı için yüksek hidrasyonlu İtalyan yufka ekmeği.'
   },
-  'style.custom': {
-    en: 'Custom',
-    tr: 'Özel'
-  },
-  'style.custom.desc': {
-    en: 'Create your own custom style with your preferred parameters.',
-    tr: 'Tercih ettiğiniz parametrelerle kendi özel stilinizi oluşturun.'
-  },
   
   // Form Labels
   'form.numberOfPizzas': {
@@ -218,18 +210,6 @@ const translations: Translations = {
   'button.reset': {
     en: 'Reset to Defaults',
     tr: 'Varsayılanlara Dön'
-  },
-  'button.manageTemplates': {
-    en: 'Manage Templates',
-    tr: 'Şablonları Yönet'
-  },
-  'button.saveTemplate': {
-    en: 'Save as Template',
-    tr: 'Şablon Olarak Kaydet'
-  },
-  'button.applyTemplate': {
-    en: 'Apply Template',
-    tr: 'Şablonu Uygula'
   },
   
   // Recipe Display
@@ -659,92 +639,6 @@ const translations: Translations = {
     en: 'Bake for 12-15 minutes until the cheese edges are deeply caramelized and crispy. The cheese touching the pan creates the signature frico crust.',
     tr: '12-15 dakika, peynir kenarları iyice karamelize olana ve çıtır olana kadar pişirin. Tavaya dokunan peynir karakteristik frico kabuğu oluşturur.'
   },
-  
-  // Template Manager
-  'template.manager': {
-    en: 'Template Manager',
-    tr: 'Şablon Yöneticisi'
-  },
-  'template.close': {
-    en: 'Close',
-    tr: 'Kapat'
-  },
-  'template.noTemplates': {
-    en: 'No Templates Yet',
-    tr: 'Henüz Şablon Yok'
-  },
-  'template.noTemplatesMessage': {
-    en: 'Create custom pizza settings and save them as templates for quick access later.',
-    tr: 'Özel pizza ayarları oluşturun ve daha sonra hızlı erişim için şablon olarak kaydedin.'
-  },
-  'template.saveCurrentSettings': {
-    en: 'Save Current Settings',
-    tr: 'Mevcut Ayarları Kaydet'
-  },
-  'template.apply': {
-    en: 'Apply',
-    tr: 'Uygula'
-  },
-  'template.delete': {
-    en: 'Delete',
-    tr: 'Sil'
-  },
-  'template.saveAsTemplate': {
-    en: 'Save Current Settings as Template',
-    tr: 'Mevcut Ayarları Şablon Olarak Kaydet'
-  },
-  'template.name': {
-    en: 'Template Name',
-    tr: 'Şablon Adı'
-  },
-  'template.placeholder': {
-    en: 'E.g., My Favorite NY Style',
-    tr: 'Örn., Favori NY Stilim'
-  },
-  'template.save': {
-    en: 'Save Template',
-    tr: 'Şablonu Kaydet'
-  },
-  'template.cancel': {
-    en: 'Cancel',
-    tr: 'İptal'
-  },
-  'template.errorName': {
-    en: 'Please enter a template name',
-    tr: 'Lütfen bir şablon adı girin'
-  },
-  'template.errorExists': {
-    en: 'A template with this name already exists',
-    tr: 'Bu isimde bir şablon zaten mevcut'
-  },
-  'template.saved': {
-    en: 'Template "{name}" saved successfully!',
-    tr: '"{name}" şablonu başarıyla kaydedildi!'
-  },
-  'template.applied': {
-    en: 'Applied template "{name}"',
-    tr: '"{name}" şablonu uygulandı'
-  },
-  'template.deleted': {
-    en: 'Deleted template "{name}"',
-    tr: '"{name}" şablonu silindi'
-  },
-  'template.created': {
-    en: 'Created',
-    tr: 'Oluşturuldu'
-  },
-  'template.rectangular': {
-    en: 'Rectangular',
-    tr: 'Dikdörtgen'
-  },
-  'template.round': {
-    en: 'Round',
-    tr: 'Yuvarlak'
-  },
-  'template.hydration': {
-    en: 'hydration',
-    tr: 'hidrasyon'
-  }
 };
 
 interface TranslationContextType {

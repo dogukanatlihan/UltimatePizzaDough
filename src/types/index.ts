@@ -55,7 +55,7 @@ export type DoughCalculatorInputs = {
   panLength?: number;
   preferment: PrefermentConfig;
   useInches: boolean;
-  isRectangular?: boolean; // Added for custom templates
+  isRectangular?: boolean; // The shape in use; styles that allow both (focaccia) toggle it
 };
 
 export type DoughIngredient = {
@@ -77,21 +77,4 @@ export type DoughRecipe = {
   };
   mainDough?: MainDough;
 };
-
-// New type for custom pizza templates
-export type CustomPizzaTemplate = {
-  id: string;
-  name: string;
-  hydration: number;
-  thicknessFactor: number;
-  isRectangular: boolean;
-  salt: number;
-  oil: number;
-  sugar: number;
-  diastaticMalt: number;
-  doughEnhancer: number;
-  yeast: number;
-  yeastType: YeastType;
-  preferment: PrefermentConfig;
-  createdAt: number; // timestamp
-}; 
+ 

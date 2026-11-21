@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { DoughCalculatorInputs, DoughRecipe, PrefermentType, YeastType, CustomPizzaTemplate } from '../types';
+import { DoughCalculatorInputs, DoughRecipe, PrefermentType, YeastType } from '../types';
 import { 
   calculateDoughRecipe, 
   PIZZA_STYLES, 
   calculateDoughBallWeight,
   calculateThicknessFactor,
+  convertYeastPercent,
   cmToInches,
   inchesToCm
 } from '../utils/doughCalculator';
@@ -15,14 +16,13 @@ import {
   trackUnitChange,
   trackReset,
   trackRecipeGenerated,
-  trackTemplateSaved,
-  trackTemplateApplied,
-  trackTemplateDeleted,
   trackShapeToggled,
-  trackRecipeAdjustment,
-  trackCustomTemplateStats
+  trackRecipeAdjustment
 } from '../utils/analytics';
-import { getTemplates, addTemplate, deleteTemplate, applyTemplate } from '../utils/templateUtils';
+
+// Every yeast % in the presets below is an instant-yeast amount. The slider % means the yeast
+// type that is selected, so presets pass through fromInstant() before they reach the inputs.
+const fromInstant = (percent: number, to: YeastType) => convertYeastPercent(percent, 'instant', to);
 
 // Update default thickness factors based on the new calculation method
 // These values represent the thickness factor in ounces per square inch
@@ -54,16 +54,6 @@ const DEFAULT_INPUTS: DoughCalculatorInputs = {
 export const useDoughCalculator = () => {
   const [inputs, setInputs] = useState<DoughCalculatorInputs>(DEFAULT_INPUTS);
   const [recipe, setRecipe] = useState<DoughRecipe | null>(null);
-  const [templates, setTemplates] = useState<CustomPizzaTemplate[]>([]);
-
-  // Load templates on initial render
-  useEffect(() => {
-    const savedTemplates = getTemplates();
-    setTemplates(savedTemplates);
-    
-    // Track template statistics
-    trackCustomTemplateStats();
-  }, []);
 
   // Update recipe whenever inputs change
   useEffect(() => {
@@ -287,15 +277,6 @@ export const useDoughCalculator = () => {
           diastaticMalt = 0.4; // 0.25-0.5%
           doughEnhancer = 0.1; // 0-0.25%
           break;
-        case 'custom':
-          // Keep current values or use defaults
-          oil = inputs.oil;
-          sugar = inputs.sugar;
-          salt = inputs.salt;
-          yeast = inputs.yeast;
-          diastaticMalt = inputs.diastaticMalt;
-          doughEnhancer = inputs.doughEnhancer;
-          break;
       }
       
       setInputs(prev => ({
@@ -311,7 +292,7 @@ export const useDoughCalculator = () => {
         oil,
         sugar,
         salt,
-        yeast,
+        yeast: fromInstant(yeast, prev.yeastType),
         diastaticMalt,
         doughEnhancer
       }));
@@ -378,50 +359,6 @@ export const useDoughCalculator = () => {
       
       return newInputs;
     });
-  };
-
-  // Handle saving a template
-  const handleSaveTemplate = (name: string) => {
-    const newTemplate = addTemplate(name, inputs);
-    setTemplates(prev => [...prev, newTemplate]);
-    trackTemplateSaved(name, inputs);
-    return newTemplate;
-  };
-
-  // Handle applying a template
-  const handleApplyTemplate = (templateId: string) => {
-    const template = templates.find(t => t.id === templateId);
-    if (template) {
-      const newInputs = applyTemplate(template, inputs);
-      
-      // Ensure proper dimensions are set based on shape
-      const templateDimensions = getStyleDefaultDimensions(newInputs.pizzaStyle);
-      if (template.isRectangular) {
-        // For rectangular pizzas, ensure pan dimensions are set
-        if (!newInputs.panWidth || !newInputs.panLength) {
-          newInputs.panWidth = templateDimensions.panWidth;
-          newInputs.panLength = templateDimensions.panLength;
-        }
-      } else {
-        // For round pizzas, ensure diameter is set
-        if (!newInputs.pizzaDiameter) {
-          newInputs.pizzaDiameter = templateDimensions.diameter;
-        }
-      }
-      
-      setInputs(newInputs);
-      trackTemplateApplied(template.name, template);
-    }
-  };
-
-  // Handle deleting a template
-  const handleDeleteTemplate = (templateId: string) => {
-    const template = templates.find(t => t.id === templateId);
-    if (template) {
-      deleteTemplate(templateId);
-      setTemplates(prev => prev.filter(t => t.id !== templateId));
-      trackTemplateDeleted(template.name);
-    }
   };
 
   // Handle pizza diameter change
@@ -608,7 +545,8 @@ export const useDoughCalculator = () => {
     setInputs(prev => {
       let percentage = prev.preferment.percentage;
       let hydration = prev.preferment.hydration;
-      let yeast = prev.yeast;
+      // Instant basis, like the presets; converted back to the selected yeast type below.
+      let yeast = convertYeastPercent(prev.yeast, prev.yeastType, 'instant');
 
       if (type === 'none') {
         percentage = 0;
@@ -646,7 +584,7 @@ export const useDoughCalculator = () => {
 
       const newInputs = {
         ...prev,
-        yeast,
+        yeast: fromInstant(yeast, prev.yeastType),
         preferment: {
           type,
           percentage,
@@ -686,8 +624,10 @@ export const useDoughCalculator = () => {
   // Handle yeast type change
   const handleYeastTypeChange = (yeastType: YeastType) => {
     setInputs(prev => {
+      // Same dough, different yeast: convert the % so the leavening power stays equal.
       const newInputs = {
         ...prev,
+        yeast: convertYeastPercent(prev.yeast, prev.yeastType, yeastType),
         yeastType: yeastType
       };
       
@@ -709,7 +649,6 @@ export const useDoughCalculator = () => {
   return {
     inputs,
     recipe,
-    templates,
     handleInputChange,
     handlePizzaStyleChange,
     handlePrefermentTypeChange,
@@ -721,9 +660,6 @@ export const useDoughCalculator = () => {
     handlePrefermentHydrationChange,
     handleYeastTypeChange,
     handleShapeToggle,
-    handleSaveTemplate,
-    handleApplyTemplate,
-    handleDeleteTemplate,
     resetToDefaults
   };
 }; 

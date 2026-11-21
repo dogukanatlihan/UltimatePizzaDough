@@ -1,5 +1,9 @@
 # Netlify → Cloudflare migration — makebetter.pizza
 
+> **Update 2026-11-22:** `public/_redirects`, `netlify.toml` and the two Netlify guides are deleted.
+> `npm run build` output now deploys as is; the `rm -f dist/_redirects` step below is no longer needed
+> (harmless if the Workers Builds command still has it). `public/_headers` is the only header source.
+
 ## ✅ CUTOVER COMPLETE (2026-07-27)
 
 `https://makebetter.pizza/` and `https://www.makebetter.pizza/` both serve **200** from

@@ -1,5 +1,3 @@
-import { getTemplates } from './templateUtils';
-
 // Define the gtag function type to avoid TypeScript errors
 declare global {
   interface Window {
@@ -101,44 +99,6 @@ export const trackReset = (): void => {
   trackEvent('reset_calculator');
 };
 
-// Add these new tracking functions for templates
-export const trackTemplateSaved = (templateName: string, templateData?: Record<string, unknown>): void => {
-  const eventParams: { [key: string]: unknown } = { template_name: templateName };
-  
-  // Add template details if available
-  if (templateData) {
-    eventParams.pizza_style = templateData.pizzaStyle;
-    eventParams.hydration = templateData.hydration;
-    eventParams.salt = templateData.salt;
-    eventParams.yeast = templateData.yeast;
-    eventParams.oil = templateData.oil;
-    eventParams.sugar = templateData.sugar;
-    eventParams.diastatic_malt = templateData.diastaticMalt;
-    eventParams.dough_enhancer = templateData.doughEnhancer;
-    eventParams.shape = templateData.isRectangular ? 'rectangular' : 'round';
-    eventParams.thickness_factor = templateData.thicknessFactor;
-  }
-  
-  trackEvent('save_template', eventParams);
-};
-
-export const trackTemplateApplied = (templateName: string, templateData?: Record<string, unknown>): void => {
-  const eventParams: { [key: string]: unknown } = { template_name: templateName };
-  
-  // Add template details if available
-  if (templateData) {
-    eventParams.pizza_style = templateData.pizzaStyle;
-    eventParams.hydration = templateData.hydration;
-    eventParams.shape = templateData.isRectangular ? 'rectangular' : 'round';
-  }
-  
-  trackEvent('apply_template', eventParams);
-};
-
-export const trackTemplateDeleted = (templateName: string): void => {
-  trackEvent('delete_template', { template_name: templateName });
-};
-
 export const trackShapeToggled = (shape: 'round' | 'rectangular'): void => {
   trackEvent('toggle_shape', { shape });
 };
@@ -157,43 +117,3 @@ export const trackRecipeAdjustment = (
     pizza_style: pizzaStyle
   });
 };
-
-// Track custom template usage statistics
-export const trackCustomTemplateStats = (): void => {
-  // This function would be called periodically or when the app loads
-  // to send aggregate data about template usage
-  
-  // Get templates from the cookie store that templateUtils writes (it already handles parse errors)
-  const templates = getTemplates();
-  
-  if (templates.length > 0) {
-    // Calculate some statistics
-    const templateCount = templates.length;
-    const styleDistribution: {[key: string]: number} = {};
-    const shapeDistribution = {
-      round: 0,
-      rectangular: 0
-    };
-    
-    templates.forEach((template: Record<string, unknown>) => {
-      // Count by pizza style
-      if (template.pizzaStyle) {
-        styleDistribution[template.pizzaStyle as string] = (styleDistribution[template.pizzaStyle as string] || 0) + 1;
-      }
-      
-      // Count by shape
-      if (template.isRectangular) {
-        shapeDistribution.rectangular++;
-      } else {
-        shapeDistribution.round++;
-      }
-    });
-    
-    // Send the statistics to Google Analytics
-    trackEvent('custom_template_stats', {
-      template_count: templateCount,
-      style_distribution: JSON.stringify(styleDistribution),
-      shape_distribution: JSON.stringify(shapeDistribution)
-    });
-  }
-}; 
