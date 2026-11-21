@@ -1,9 +1,10 @@
 import { PIZZA_STYLES } from '../utils/doughCalculator';
 import { useTranslation } from '../context/TranslationContext';
 import { RANGES, clamp, sizeBounds } from '../utils/ranges';
-import { formatGrams, lengthNumber } from '../utils/format';
+import { formatGrams } from '../utils/format';
 import type { Calc } from './TrePassi';
 import { Counter, RangeField, Segmented } from './controls';
+import { Num } from './Num';
 
 export const crustKey = (tf: number) => (tf <= 0.06 ? 'crust.thin' : tf <= 0.09 ? 'crust.medium' : tf <= 0.12 ? 'crust.thick' : 'crust.extraThick');
 
@@ -13,7 +14,7 @@ export function StepSize({ calc }: { calc: Calc }) {
   const style = PIZZA_STYLES.find((s) => s.id === inputs.pizzaStyle);
   const bounds = sizeBounds(inputs.useInches);
   const unit = inputs.useInches ? '″' : ' cm';
-  const len = (v: number) => `${lengthNumber(v, language)}${unit}`;
+  const len = (v: number) => <Num value={v} digits={1} suffix={unit} />;
   // One press moves a size by 1 in the unit on screen (11.8″ goes to 12″, then 13″).
   const nudge = (v: number, dir: number, [min, max]: readonly [number, number]) => clamp(Math.round(v) + dir, min, max);
   const labels = { lessLabel: t('a11y.less'), moreLabel: t('a11y.more') };
@@ -26,7 +27,7 @@ export function StepSize({ calc }: { calc: Calc }) {
       <div className="block">
         <Counter
           label={t('size.pizzas')}
-          text={inputs.numberOfPizzas}
+          text={<Num value={inputs.numberOfPizzas} />}
           onLess={() => calc.handleInputChange('numberOfPizzas', clamp(inputs.numberOfPizzas - 1, minPizzas, maxPizzas))}
           onMore={() => calc.handleInputChange('numberOfPizzas', clamp(inputs.numberOfPizzas + 1, minPizzas, maxPizzas))}
           lessDisabled={inputs.numberOfPizzas <= minPizzas}

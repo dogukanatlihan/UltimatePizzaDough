@@ -1,7 +1,9 @@
+import { useAutoAnimate } from '@formkit/auto-animate/react';
 import type { DoughCalculatorInputs, DoughRecipe } from '../types';
 import { useTranslation } from '../context/TranslationContext';
 import { formatGrams, formatOunces, formatPercent } from '../utils/format';
-import { STYLE_IMAGES, STYLE_IMAGE_SIZE, STYLE_TINT } from './styleMeta';
+import { Photo } from './Photo';
+import { Grams } from './Num';
 import { ingredientRows, sizeText, stageRows, totalDough, type Row } from './recipeText';
 
 interface Props {
@@ -13,12 +15,17 @@ export function RecipeCard({ recipe, inputs }: Props) {
   const { t, language } = useTranslation();
   const stages = stageRows(recipe, t);
   const total = totalDough(recipe);
+  // Rows slide in and out and make room for each other (off for reduced motion, by the library).
+  const rows = { duration: 220, easing: 'ease-out' };
+  const [listRef] = useAutoAnimate(rows);
+  const [firstRef] = useAutoAnimate(rows);
+  const [mainRef] = useAutoAnimate(rows);
 
   const row = (r: Row) => (
     <div className="ing" key={r.key}>
       <span className="ing-name">{r.label}</span>
       <span className="ing-weight num">
-        {formatGrams(r.g, { yeast: r.key === 'yeast', locale: language })}
+        <Grams g={r.g} yeast={r.key === 'yeast'} />
         <small>{formatOunces(r.g, language)}</small>
       </span>
       {r.pct === undefined ? <span /> : <span className="ing-pct num">{formatPercent(r.pct, language)}</span>}
@@ -28,9 +35,7 @@ export function RecipeCard({ recipe, inputs }: Props) {
   return (
     <article className="recipe" aria-labelledby="recipe-name">
       <header className="recipe-head">
-        <span className="recipe-photo" style={{ background: STYLE_TINT[inputs.pizzaStyle] }}>
-          <img src={STYLE_IMAGES[inputs.pizzaStyle]} alt="" width={STYLE_IMAGE_SIZE} height={STYLE_IMAGE_SIZE} />
-        </span>
+        <Photo styleId={inputs.pizzaStyle} className="recipe-photo" eager />
         <div>
           <p className="recipe-name" id="recipe-name">{t(`style.${inputs.pizzaStyle}`)}</p>
           <p className="recipe-sub num">
@@ -39,11 +44,11 @@ export function RecipeCard({ recipe, inputs }: Props) {
         </div>
       </header>
 
-      <div className="ing-list">{ingredientRows(recipe, t).map(row)}</div>
+      <div className="ing-list" ref={listRef}>{ingredientRows(recipe, t).map(row)}</div>
       <div className="ing ing-total">
         <span className="ing-name">{t('recipe.totalDough')}</span>
         <span className="ing-weight num">
-          {formatGrams(total, { locale: language })}
+          <Grams g={total} />
           <small>{formatOunces(total, language)}</small>
         </span>
         <span />
@@ -53,9 +58,9 @@ export function RecipeCard({ recipe, inputs }: Props) {
         <>
           {recipe.mainDough && recipe.mainDough.water < 0 && <p className="warn" role="alert">{t('preferment.waterWarning')}</p>}
           <h3 className="stage-head">{t('stage.dayBefore', { name: stages.name })}</h3>
-          <div className="ing-list">{stages.first.map(row)}</div>
+          <div className="ing-list" ref={firstRef}>{stages.first.map(row)}</div>
           <h3 className="stage-head">{t('stage.bakingDay')}</h3>
-          <div className="ing-list">{stages.main.map(row)}</div>
+          <div className="ing-list" ref={mainRef}>{stages.main.map(row)}</div>
         </>
       )}
     </article>

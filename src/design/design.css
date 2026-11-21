@@ -41,7 +41,7 @@
 .pick { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .style-card { position: relative; display: block; padding: 0; text-align: left; border: 2px solid transparent; border-radius: var(--r-card); background: var(--card); overflow: hidden; box-shadow: var(--shadow); }
 .style-photo { display: block; aspect-ratio: 4 / 3; overflow: hidden; }
-.style-photo img { width: 100%; height: 100%; object-fit: cover; }
+.photo img { width: 100%; height: 100%; object-fit: cover; }
 .style-text { display: block; padding: 10px 12px 12px; }
 .style-name { display: block; font: 700 18px/1.15 var(--font-display); letter-spacing: -.01em; }
 .style-short { display: block; margin-top: 3px; font-size: 13px; line-height: 1.3; color: var(--ink-2); }
@@ -52,8 +52,7 @@
 
 /* ---- Step 2: chosen-style chip (phones) */
 .chip { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; margin-bottom: 16px; padding: 4px 14px 4px 4px; border: 1.5px solid var(--line); border-radius: 999px; background: var(--card); }
-.chip-photo { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; flex: none; }
-.chip-photo img { width: 100%; height: 100%; object-fit: cover; }
+.chip-photo { display: block; width: 40px; height: 40px; border-radius: 50%; overflow: hidden; flex: none; }
 .chip-name { font: 700 16px/1 var(--font-display); }
 .chip-change { font-size: 14px; font-weight: 600; color: var(--basil); text-decoration: underline; text-underline-offset: 3px; }
 
@@ -75,9 +74,11 @@
 .counter button:disabled { opacity: .35; cursor: default; }
 .counter output { text-align: center; font: 800 clamp(22px, 6vw, 30px)/1 var(--font-display); letter-spacing: -.02em; white-space: nowrap; }
 
-.seg { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
-.seg button { flex: 1 1 auto; min-height: 46px; padding: 0 14px; border: 1.5px solid var(--line); border-radius: 13px; background: var(--card); font-weight: 600; font-size: 15px; }
-.seg button[aria-pressed="true"] { background: var(--basil); border-color: var(--basil); color: var(--on-basil); }
+.seg { position: relative; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.seg button { position: relative; flex: 1 1 auto; min-height: 46px; padding: 0 14px; border: 1.5px solid var(--line); border-radius: 13px; background: var(--card); font-weight: 600; font-size: 15px; }
+/* The chosen option is marked by one pill that slides between options (measured in Segmented). */
+.seg-pill { position: absolute; left: 0; top: 0; border-radius: 13px; background: var(--basil); pointer-events: none; }
+.seg button[aria-pressed="true"] { background: transparent; border-color: transparent; color: var(--on-basil); }
 
 input[type="range"] { display: block; width: 100%; height: 44px; margin: 0; background: transparent; appearance: none; -webkit-appearance: none; cursor: pointer; }
 input[type="range"]::-webkit-slider-runnable-track { height: 10px; border-radius: 10px; background: linear-gradient(to right, var(--basil) var(--p, 0%), var(--line) var(--p, 0%)); }
@@ -99,14 +100,14 @@ input[type="range"]::-moz-range-thumb { width: 24px; height: 24px; border-radius
 .disc-panel { display: grid; grid-template-rows: 0fr; }
 .disc[data-open="true"] .disc-panel { grid-template-rows: 1fr; }
 /* Closed content stays in the page for the height animation, so take it out of the tab order and the accessibility tree. */
-.disc-inner { min-height: 0; overflow: hidden; visibility: hidden; display: grid; gap: 18px; padding: 0 18px; }
-.disc[data-open="true"] .disc-inner { visibility: visible; padding-bottom: 18px; }
+.disc-clip { min-height: 0; overflow: hidden; visibility: hidden; }
+.disc[data-open="true"] .disc-clip { visibility: visible; }
+.disc-inner { display: grid; gap: 18px; padding: 0 18px 18px; }
 
 /* ---- Recipe card */
 .recipe { background: var(--card); border-radius: var(--r-card); overflow: hidden; box-shadow: var(--shadow); }
 .recipe-head { display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--basil-deep); color: #fff; }
-.recipe-photo { width: 60px; height: 60px; border-radius: 14px; overflow: hidden; flex: none; }
-.recipe-photo img { width: 100%; height: 100%; object-fit: cover; }
+.recipe-photo { display: block; width: 60px; height: 60px; border-radius: 14px; overflow: hidden; flex: none; }
 .recipe-name { font: 800 22px/1.1 var(--font-display); letter-spacing: -.01em; }
 .recipe-sub { font-size: 14px; color: #CFE2D3; }
 .ing { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(58px, auto); align-items: center; gap: 10px; min-height: 54px; padding: 6px 16px; border-bottom: 1px solid var(--line); background: var(--card); }
@@ -184,6 +185,68 @@ input[type="range"]::-moz-range-thumb { width: 24px; height: 24px; border-radius
   .foot p { flex-basis: auto; margin-left: auto; }
 }
 
+/* ============ Motion ============
+   Rules: interactions 200ms or less, transitions 300ms or less, ease-out; transform and opacity only
+   (the disclosure panel is the one exception); never from a slider; reduced motion leaves short fades. */
+
+/* Photos fade in over their average colour. */
+.photo img { opacity: 0; transition: opacity 250ms ease-out; }
+.photo img[data-loaded="true"] { opacity: 1; }
+
+/* Press feedback. */
+.btn, .style-card, .counter button, .seg button, .tab, .tool, .chip, .bar-back, .disc-head button {
+  transition: transform 120ms var(--ease-out), background-color 150ms ease-out, border-color 150ms ease-out, color 150ms ease-out, box-shadow 150ms ease-out; }
+.btn:active, .style-card:active, .counter button:active:not(:disabled), .seg button:active, .tab:active, .tool:active, .chip:active, .bar-back:active { transform: scale(.97); }
+
+/* The check on the chosen style. */
+.style-check { display: grid; opacity: 0; transform: scale(.9); transition: opacity 180ms var(--ease-out), transform 180ms var(--ease-out); }
+.style-card[aria-pressed="true"] .style-check { opacity: 1; transform: none; }
+
+/* Selection pill. */
+.seg-pill[data-slide="true"] { transition: transform 250ms var(--spring), width 250ms var(--ease-out), height 250ms var(--ease-out); }
+
+/* Disclosure: the row grows from 0 to its content height. */
+.disc-panel { transition: grid-template-rows 250ms var(--ease-out); }
+.disc-clip { transition: visibility 0s linear 250ms; }
+.disc[data-open="true"] .disc-clip { transition-delay: 0s; }
+.disc-icon::after { transition: transform 200ms var(--ease-out); }
+
+/* Copy: the check draws itself. */
+.draw path { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 260ms var(--ease-out) forwards; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+
+/* Toast enters from below; its exit is a Web Animation in ToastProvider. */
+.toast { transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out); }
+@starting-style { .toast { opacity: 0; transform: translateY(12px); } }
+
+/* Step changes on phones (View Transitions; browsers without them change step at once).
+   The header and the bottom bar keep their place; the page slides a little and fades; the style photo travels. */
+.top { view-transition-name: top-bar; }
+.bar { view-transition-name: bottom-bar; }
+@media (max-width: 1039px) {
+  .steps[data-step="2"] .chip-photo, .steps[data-step="3"] .recipe-photo { view-transition-name: style-photo; }
+}
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 250ms; animation-timing-function: cubic-bezier(.22, 1, .36, 1); }
+html[data-dir="forward"]::view-transition-old(root) { animation-name: vt-fade-out, vt-out-left; }
+html[data-dir="forward"]::view-transition-new(root) { animation-name: vt-fade-in, vt-in-right; }
+html[data-dir="back"]::view-transition-old(root) { animation-name: vt-fade-out, vt-out-right; }
+html[data-dir="back"]::view-transition-new(root) { animation-name: vt-fade-in, vt-in-left; }
+::view-transition-group(style-photo) { animation-duration: 280ms; animation-timing-function: cubic-bezier(.22, 1, .36, 1); }
+::view-transition-old(style-photo), ::view-transition-new(style-photo) { height: 100%; object-fit: cover; }
+@keyframes vt-fade-out { to { opacity: 0; } }
+@keyframes vt-fade-in { from { opacity: 0; } }
+@keyframes vt-out-left { to { transform: translateX(-28px); } }
+@keyframes vt-in-right { from { transform: translateX(28px); } }
+@keyframes vt-out-right { to { transform: translateX(28px); } }
+@keyframes vt-in-left { from { transform: translateX(-28px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition-property: opacity, visibility !important; transition-duration: 120ms !important; }
+  .btn:active, .style-card:active, .counter button:active, .seg button:active, .tab:active, .tool:active, .chip:active, .bar-back:active { transform: none; }
+  .draw path { stroke-dashoffset: 0; }
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}
+
 /* ---- Print: the recipe and how to make it, nothing else */
 @media print {
   .top, .bar, .foot, .toasts, #s1, #s2, #tune, .actions, .kicker, .disc-icon { display: none !important; }
@@ -193,5 +256,5 @@ input[type="range"]::-moz-range-thumb { width: 24px; height: 24px; border-radius
   .recipe, .disc { box-shadow: none; border: 1px solid #999; margin-bottom: 12px; break-inside: avoid; }
   .recipe-head { background: none; color: #000; } .recipe-sub { color: #333; }
   .disc-panel { grid-template-rows: 1fr !important; }
-  .disc-inner { visibility: visible !important; padding-bottom: 18px; }
+  .disc-clip { visibility: visible !important; }
 }

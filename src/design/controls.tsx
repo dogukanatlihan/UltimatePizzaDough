@@ -1,6 +1,7 @@
-import { useId, useState, type CSSProperties, type ReactNode } from 'react';
+import { useId, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import type { Range } from '../utils/ranges';
 import { clamp } from '../utils/ranges';
+import { markSliding } from './motion';
 
 interface CounterProps {
   label: string;
@@ -56,7 +57,10 @@ export function RangeField({ label, value, range: [min, max, step], onChange, va
         step={step}
         value={shown}
         // Snap to the step and trim float noise (0.30000000000000004).
-        onChange={(e) => onChange(+clamp(Math.round(+e.target.value / step) * step, min, max).toFixed(2))}
+        onChange={(e) => {
+          markSliding(); // numbers follow the slider with no roll
+          onChange(+clamp(Math.round(+e.target.value / step) * step, min, max).toFixed(2));
+        }}
         style={{ '--p': `${((shown - min) / (max - min)) * 100}%` } as CSSProperties}
       />
       {ends && <div className="range-ends"><span>{ends[0]}</span><span>{ends[1]}</span></div>}
@@ -72,12 +76,34 @@ interface SegmentedProps<T extends string> {
   onChange: (value: T) => void;
 }
 
+interface Pill { x: number; y: number; w: number; h: number; slide: boolean }
+
 export function Segmented<T extends string>({ label, value, options, onChange }: SegmentedProps<T>) {
   const id = useId();
+  const box = useRef<HTMLDivElement>(null);
+  const [pill, setPill] = useState<Pill | null>(null);
+  const labels = options.map((o) => o.label).join('|');
+
+  // One pill slides to the chosen option. Options can wrap to a second row, so it is measured, not computed.
+  useLayoutEffect(() => {
+    const el = box.current;
+    if (!el) return;
+    const measure = () => {
+      const on = el.querySelector<HTMLElement>('[aria-pressed="true"]');
+      // No slide when the group was hidden (width 0) a moment ago: the pill just appears in place.
+      setPill((prev) => (on ? { x: on.offsetLeft, y: on.offsetTop, w: on.offsetWidth, h: on.offsetHeight, slide: !!prev && prev.w > 0 && on.offsetWidth > 0 } : null));
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [value, labels]);
+
   return (
     <div className="field">
       <span className="field-label" id={id}>{label}</span>
-      <div className="seg" role="group" aria-labelledby={id}>
+      <div className="seg" role="group" aria-labelledby={id} ref={box}>
+        {pill && <span className="seg-pill" data-slide={pill.slide} aria-hidden="true" style={{ transform: `translate(${pill.x}px, ${pill.y}px)`, width: pill.w, height: pill.h }} />}
         {options.map((o) => (
           <button type="button" key={o.value} aria-pressed={o.value === value} onClick={() => onChange(o.value)}>
             {o.label}
@@ -111,7 +137,9 @@ export function Disclosure({ title, subtitle, defaultOpen = false, children }: D
         </button>
       </h3>
       <div className="disc-panel" id={id}>
-        <div className="disc-inner">{children}</div>
+        <div className="disc-clip">
+          <div className="disc-inner">{children}</div>
+        </div>
       </div>
     </section>
   );

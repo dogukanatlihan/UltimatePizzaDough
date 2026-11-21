@@ -11,11 +11,10 @@ const number = (value: number, maximumFractionDigits: number, locale = 'en'): st
 };
 
 // Weights the way a kitchen scale reads: whole grams from 10 g, one decimal below, two below 1 g and for yeast.
-export const gramsNumber = (g: number, { yeast = false, locale }: WeightOptions = {}): string => {
-  if (!Number.isFinite(g)) return '0';
-  const size = Math.abs(g);
-  return number(g, yeast || size < 1 ? 2 : size < 10 ? 1 : 0, locale);
-};
+export const gramsDigits = (g: number, yeast = false): number => (yeast || Math.abs(g) < 1 ? 2 : Math.abs(g) < 10 ? 1 : 0);
+
+export const gramsNumber = (g: number, { yeast = false, locale }: WeightOptions = {}): string =>
+  Number.isFinite(g) ? number(g, gramsDigits(g, yeast), locale) : '0';
 
 export const formatGrams = (g: number, opts?: WeightOptions): string => `${gramsNumber(g, opts)} g`;
 

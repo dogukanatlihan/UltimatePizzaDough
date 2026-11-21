@@ -1,22 +1,21 @@
 import { PIZZA_STYLES } from '../utils/doughCalculator';
 import { useTranslation } from '../context/TranslationContext';
-import { STYLE_IMAGES, STYLE_IMAGE_SIZE, STYLE_TINT } from './styleMeta';
+import { Photo } from './Photo';
 
 interface Props {
   value: string;
   onPick: (styleId: string) => void;
+  /** The card whose photo travels to the next step. */
+  morphId: string;
 }
 
-export function StepStyle({ value, onPick }: Props) {
+export function StepStyle({ value, onPick, morphId }: Props) {
   const { t } = useTranslation();
   return (
     <div className="pick">
       {PIZZA_STYLES.map((s, i) => (
         <button type="button" key={s.id} className="style-card" aria-pressed={s.id === value} onClick={() => onPick(s.id)}>
-          <span className="style-photo" style={{ background: STYLE_TINT[s.id] }}>
-            {/* The name is in the text beside it, so the photo is decoration for screen readers. */}
-            <img src={STYLE_IMAGES[s.id]} alt="" width={STYLE_IMAGE_SIZE} height={STYLE_IMAGE_SIZE} loading={i < 2 ? 'eager' : 'lazy'} decoding="async" />
-          </span>
+          <Photo styleId={s.id} className="style-photo" eager={i < 2} transitionName={s.id === morphId ? 'style-photo' : undefined} />
           <span className="style-text">
             <span className="style-name">{t(`style.${s.id}`)}</span>
             <span className="style-short">{t(`style.${s.id}.short`)}</span>

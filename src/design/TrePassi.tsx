@@ -1,5 +1,6 @@
 import './design.css';
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { flushSync } from 'react-dom';
 import { useDoughCalculator } from '../hooks/useDoughCalculator';
 import { useTranslation } from '../context/TranslationContext';
 import { useToast } from '../components/ToastProvider';
@@ -14,7 +15,8 @@ import { StepSize } from './StepSize';
 import { RecipeCard } from './RecipeCard';
 import { Tuning } from './Tuning';
 import { Guide } from './Guide';
-import { STYLE_IMAGES, STYLE_IMAGE_SIZE, STYLE_TINT } from './styleMeta';
+import { Photo } from './Photo';
+import { runTransition } from './motion';
 import { copyText, sizeText, totalDough, weightOf } from './recipeText';
 
 export type Calc = ReturnType<typeof useDoughCalculator>;
@@ -38,13 +40,17 @@ export function TrePassi() {
   const [step, setStep] = useState<Step>(calc.restored ? 3 : 1);
   const headings = useRef<Partial<Record<Step, HTMLHeadingElement | null>>>({});
   const moved = useRef(false);
+  // The card that was just tapped: its photo carries into the next step. Null means "the selected style".
+  const [tapped, setTapped] = useState<string | null>(null);
   // Computed here, not read from the hook's state, so the numbers never lag a render behind the control.
   const recipe = useMemo(() => calculateDoughRecipe(inputs), [inputs]);
 
   const goTo = (next: Step) => {
     moved.current = true;
-    setStep(next);
     trackTabChange(STEP_KEYS[next].replace('step.', ''));
+    // Side by side there is nothing to transition between.
+    if (wide || next === step) setStep(next);
+    else runTransition(() => flushSync(() => setStep(next)), next > step ? 'forward' : 'back');
   };
 
   // After a step change: top of the page on phones, and focus on the new step's heading for keyboards and screen readers.
@@ -57,8 +63,19 @@ export function TrePassi() {
   }, [step, wide]);
 
   const pickStyle = (styleId: string) => {
-    calc.handlePizzaStyleChange(styleId);
-    if (!wide) goTo(2);
+    if (wide) {
+      calc.handlePizzaStyleChange(styleId);
+      return;
+    }
+    // Name the tapped photo before the browser takes its "before" picture, then change style and step together.
+    flushSync(() => setTapped(styleId));
+    moved.current = true;
+    trackTabChange('size');
+    runTransition(() => flushSync(() => {
+      calc.handlePizzaStyleChange(styleId);
+      setStep(2);
+      setTapped(null);
+    }), 'forward');
   };
 
   const copy = async (): Promise<boolean> => {
@@ -105,14 +122,12 @@ export function TrePassi() {
       <main className="steps" data-step={step}>
         <section className="step" id="s1" aria-labelledby="h-1">
           {head(1, t('s1.title'))}
-          <StepStyle value={inputs.pizzaStyle} onPick={pickStyle} />
+          <StepStyle value={inputs.pizzaStyle} onPick={pickStyle} morphId={tapped ?? inputs.pizzaStyle} />
         </section>
 
         <section className="step" id="s2" aria-labelledby="h-2">
           <button type="button" className="chip" onClick={() => goTo(1)}>
-            <span className="chip-photo" style={{ background: STYLE_TINT[inputs.pizzaStyle] }}>
-              <img src={STYLE_IMAGES[inputs.pizzaStyle]} alt="" width={STYLE_IMAGE_SIZE} height={STYLE_IMAGE_SIZE} />
-            </span>
+            <Photo styleId={inputs.pizzaStyle} className="chip-photo" eager />
             <span className="chip-name">{styleName}</span>
             <span className="chip-change">{t('chip.change')}</span>
           </button>

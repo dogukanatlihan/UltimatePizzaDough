@@ -46,7 +46,12 @@ export function Guide({ recipe, styleId, onCopy, onPrint }: Props) {
       </Disclosure>
 
       <div className="actions">
-        <button type="button" className="btn btn-primary" onClick={copy}>{copied ? t('action.copied') : t('action.copy')}</button>
+        <button type="button" className="btn btn-primary" onClick={copy}>
+          {copied && (
+            <svg className="draw" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" pathLength="1" /></svg>
+          )}
+          {copied ? t('action.copied') : t('action.copy')}
+        </button>
         <button type="button" className="btn" onClick={onPrint}>{t('action.print')}</button>
       </div>
     </>

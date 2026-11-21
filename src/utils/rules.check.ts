@@ -8,6 +8,7 @@ import { translations, translate } from '../context/translations';
 import { calculateDoughRecipe } from './doughCalculator';
 import { gramsNumber, formatPercent } from './format';
 import { methodStages, bakeInfo, copyText, sizeText } from '../design/recipeText';
+import { runTransition } from '../design/motion';
 
 // ---- Weights read like a kitchen scale
 assert.equal(formatGrams(457.3), '457 g');
@@ -143,6 +144,37 @@ assert.equal(sizeText({ ...ny, isRectangular: true, panWidth: 25, panLength: 36 
   assert.equal(bake.steps.length, 4);
   assert.ok(bake.flour);
   assert.equal(bakeInfo('ny', tTr).time, '8–10 dk');
+}
+
+// ---- Step transitions: the update runs exactly once on every path
+{
+  const calls: string[] = [];
+  const el = { dataset: {} as Record<string, string | undefined> };
+  // No View Transitions API: the step changes at once.
+  runTransition(() => calls.push('a'), 'forward', { documentElement: el }, false);
+  assert.deepEqual(calls, ['a']);
+  // The API throws: the step still changes, once.
+  runTransition(() => calls.push('b'), 'back', { documentElement: el, startViewTransition() { throw new Error('x'); } }, false);
+  assert.deepEqual(calls, ['a', 'b']);
+  assert.equal(el.dataset.dir, 'back');
+  // The API works: the browser calls the update.
+  const queue: (() => void)[] = [];
+  const doc = { documentElement: el, startViewTransition(run: () => void) {
+    queue.push(run);
+    // A skipped transition rejects both promises; neither may surface as an unhandled rejection.
+    return { finished: Promise.reject(new Error('skipped')), ready: Promise.reject(new Error('skipped')) };
+  } };
+  runTransition(() => calls.push('c'), 'forward', doc, false);
+  assert.deepEqual(calls, ['a', 'b']);
+  // Two taps in a row: both updates run, in order, so the last tap wins.
+  runTransition(() => calls.push('d'), 'forward', doc, false);
+  queue.forEach((run) => run());
+  queue.forEach((run) => run()); // a browser that calls back twice must not apply an update twice
+  assert.deepEqual(calls, ['a', 'b', 'c', 'd']);
+  assert.equal(el.dataset.dir, 'forward');
+  // Reduced motion: no transition is started.
+  runTransition(() => calls.push('e'), 'forward', { documentElement: el, startViewTransition() { throw new Error('must not be called'); } }, true);
+  assert.deepEqual(calls, ['a', 'b', 'c', 'd', 'e']);
 }
 
 console.log('rules checks passed');

@@ -25,7 +25,15 @@ export default function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const nextId = useRef(1);
 
-  const remove = useCallback((id: number) => setToasts((list) => list.filter((toast) => toast.id !== id)), []);
+  const nodes = useRef(new Map<number, HTMLDivElement>());
+
+  const remove = useCallback((id: number) => {
+    const drop = () => setToasts((list) => list.filter((toast) => toast.id !== id));
+    const node = nodes.current.get(id);
+    if (!node || typeof node.animate !== 'function' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return drop();
+    // Leave quickly: 150 ms down and out, then remove.
+    node.animate([{ opacity: 1, transform: 'translateY(0)' }, { opacity: 0, transform: 'translateY(8px)' }], { duration: 150, easing: 'ease-in', fill: 'forwards' }).onfinish = drop;
+  }, []);
 
   const showToast = useCallback<ToastContextType['showToast']>((message, type = 'info', options = {}) => {
     const id = nextId.current++;
@@ -39,7 +47,7 @@ export default function ToastProvider({ children }: { children: ReactNode }) {
       {children}
       <div className="toasts" role="status" aria-live="polite">
         {toasts.map((toast) => (
-          <div key={toast.id} className={`toast toast-${toast.type}`}>
+          <div key={toast.id} className={`toast toast-${toast.type}`} ref={(node) => { if (node) nodes.current.set(toast.id, node); else nodes.current.delete(toast.id); }}>
             <span>{toast.message}</span>
             {toast.action && (
               <button type="button" onClick={() => { toast.action?.onAction(); remove(toast.id); }}>{toast.action.label}</button>
