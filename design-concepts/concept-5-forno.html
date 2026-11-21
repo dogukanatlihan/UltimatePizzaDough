@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Forno · Pizza dough calculator</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,500;0,600;0,700;1,500&family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+:root{color-scheme:dark;--ground:#251e20;--panel:#302729;--tile:#352c2d;--light:#fff3e4;--muted:#c7b8ae;--line:#514346;--copper:#e8a577;--ember:linear-gradient(100deg,#f4b56e,#df7c48);--ink:#32201a;--photoInk:#1f1515;--scrim:rgba(27,17,18,.82);--glow:rgba(255,230,207,.055);--veil:rgba(20,14,15,.65);--serif:'Bodoni Moda','Times New Roman',serif;--sans:Manrope,'Helvetica Neue',Arial,sans-serif;--pad:clamp(18px,4.7vw,76px)}
+*{box-sizing:border-box}body{margin:0;background:var(--ground);color:var(--light);font:500 15px/1.5 var(--sans);font-variant-numeric:tabular-nums}button,input,select{font:inherit;color:inherit}button,a,input,select{touch-action:manipulation}button,select{cursor:pointer}button{background:none;border:0;padding:0;min-height:44px;min-width:44px}button,a{transition:background .18s,color .18s,opacity .18s}button:hover,a:hover{color:var(--copper)}button:active{opacity:.78}:focus-visible{outline:2px solid var(--copper);outline-offset:2px}a{color:inherit;text-decoration:none}svg{width:20px;height:20px;vertical-align:middle;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}.symbols{display:none}.cap{font:800 10px/1.4 var(--sans);letter-spacing:.16em;text-transform:uppercase}.muted,small{color:var(--muted)}h1,h2,h3,p{margin:0}h2{font:500 clamp(32px,3vw,46px)/1.15 var(--serif);letter-spacing:-.045em}.mast{padding:12px var(--pad);display:flex;justify-content:space-between;align-items:center}.brand{display:flex;align-items:center;gap:12px;font:700 35px/1 var(--serif);letter-spacing:-.07em}.brand svg{width:38px;height:38px;color:var(--copper)}.mast nav{display:flex;align-items:center;gap:26px;font-size:13px}.mast a{display:inline-flex;min-height:44px;align-items:center}.mast .cap{color:var(--muted);border-left:1px solid var(--line);padding-left:24px}
+.hero{position:relative}.track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}.track::-webkit-scrollbar{display:none}.slide{position:relative;flex:0 0 100%;height:clamp(280px,27vw,400px);scroll-snap-align:center;overflow:hidden;background:var(--photoInk)}.slide img{width:100%;height:100%;object-fit:cover;object-position:50% 53%;opacity:.68;transition:opacity .22s}.slide.active img{opacity:1}.slide:after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,var(--scrim),transparent 80%),linear-gradient(0deg,var(--scrim),transparent 72%)}.caption{position:absolute;z-index:1;left:var(--pad);bottom:34px;right:var(--pad)}.counter{display:inline-flex;gap:12px;align-items:center}.counter:before{content:'';width:30px;height:1px;background:var(--copper)}.styleName{font:500 clamp(62px,8.5vw,128px)/1.16 var(--serif);letter-spacing:-.065em;margin:5px 0}.caption p{font-size:16px}.arrows{position:absolute;bottom:34px;right:var(--pad);display:flex;gap:8px}.round{border:1px solid var(--muted);border-radius:50%;background:var(--veil);width:48px;height:48px}.round:hover{background:var(--ground)}.styles{display:flex;padding:0 var(--pad);border-bottom:1px solid var(--line);overflow:auto;scrollbar-width:none}.styles button{flex:1 0 auto;display:flex;align-items:center;justify-content:center;gap:10px;padding:12px;font-size:13px;color:var(--muted);border-bottom:2px solid transparent}.styles img{width:32px;height:32px;border-radius:50%;object-fit:cover}.styles button[aria-pressed=true]{border-color:var(--copper);color:var(--light);font-weight:800}
+main{max-width:1600px;margin:auto;padding:36px var(--pad) 70px}.bench{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,1fr);gap:clamp(30px,4vw,70px)}.sectionHead,.row{display:flex;align-items:center;justify-content:space-between;gap:12px}.sectionHead{margin-bottom:22px}.tune,.copy{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0 14px;border-radius:14px;font-size:13px;font-weight:700}.tune{border:1px solid var(--line)}.copy{background:var(--ember);color:var(--ink)}.copy:hover{color:var(--ink);filter:brightness(1.08)}.basics{display:grid;grid-template-columns:.92fr 1.23fr 1fr;background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:inset 0 1px var(--glow)}.control{padding:16px 14px;min-width:0}.control+.control{border-left:1px solid var(--line)}.control>.cap{color:var(--muted)}.big{font:500 39px/1.3 var(--serif);letter-spacing:-.055em}.stepper{display:flex;align-items:center;justify-content:space-between}.stepper button{font-size:23px;min-width:44px}.stepper button:disabled{opacity:.3}.stepper{margin-inline:-9px}.control small{font-size:12px}.units{min-width:44px;border:0;background:var(--panel);font-size:16px;min-height:44px;padding:0 2px}.sizeNum{appearance:textfield;-moz-appearance:textfield;border:0;border-bottom:1px dotted var(--muted);padding:0;background:transparent;width:2.15em;min-height:44px;font:500 27px var(--serif)}.sizeNum::-webkit-inner-spin-button{appearance:none}.sizeFields{display:flex;align-items:center;flex-wrap:wrap;gap:3px}.sizeFields label{display:flex;flex-direction:column;font-size:11px;color:var(--muted)}.range{width:100%;min-width:0;height:44px;margin:0;appearance:none;background:transparent;cursor:pointer}.range::-webkit-slider-runnable-track{height:4px;border-radius:3px;background:var(--line)}.range::-moz-range-track{height:4px;border-radius:3px;background:var(--line)}.range::-webkit-slider-thumb{appearance:none;width:18px;height:18px;border-radius:50%;background:var(--light);margin-top:-7px}.range::-moz-range-thumb{border:0;width:18px;height:18px;border-radius:50%;background:var(--light)}.range.heroRange::-webkit-slider-runnable-track{background:linear-gradient(to right,var(--copper) var(--fill),var(--line) var(--fill))}.range.heroRange::-webkit-slider-thumb{background:var(--ember);outline:4px solid var(--glow)}.range.heroRange::-moz-range-progress{background:var(--copper)}.range.heroRange::-moz-range-thumb{background:var(--ember)}.crustLine{display:flex;align-items:baseline;gap:4px}.crustLine small{font-size:13px}.hydration{margin-top:20px;border-block:1px solid var(--line);padding:16px 0}.hydValue{font:500 52px/1 var(--serif);letter-spacing:-.06em}.hydValue small{font-size:.5em;color:var(--copper)}.hydName{display:flex;align-items:center;gap:8px}.hydName svg{color:var(--copper)}.hydHint{margin-top:4px;color:var(--muted);font-size:14px}.ends{display:flex;justify-content:space-between;color:var(--muted);font-size:11px}.tiles{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}.tile{grid-column:span 2;padding:12px;border-radius:15px;background:var(--panel);border:1px solid var(--line);min-width:0;overflow-wrap:anywhere}.tile.major{grid-column:span 3;background:var(--tile);padding:16px}.tile .row{align-items:baseline;gap:5px;flex-wrap:wrap}.tile b{font-size:13px}.tile small{font-size:11px}.grams{font:500 31px/1.3 var(--serif);letter-spacing:-.055em}.major .grams{font-size:clamp(38px,3.8vw,56px)}.grams span{font-size:.48em;color:var(--muted)}.totals{margin-top:14px;color:var(--muted);font-size:13px}.totals b{color:var(--light)}.group{margin:14px 0 8px}.warn{color:var(--copper);margin:12px 0}.method{border-top:1px solid var(--line);padding-top:28px;margin-top:34px}.timeline{list-style:none;margin:18px 0;padding-left:20px}.timeline li{position:relative;border-left:1px solid var(--line);padding:0 0 18px 18px}.timeline li:before{content:'';position:absolute;top:7px;left:-4px;width:7px;height:7px;background:var(--copper);border-radius:50%}.timeline li:last-child{border-color:transparent}.time{font-size:12px;color:var(--copper)}.bakeStrip{display:flex;flex-wrap:wrap;gap:20px;padding:18px;background:var(--panel);border-radius:16px}.bakeStrip div:last-child{flex:1 1 210px}.bakeStrip b{display:block;font-size:15px;margin-top:4px}.method details{margin-top:12px}summary{cursor:pointer;padding:12px 0}.bar{display:none}.shape{border:1px solid var(--line);border-radius:10px;background:var(--panel);min-height:44px;font-size:16px}
+dialog{position:fixed;inset:0 0 0 auto;margin:0;width:min(430px,100%);height:100dvh;max-height:100%;max-width:100%;background:var(--ground);color:var(--light);border:1px solid var(--line);padding:0}dialog::backdrop{background:var(--veil)}.sheetHead{position:sticky;top:0;background:var(--ground);padding:18px 24px;border-bottom:1px solid var(--line);z-index:1}.sheetBody{padding:12px 24px 28px}.fine{padding:8px 0;border-bottom:1px solid var(--line)}.fine label{font-weight:700}.fine output{color:var(--copper)}.fine select{min-height:44px;font-size:16px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:4px 9px}.sheetBar{display:none}.feedback{font-size:13px;color:var(--copper)}[hidden]{display:none!important}
+@media(max-width:999px){.bench{grid-template-columns:1fr}.bar,.sheetBar{display:flex;background:var(--tile);color:var(--light);border-top:1px solid var(--line);justify-content:space-between;align-items:center;gap:8px;padding:10px var(--pad) calc(10px + env(safe-area-inset-bottom));width:100%;text-align:left;font-size:12px}.bar{position:fixed;z-index:2;bottom:0;left:0}.bar strong,.sheetBar strong{display:block;font:600 20px var(--serif)}.bar svg,.sheetBar svg{margin-left:auto}.bar b,.sheetBar b{color:var(--copper)}main{padding-bottom:105px}dialog{inset:auto 0 0;width:100%;height:min(80dvh,750px);border-radius:20px 20px 0 0}.sheetBar{position:sticky;bottom:0}.styles button{min-width:116px}}
+@media(max-width:600px){.mast{padding-block:6px}.brand{font-size:29px}.brand svg{width:32px}.mast nav{gap:12px}.mast .cap{display:none}.slide{height:292px}.caption{bottom:26px}.styleName{font-size:clamp(55px,15.5vw,82px)}.caption p{max-width:85%;font-size:14px}.arrows{right:var(--pad);bottom:auto;top:12px;gap:4px}.round{width:44px;height:44px}.styles{padding-inline:8px}.styles button{padding:8px;min-width:105px;font-size:12px}.styles img{width:27px;height:27px}main{padding-top:24px}.sectionHead{margin-bottom:16px}.basics{display:block}.control{display:grid;grid-template-columns:1fr 1.5fr;align-items:center;gap:2px 8px;padding:10px 16px}.control+.control{border-left:0;border-top:1px solid var(--line)}.control>small{grid-column:2}.stepper{justify-content:space-between}.sizeTop{grid-column:1;display:flex;flex-wrap:wrap}.sizeFields{justify-content:flex-end}.crustLine{justify-content:flex-end}.control .range{grid-column:1/-1}.control .shape{grid-column:1/-1}.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}.tile,.tile.major{grid-column:span 1}.major .grams{font-size:44px}.bakeStrip{gap:14px}.hydration{margin-top:12px}.sheetBody{padding-inline:18px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<svg class="symbols" aria-hidden="true"><defs>
+<symbol id="oven" viewBox="0 0 40 40"><path d="M3 31v-6a17 17 0 0 1 34 0v6zM8 31v-5a12 12 0 0 1 24 0v5M2 35h36M20 8v5M8 13l4 4M32 13l-4 4M3 24l5 1M37 24l-5 1"/><path d="M17 29c-4-4 1-6 2-10 0 3 4 4 3 7l2-2c2 4-1 6-3 6"/></symbol>
+<symbol id="left" viewBox="0 0 24 24"><path d="m14 6-6 6 6 6"/></symbol><symbol id="right" viewBox="0 0 24 24"><path d="m10 6 6 6-6 6"/></symbol>
+<symbol id="tuning" viewBox="0 0 24 24"><path d="M3 7h6m5 0h7M3 17h11m5 0h2"/><circle cx="11.5" cy="7" r="2.5"/><circle cx="16.5" cy="17" r="2.5"/></symbol>
+<symbol id="sheets" viewBox="0 0 24 24"><rect x="8" y="7" width="12" height="14" rx="2"/><path d="M15 7V3H4v14h4"/></symbol><symbol id="drop" viewBox="0 0 24 24"><path d="M12 2S5 10 5 15a7 7 0 0 0 14 0c0-5-7-13-7-13Z"/></symbol></defs></svg>
+<header class="mast"><div class="brand"><svg aria-hidden="true"><use href="#oven"/></svg>Forno</div><nav aria-label="Page navigation"><a href="#recipe">Recipe</a><a href="#method">Method</a><span class="cap">Pizza dough calculator</span></nav></header>
+<section class="hero" aria-label="Choose a pizza style"><div class="track" id="track" tabindex="0" aria-label="Pizza styles, use left and right arrows"></div><div class="arrows"><button class="round" id="prev" aria-label="Previous style"><svg><use href="#left"/></svg></button><button class="round" id="next" aria-label="Next style"><svg><use href="#right"/></svg></button></div></section>
+<nav class="styles" id="styles" aria-label="Pizza styles"></nav>
+<main><div class="bench"><section aria-labelledby="settings"><div class="sectionHead"><h2 id="settings">Dough settings</h2><button class="tune" id="open"><svg><use href="#tuning"/></svg>Fine-tune</button></div>
+<div class="basics"><div class="control"><label class="cap" for="count">How many</label><div class="stepper"><button id="minus" aria-label="One fewer pizza">−</button><output id="count" class="big"></output><button id="plus" aria-label="One more pizza">+</button></div><small>Pizzas</small></div>
+<div class="control"><div class="row sizeTop"><span class="cap muted">Size</span><select id="units" class="units" aria-label="Size units"><option>cm</option><option>in</option></select></div><div class="sizeFields" id="sizes"></div><select class="shape" id="shape" aria-label="Focaccia shape"><option value="round">Round</option><option value="rect">Rectangular</option></select></div>
+<div class="control"><label class="cap" for="tf">Crust</label><div class="crustLine"><output class="big" id="weight"></output><small>g / ball</small></div><input id="tf" class="range" type="range" aria-label="Crust thickness, thin to thick"><div class="ends" style="grid-column:1/-1"><span>Thin</span><span>Thick</span></div></div></div>
+<div class="hydration"><div class="row"><div><label class="cap hydName" for="hydration"><svg><use href="#drop"/></svg>Hydration</label><p class="hydHint" id="hint"></p></div><output class="hydValue" id="hydVal" for="hydration"></output></div><input id="hydration" type="range" class="range heroRange"><div class="ends"><span>50% · Firm</span><span>85% · Wet</span></div></div></section>
+<section id="recipe" tabindex="-1"><div class="sectionHead"><h2>Your recipe</h2><button class="copy" id="copy"><svg><use href="#sheets"/></svg><span>Copy recipe</span></button></div><p class="feedback" id="feedback" role="status"></p><p class="warn" id="warning" role="status"></p><div id="ingredients"></div><div id="totals" class="totals"></div></section></div>
+<section id="method" class="method"><h2>Method</h2><div id="timeline"></div><div id="bake"></div></section></main>
+<button class="bar" aria-label="Jump to recipe"></button>
+<dialog id="dialog" aria-labelledby="sheetTitle"><div class="sheetHead row"><h2 id="sheetTitle">Fine-tune</h2><button id="close" aria-label="Close fine-tuning">✕</button></div><div class="sheetBody" id="fine"></div><button class="sheetBar" aria-label="View recipe"></button></dialog>
+<script src="calc.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const icon=id=>'<svg aria-hidden="true"><use href="#'+id+'"/></svg>';
+const styles=Dough.STYLES;
+let st=Dough.defaults(styles[0].id),rec=Dough.calc(st),copyTimer,scrollTimer;
+const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+const index=()=>styles.findIndex(s=>s.id===st.style);
+$('track').innerHTML=styles.map((s,i)=>`<article class="slide"><img src="${s.img}" alt="" ${i?'loading="lazy"':''}><div class="caption"><span class="counter cap">Pizza style &nbsp; ${String(i+1).padStart(2,'0')} / 06</span><h1 class="styleName">${s.name}</h1><p>${s.blurb}</p></div></article>`).join('');
+$('styles').innerHTML=styles.map((s,i)=>`<button data-index="${i}"><img src="${s.img}" alt="">${s.name}</button>`).join('');
+function syncStyle(){
+ const i=index();
+ [...$('track').children].forEach((el,n)=>{el.classList.toggle('active',n===i);el.setAttribute('aria-hidden',n!==i)});
+ [...$('styles').children].forEach((el,n)=>el.setAttribute('aria-pressed',n===i));
+ const tab=$('styles').children[i];
+ $('styles').scrollLeft+=tab.getBoundingClientRect().left+tab.offsetWidth/2-$('styles').clientWidth/2;
+}
+function choose(i,scroll){
+ i=(i+styles.length)%styles.length;
+ if(index()!==i){st=Dough.setStyle(st,styles[i].id);buildSizes();buildFine();render()}
+ if(scroll)$('track').scrollTo({left:i*$('track').clientWidth,behavior:reduced.matches?'instant':'smooth'});
+ syncStyle();
+}
+$('styles').onclick=e=>{const b=e.target.closest('button');if(b)choose(+b.dataset.index,true)};
+$('prev').onclick=()=>choose(index()-1,true);
+$('next').onclick=()=>choose(index()+1,true);
+$('track').onkeydown=e=>{if(['ArrowLeft','ArrowRight'].includes(e.key)){e.preventDefault();choose(index()+(e.key==='ArrowRight'?1:-1),true)}};
+$('track').onscroll=()=>{clearTimeout(scrollTimer);scrollTimer=setTimeout(()=>choose(Math.round($('track').scrollLeft/$('track').clientWidth),false),150)};
+new ResizeObserver(()=>{$('track').scrollLeft=index()*$('track').clientWidth}).observe($('track'));
+function rangeAttrs(el,key){const [min,max,step]=Dough.RANGES[key];Object.assign(el,{min,max,step})}
+function buildSizes(){
+ $('units').value=st.units;$('shape').hidden=Dough.style(st.style).shape!=='both';$('shape').value=st.shape;
+ $('sizes').innerHTML=(st.shape==='round'?['d']:['w','l']).map(key=>{
+ const [min,max]=Dough.RANGES[key],name={d:'Diameter',w:'Width',l:'Length'}[key];
+ return `<label><input class="sizeNum" aria-label="${name} in ${st.units}" type="number" data-key="${key}" min="${Dough.toDisp(min,st.units)}" max="${Dough.toDisp(max,st.units)}" step="${st.units==='cm'?1:0.1}" value="${Dough.toDisp(st[key],st.units)}">${name}</label>`}).join(' <span>×</span> ');
+}
+$('sizes').oninput=e=>{
+ const input=e.target,k=input.dataset.key;if(!k||!input.value||!input.validity.valid)return;
+ const [min,max]=Dough.RANGES[k];st={...st,[k]:Math.max(min,Math.min(max,Dough.fromDisp(+input.value,st.units)))};render()
+};
+$('sizes').onfocusout=e=>{const k=e.target.dataset.key;if(k)e.target.value=Dough.toDisp(st[k],st.units)};
+$('units').onchange=e=>{st={...st,units:e.target.value};buildSizes();render()};
+$('shape').onchange=e=>{st={...st,shape:e.target.value};buildSizes();render()};
+function add(delta){st={...st,pizzas:st.pizzas+delta};render()}
+$('plus').onclick=()=>add(1);$('minus').onclick=()=>add(-1);
+for(const key of ['tf','hydration']){rangeAttrs($(key),key);$(key).oninput=e=>{st={...st,[key]:+e.target.value};render()}}
+const fineNames={salt:'Salt',yeast:'Yeast',oil:'Olive oil',sugar:'Sugar',malt:'Diastatic malt',enhancer:'Dough enhancer',prefPct:'Prefermented flour',prefHyd:'Preferment hydration'};
+function fineRange(k){
+ const [min,max,step]=Dough.RANGES[k==='yeast'&&st.yeastType==='fresh'?'yeastFresh':k];
+ const v=k==='prefPct'?st.pref.pct:k==='prefHyd'?st.pref.hyd:st[k];
+ return `<div class="fine"><div class="row"><label for="f-${k}">${fineNames[k]}</label><output id="out-${k}" for="f-${k}">${v}%</output></div><input class="range" type="range" id="f-${k}" data-key="${k}" min="${min}" max="${max}" step="${step}" value="${v}"></div>`
+}
+function selectRow(id,label,opts,value){return `<div class="fine row"><label for="${id}">${label}</label><select id="${id}">${Object.entries(opts).map(([k,n])=>`<option value="${k}" ${k===value?'selected':''}>${n}</option>`).join('')}</select></div>`}
+function buildFine(){
+ $('fine').innerHTML=selectRow('yeastType','Yeast type',Dough.YEAST_NAMES,st.yeastType)+['salt','yeast','oil','sugar','malt','enhancer'].map(fineRange).join('')+selectRow('preferment','Preferment',Dough.PREF_NAMES,st.pref.type)+(st.pref.type==='none'?'':fineRange('prefPct')+fineRange('prefHyd'))+'<p class="warn" id="sheetWarning" role="status"></p>';
+}
+$('fine').oninput=e=>{const k=e.target.dataset.key;if(!k)return;const v=+e.target.value;
+ if(k==='prefHyd'||k==='prefPct')st={...st,pref:{...st.pref,[k==='prefHyd'?'hyd':'pct']:v}};
+ else st={...st,[k]:v};$('out-'+k).textContent=v+'%';render()};
+$('fine').onchange=e=>{const id=e.target.id;if(id!=='yeastType'&&id!=='preferment')return;
+ st=id==='yeastType'?Dough.setYeastType(st,e.target.value):Dough.setPreferment(st,e.target.value);buildFine();$(id).focus();render()};
+$('open').onclick=()=>{$('dialog').showModal();document.body.style.overflow='hidden'};
+$('dialog').onclose=()=>{document.body.style.overflow=''};
+$('close').onclick=()=>$('dialog').close();
+$('dialog').onclick=e=>{if(e.target!==$('dialog'))return;const r=$('dialog').getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)$('dialog').close()};
+function tiles(rows){return '<div class="tiles">'+rows.map(i=>{
+ const grams=Dough.fmtG(i.g,i.key).split(' ')[0],pct=i.pct??Number((100*i.g/rec.flour).toFixed(2));
+ return `<div class="tile ${['flour','water'].includes(i.key)?'major':''}"><div class="row"><b>${i.name}</b><small title="Baker’s percentage of total flour">${pct}%</small></div><div class="grams">${grams}<span> g</span></div><small>${Dough.fmtOz(i.g)}</small></div>`
+ }).join('')+'</div>'}
+function render(){
+ rec=Dough.calc(st);$('count').value=st.pizzas;$('minus').disabled=st.pizzas<=1;$('plus').disabled=st.pizzas>=20;
+ $('tf').value=st.tf;$('weight').value=rec.ballWeight;$('tf').setAttribute('aria-valuetext',rec.ballWeight+' grams per ball');
+ $('hydration').value=st.hydration;$('hydration').style.setProperty('--fill',(st.hydration-50)/35*100+'%');
+ const previous=$('hydVal').textContent;$('hydVal').innerHTML=st.hydration+'<small>%</small>';
+ if(previous&&previous!==$('hydVal').textContent&&!reduced.matches)$('hydVal').animate([{transform:'translateY(2px)',opacity:.8},{transform:'none',opacity:1}],{duration:160});
+ $('hint').textContent=st.hydration<60?'Firm, easy to shape':st.hydration<=68?'Classic, balanced dough':st.hydration<=75?'Soft and airy':'Very wet, ideal for pans';
+ const stages=rec.stages;
+ $('ingredients').innerHTML=stages?`<h3 class="group cap">${stages.name}</h3>${tiles(stages.first)}<h3 class="group cap">Main dough</h3>${tiles(stages.main)}`:tiles(rec.ingredients);
+ const warning=rec.warnWater?'The preferment uses more water than the whole recipe. Reduce its flour share or hydration.':'';
+ for(const id of ['warning','sheetWarning']){$(id).hidden=!warning;$(id).textContent=warning}
+ $('totals').innerHTML=`Total dough <b>${rec.totalDough} g</b> &nbsp;·&nbsp; ${st.pizzas} × ${rec.ballWeight} g`;
+ const water=rec.ingredients.find(i=>i.key==='water');
+ for(const bar of document.querySelectorAll('.bar,.sheetBar'))bar.innerHTML=`<span><strong>${st.pizzas} × ${rec.ballWeight} g</strong>Flour <b>${Dough.fmtG(rec.flour)}</b> &nbsp;·&nbsp; Water <b>${Dough.fmtG(water.g)}</b></span>${icon('right')}`;
+ $('timeline').innerHTML=Dough.method(st,rec).map(m=>`<h3 class="group">${m.title} <span class="time">${m.time}</span></h3><ol class="timeline">${m.steps.map(s=>'<li>'+s+'</li>').join('')}</ol>`).join('');
+ const b=Dough.bake(st),expanded=$('bake').querySelector('details')?.open;
+ $('bake').innerHTML=`<div class="bakeStrip">${[['Oven',b.temp],['Bake time',b.time],['Flour tip',b.flour]].map(([k,v])=>`<div><span class="cap muted">${k}</span><b>${v}</b></div>`).join('')}</div><details ${expanded?'open':''}><summary>Baking steps</summary><ol>${b.steps.map(s=>'<li>'+s+'</li>').join('')}</ol></details>`;
+ clearTimeout(copyTimer);$('feedback').textContent='';$('copy').lastElementChild.textContent='Copy recipe';
+}
+$('copy').onclick=async()=>{try{await navigator.clipboard.writeText(Dough.copyText(st,rec));$('copy').lastElementChild.textContent='Copied';$('feedback').textContent='Recipe copied.'}catch{$('feedback').textContent='Clipboard unavailable. Select the recipe text to copy it.'}
+ clearTimeout(copyTimer);copyTimer=setTimeout(()=>{$('copy').lastElementChild.textContent='Copy recipe';$('feedback').textContent=''},3000)};
+for(const bar of document.querySelectorAll('.bar,.sheetBar'))bar.onclick=()=>{if($('dialog').open)$('dialog').close();$('recipe').focus({preventScroll:true});$('recipe').scrollIntoView({behavior:reduced.matches?'instant':'smooth'})};
+buildSizes();buildFine();syncStyle();render();
+</script>
+</body>
+</html>

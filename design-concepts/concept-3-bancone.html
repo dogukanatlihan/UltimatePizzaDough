@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bancone — concept 3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: the counter. A kitchen-scale readout that never leaves the screen (sticky top on phones, right column on desktop); controls are stations on the counter. */
+:root {
+  --marble: #E9ECE8;      /* counter top */
+  --panel: #FFFFFF; --line: #CDD4CC; --ink: #1B211D; --ink-2: #5C665F;
+  --scale: #1B211D;       /* the scale body */
+  --digit: #F3C453;       /* semolina-yellow display digits; the one accent */
+  --check: #C5392C;       /* tablecloth red, decoration only */
+  --sans: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --mono: "Spline Sans Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--marble); color: var(--ink); font: 16px/1.5 var(--sans); }
+button { font: inherit; color: inherit; cursor: pointer; }
+h1, h2, h3, p { margin: 0; }
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+.caps { font: 600 12px/1 var(--sans); font-stretch: 80%; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-2); }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+.cloth { height: 16px; background:
+  repeating-linear-gradient(90deg, color-mix(in srgb, var(--check) 62%, transparent) 0 8px, transparent 8px 16px),
+  repeating-linear-gradient(0deg, color-mix(in srgb, var(--check) 62%, transparent) 0 8px, transparent 8px 16px), #fff; }
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; max-width: 1240px; margin: 0 auto; padding: 14px 16px 10px; }
+.brand { font: 800 clamp(15px, 4.4vw, 20px)/1 var(--sans); white-space: nowrap; font-stretch: 118%; letter-spacing: -.02em; text-transform: uppercase; }
+.brand span { display: block; margin-top: 4px; font: 500 11px/1 var(--mono); letter-spacing: .1em; color: var(--ink-2); }
+.units { display: flex; padding: 3px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); }
+.units button { min-width: 48px; min-height: 44px; border: 0; border-radius: 6px; background: transparent; font: 600 13px/1 var(--mono); }
+.units button[aria-pressed="true"] { background: var(--ink); color: var(--digit); }
+
+.page { max-width: 1240px; margin: 0 auto; padding: 0 16px 40px; display: flex; flex-direction: column; gap: 14px; }
+.right { display: contents; }
+.scalebox { order: 1; position: sticky; top: 0; z-index: 10; margin: 0 -16px; padding: 8px 16px; background: var(--marble); }
+.controls { order: 2; display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); }
+.recipe { order: 3; scroll-margin-top: 170px; }
+@media (min-width: 980px) {
+  .page { display: grid; grid-template-columns: minmax(0, 1fr) minmax(400px, 0.9fr); gap: 24px; align-items: start; }
+  .controls { order: 1; }
+  .right { order: 2; display: grid; gap: 14px; position: sticky; top: 16px; }
+  .scalebox { position: static; margin: 0; padding: 0; background: none; }
+  #jump { display: none; }
+}
+
+/* The scale */
+.scale { background: var(--scale); color: #fff; border-radius: 12px; padding: 12px 14px 10px; box-shadow: 0 10px 24px -14px rgba(27,33,29,.7), inset 0 1px 0 rgba(255,255,255,.08); }
+.cells { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; }
+.cell { padding: 0 8px; min-width: 0; }
+.cell + .cell { border-left: 1px solid rgba(255,255,255,.14); }
+.cell:first-child { padding-left: 0; }
+.cell small { display: block; font: 600 10px/1 var(--sans); font-stretch: 80%; letter-spacing: .14em; text-transform: uppercase; color: #9AA59D; }
+.cell b { display: block; margin-top: 6px; font: 500 clamp(19px, 5.6vw, 30px)/1 var(--mono); font-variant-numeric: tabular-nums; color: var(--digit); white-space: nowrap; }
+.cell b i { font: 500 .5em/1 var(--mono); font-style: normal; color: #9AA59D; margin-left: 2px; }
+.scalefoot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,.14); font: 500 13px/1.2 var(--mono); color: #C9D1CB; }
+#jump { min-height: 44px; padding: 0 12px; border: 1px solid rgba(255,255,255,.3); border-radius: 6px; background: transparent; color: #fff; font: 600 12px/1 var(--sans); font-stretch: 85%; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+
+/* Stations */
+.st { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+.st > h2, summary h2 { font: 800 15px/1 var(--sans); font-stretch: 112%; letter-spacing: .02em; text-transform: uppercase; }
+.st > h2 { margin-bottom: 12px; }
+.chips { display: grid; grid-auto-flow: column; grid-auto-columns: 172px; gap: 8px; overflow-x: auto; scroll-snap-type: x proximity; margin: 0 -16px; padding: 2px 16px 6px; scrollbar-width: thin; }
+@media (min-width: 620px) { .chips { grid-auto-flow: row; grid-template-columns: repeat(3, minmax(0, 1fr)); overflow: visible; margin: 0; padding: 0; } }
+.chip { scroll-snap-align: start; display: grid; grid-template-columns: 44px minmax(0, 1fr); align-items: center; gap: 10px; min-height: 58px; padding: 6px 10px 6px 6px; text-align: left; border: 1.5px solid var(--line); border-radius: 10px; background: var(--panel); transition: background .15s, border-color .15s, color .15s; }
+.chip img { width: 44px; height: 44px; border-radius: 7px; object-fit: cover; display: block; }
+.chip b { display: block; font: 700 15px/1.15 var(--sans); }
+.chip small { display: block; font: 500 11px/1.2 var(--mono); color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chip:hover { border-color: var(--ink); }
+.chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: #fff; }
+.chip[aria-pressed="true"] small { color: var(--digit); }
+
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; }
+.f { min-width: 0; }
+.ftop { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+.ftop label, .ftop .l { font-weight: 600; }
+.ftop output { font: 600 17px/1 var(--mono); font-variant-numeric: tabular-nums; }
+.stepper { display: grid; grid-template-columns: 46px minmax(0, 1fr) 46px; border: 1.5px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--panel); }
+.stepper button { height: 46px; border: 0; background: #F3F5F2; font: 500 22px/1 var(--mono); transition: background .12s; }
+.stepper button:hover { background: #E3E8E2; }
+.stepper output { display: grid; place-items: center; font: 600 18px/1 var(--mono); font-variant-numeric: tabular-nums; }
+.seg { display: flex; padding: 3px; border: 1.5px solid var(--line); border-radius: 10px; background: #F3F5F2; gap: 3px; flex-wrap: wrap; }
+.seg button { flex: 1 1 auto; min-height: 42px; padding: 0 10px; border: 0; border-radius: 7px; background: transparent; font-weight: 600; font-size: 14px; transition: background .15s, color .15s; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--digit); }
+input[type=range] { display: block; width: 100%; height: 44px; margin: 0; background: transparent; appearance: none; -webkit-appearance: none; }
+input[type=range]::-webkit-slider-runnable-track { height: 8px; border-radius: 2px; background: linear-gradient(to right, var(--ink) var(--p, 0%), var(--line) var(--p, 0%)); }
+input[type=range]::-moz-range-track { height: 8px; border-radius: 2px; background: var(--line); }
+input[type=range]::-moz-range-progress { height: 8px; border-radius: 2px; background: var(--ink); }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 28px; height: 28px; margin-top: -10px; border-radius: 50%; background: var(--digit); border: 3px solid var(--ink); }
+input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: var(--digit); border: 3px solid var(--ink); }
+.ends { display: flex; justify-content: space-between; font: 500 11px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); }
+.say { margin-top: 8px; font-size: 14px; color: var(--ink-2); }
+details.st { padding: 0; }
+summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 58px; padding: 0 16px; cursor: pointer; list-style: none; border-radius: 12px; }
+summary::-webkit-details-marker { display: none; }
+summary small { display: block; margin-top: 5px; font: 500 12px/1.2 var(--mono); color: var(--ink-2); text-transform: none; letter-spacing: 0; }
+summary::after { content: ""; flex: none; width: 10px; height: 10px; border-right: 2px solid var(--ink); border-bottom: 2px solid var(--ink); transform: rotate(45deg); transition: transform .2s; margin-right: 4px; }
+details[open] > summary::after { transform: rotate(-135deg); }
+.inside { display: grid; gap: 16px; padding: 4px 16px 18px; }
+
+/* Recipe */
+.recipe { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.tabs { display: flex; border-bottom: 1px solid var(--line); background: #F3F5F2; }
+.tabs button { flex: 1; min-height: 50px; border: 0; border-bottom: 3px solid transparent; background: transparent; font: 700 13px/1 var(--sans); font-stretch: 108%; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); transition: color .15s, border-color .15s, background .15s; }
+.tabs button[aria-selected="true"] { background: var(--panel); color: var(--ink); border-bottom-color: var(--digit); }
+.pane { padding: 4px 16px 16px; }
+.ing { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto 58px; align-items: center; gap: 10px; min-height: 52px; border-bottom: 1px solid #E4E8E3; }
+.ing::after { content: ""; position: absolute; left: 0; bottom: -1px; height: 2px; width: min(100%, calc(var(--w, 0) * 1%)); background: var(--ink); opacity: .85; }
+.ing .g { text-align: right; font: 600 19px/1 var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ing .g small { display: block; margin-top: 4px; font: 400 12px/1 var(--mono); color: var(--ink-2); }
+.ing .pc { text-align: right; font: 500 13px/1 var(--mono); font-variant-numeric: tabular-nums; color: var(--ink-2); }
+.ing.sum { border-bottom: 0; font-weight: 700; } .ing.sum::after { display: none; }
+.stagehd { display: flex; align-items: center; gap: 10px; margin: 16px 0 2px; }
+.stagehd::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.warn { margin: 12px 0 0; padding: 10px 12px; border: 1.5px solid var(--check); border-radius: 8px; font-size: 14px; }
+.how h3 { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin: 16px 0 8px; font: 700 16px/1.2 var(--sans); }
+.how h3 span { font: 500 12px/1 var(--mono); color: var(--ink-2); white-space: nowrap; }
+.how ol { margin: 0; padding-left: 0; list-style: none; counter-reset: s; display: grid; gap: 10px; }
+.how li { counter-increment: s; display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; }
+.how li::before { content: counter(s); display: grid; place-items: center; width: 28px; height: 28px; border-radius: 6px; background: var(--ink); color: var(--digit); font: 600 13px/1 var(--mono); }
+.facts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+.facts div { padding: 12px; border-radius: 10px; background: var(--scale); }
+.facts small { display: block; font: 600 10px/1 var(--sans); font-stretch: 80%; letter-spacing: .14em; text-transform: uppercase; color: #9AA59D; }
+.facts b { display: block; margin-top: 6px; font: 500 17px/1.2 var(--mono); color: var(--digit); }
+.tip { margin-top: 12px; font-size: 15px; }
+.copy { width: 100%; min-height: 50px; margin-top: 14px; border: 0; border-radius: 10px; background: var(--ink); color: #fff; font: 700 14px/1 var(--sans); font-stretch: 108%; letter-spacing: .06em; text-transform: uppercase; transition: background .15s, color .15s; }
+.copy:hover { color: var(--digit); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
+</style>
+</head>
+<body>
+<div class="cloth" aria-hidden="true"></div>
+<header class="top">
+  <div class="brand">Make Better Pizza<span>dough counter</span></div>
+  <div class="units" role="group" aria-label="Units" id="units"></div>
+</header>
+
+<main class="page">
+  <div class="controls" id="controls"></div>
+  <div class="right">
+    <div class="scalebox">
+      <section class="scale" aria-label="Recipe at a glance">
+        <div class="cells" id="cells" aria-live="off"></div>
+        <div class="scalefoot"><span id="scalefoot"></span><button type="button" id="jump">Full recipe</button></div>
+      </section>
+    </div>
+    <section class="recipe" id="recipe" aria-label="Recipe">
+      <div class="tabs" role="tablist" aria-label="Recipe sections">
+        <button type="button" role="tab" id="t-ing" data-tab="ing" aria-selected="true" aria-controls="pane">Ingredients</button>
+        <button type="button" role="tab" id="t-how" data-tab="how" aria-selected="false" aria-controls="pane">Method</button>
+        <button type="button" role="tab" id="t-bake" data-tab="bake" aria-selected="false" aria-controls="pane">Bake</button>
+      </div>
+      <div class="pane" id="pane" role="tabpanel"></div>
+    </section>
+  </div>
+</main>
+
+<script src="calc.js"></script>
+<script>
+const D = Dough, $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+let st = D.defaults('neapolitan'), rec, tab = 'ing';
+const feel = (h) => h < 60 ? 'Firm and easy to shape.' : h <= 68 ? 'Classic and balanced.' : h <= 75 ? 'Soft and airy, a little sticky.' : 'Very wet. Best baked in a pan.';
+const crust = (tf) => tf <= 0.06 ? 'Thin' : tf <= 0.09 ? 'Medium' : tf <= 0.12 ? 'Thick' : 'Extra thick';
+const pc = (v) => +(+v).toFixed(2) + '%';
+const F = {
+  tf:        { label: 'Crust thickness', get: () => st.tf, set: (v) => st = { ...st, tf: v }, range: () => D.RANGES.tf, text: crust, ends: ['Thin', 'Thick'], say: () => `Ball weight ${D.ballWeight(st)} g` },
+  hydration: { label: 'Hydration (water)', get: () => st.hydration, set: (v) => st = { ...st, hydration: v }, range: () => D.RANGES.hydration, text: pc, ends: ['Firm', 'Wet'], say: () => feel(st.hydration) },
+  salt:      { label: 'Salt', get: () => st.salt, set: (v) => st = { ...st, salt: v }, range: () => D.RANGES.salt, text: pc },
+  yeast:     { label: 'Yeast', get: () => st.yeast, set: (v) => st = { ...st, yeast: v }, range: () => st.yeastType === 'fresh' ? D.RANGES.yeastFresh : D.RANGES.yeast, text: (v) => (+v).toFixed(2) + '%' },
+  oil:       { label: 'Olive oil', get: () => st.oil, set: (v) => st = { ...st, oil: v }, range: () => D.RANGES.oil, text: pc },
+  sugar:     { label: 'Sugar', get: () => st.sugar, set: (v) => st = { ...st, sugar: v }, range: () => D.RANGES.sugar, text: pc },
+  malt:      { label: 'Diastatic malt', get: () => st.malt, set: (v) => st = { ...st, malt: v }, range: () => D.RANGES.malt, text: pc },
+  enhancer:  { label: 'Dough enhancer', get: () => st.enhancer, set: (v) => st = { ...st, enhancer: v }, range: () => D.RANGES.enhancer, text: pc },
+  prefPct:   { label: 'Share of the flour', get: () => st.pref.pct, set: (v) => st = { ...st, pref: { ...st.pref, pct: v } }, range: () => D.RANGES.prefPct, text: pc },
+  prefHyd:   { label: 'Preferment hydration', get: () => st.pref.hyd, set: (v) => st = { ...st, pref: { ...st.pref, hyd: v } }, range: () => D.RANGES.prefHyd, text: pc, say: () => 'Poolish about 100%, biga 50–60%, sponge 65–80%.' },
+};
+const slider = (k) => { const f = F[k], [min, max, s] = f.range(), v = f.get();
+  return `<div class="f"><div class="ftop"><label for="r-${k}">${f.label}</label><output id="o-${k}" for="r-${k}">${f.text(v)}</output></div>
+    <input type="range" id="r-${k}" data-k="${k}" min="${min}" max="${max}" step="${s}" value="${v}" style="--p:${(v - min) / (max - min) * 100}%">
+    ${f.ends ? `<div class="ends"><span>${f.ends[0]}</span><span>${f.ends[1]}</span></div>` : ''}${f.say ? `<p class="say" id="y-${k}">${f.say()}</p>` : ''}</div>`; };
+const stepper = (k, label, text) => `<div class="f"><div class="ftop"><span class="l" id="sl-${k}">${label}</span></div><div class="stepper" role="group" aria-labelledby="sl-${k}">
+  <button type="button" data-nudge="${k}" data-dir="-1" aria-label="Less">−</button><output id="c-${k}">${text}</output><button type="button" data-nudge="${k}" data-dir="1" aria-label="More">+</button></div></div>`;
+const seg = (label, attr, opts, cur) => `<div class="f"><div class="ftop"><span class="l" id="sg-${attr}">${label}</span></div><div class="seg" role="group" aria-labelledby="sg-${attr}">${opts.map(([v, t]) => `<button type="button" data-${attr}="${v}" aria-pressed="${v === cur}">${t}</button>`).join('')}</div></div>`;
+
+/* build(): redraws the stations. Only on structural changes, never while a slider moves. */
+function build() {
+  const keep = Object.fromEntries($$('#controls details').map((d) => [d.id, d.open])), s = D.style(st.style), scroll = $('.chips') ? $('.chips').scrollLeft : 0;
+  $('#units').innerHTML = [['cm', 'cm'], ['in', 'in']].map(([v, t]) => `<button type="button" data-units="${v}" aria-pressed="${v === st.units}" aria-label="${v === 'cm' ? 'Centimetres' : 'Inches'}">${t}</button>`).join('');
+  $('#controls').innerHTML = `
+    <section class="st"><h2>Style</h2><div class="chips">${D.STYLES.map((x) => `<button type="button" class="chip" data-style="${x.id}" aria-pressed="${x.id === st.style}"><img src="${x.img}" alt="" loading="lazy"><span><b>${x.name}</b><small>${x.bakeTime}</small></span></button>`).join('')}</div></section>
+    <section class="st"><h2>Order</h2><div class="grid2">${stepper('pizzas', 'Pizzas', st.pizzas)}
+      ${st.shape === 'rect' ? stepper('w', 'Pan width', D.fmtLen(st.w, st.units)) + stepper('l', 'Pan length', D.fmtLen(st.l, st.units)) : stepper('d', 'Diameter', D.fmtLen(st.d, st.units))}
+      ${s.shape === 'both' ? seg('Shape', 'shape', [['rect', 'Pan'], ['round', 'Round']], st.shape) : ''}</div>
+      <div style="margin-top:16px">${slider('tf')}</div></section>
+    <section class="st"><h2>Dough</h2>${slider('hydration')}</section>
+    <details class="st" id="d-fine"${keep['d-fine'] ? ' open' : ''}><summary><div><h2>Fine-tune</h2><small id="finesub"></small></div></summary><div class="inside">
+      <div class="grid2">${slider('salt')}${slider('yeast')}</div>${seg('Yeast type', 'ytype', Object.entries(D.YEAST_NAMES).map(([k, v]) => [k, v.replace(' yeast', '')]), st.yeastType)}
+      <div class="grid2">${slider('oil')}${slider('sugar')}${slider('malt')}${slider('enhancer')}</div></div></details>
+    <details class="st" id="d-pref"${keep['d-pref'] ? ' open' : ''}><summary><div><h2>Preferment</h2><small id="prefsub"></small></div></summary><div class="inside">
+      ${seg('Type', 'pref', Object.entries(D.PREF_NAMES), st.pref.type)}${st.pref.type === 'none' ? '<p class="say">Part of the flour and water, fermented the day before. Optional.</p>' : `<div class="grid2">${slider('prefPct')}${slider('prefHyd')}</div>`}</div></details>`;
+  if ($('.chips')) $('.chips').scrollLeft = scroll;
+  paint();
+}
+const ing = (key, name, g, pct) => `<div class="ing" style="--w:${pct === undefined ? 0 : Math.min(100, pct)}"><span>${name}</span><span class="g">${D.fmtG(g, key)}<small>${D.fmtOz(g)}</small></span><span class="pc">${pct === undefined ? '' : pc(pct)}</span></div>`;
+function pane() {
+  if (tab === 'how') return `<div class="how">${D.method(st, rec).map((m) => `<h3>${m.title}<span>${m.time}</span></h3><ol>${m.steps.map((t) => `<li><span>${t}</span></li>`).join('')}</ol>`).join('')}</div>`;
+  if (tab === 'bake') { const b = D.bake(st); return `<div class="how"><div class="facts"><div><small>Oven</small><b>${b.temp}</b></div><div><small>Time</small><b>${b.time}</b></div></div><p class="tip"><strong>Flour.</strong> ${b.flour}</p><h3>Steps</h3><ol>${b.steps.map((t) => `<li><span>${t}</span></li>`).join('')}</ol></div>`; }
+  return rec.ingredients.map((i) => ing(i.key, i.name, i.g, i.pct)).join('')
+    + `<div class="ing sum"><span>Total dough</span><span class="g">${Math.round(rec.totalDough)} g<small>${D.fmtOz(rec.totalDough)}</small></span><span class="pc"></span></div>`
+    + (rec.stages ? `${rec.warnWater ? '<p class="warn">The preferment holds more water than the whole dough. Lower its share or its hydration.</p>' : ''}
+        <p class="stagehd caps">Stage 1 · ${rec.stages.name}</p>${rec.stages.first.map((x) => ing(x.key, x.name, x.g)).join('')}
+        <p class="stagehd caps">Stage 2 · main dough</p>${rec.stages.main.map((x) => ing(x.key, x.name, x.g)).join('')}` : '')
+    + `<button type="button" class="copy" id="copy">Copy recipe</button>`;
+}
+/* paint(): numbers only. */
+function paint() {
+  rec = D.calc(st);
+  const g = (k) => (rec.ingredients.find((i) => i.key === k) || { g: 0 }).g, cell = (label, grams, key) => { const [n, u] = D.fmtG(grams, key).split(' '); return `<div class="cell"><small>${label}</small><b>${n}<i>${u}</i></b></div>`; };
+  $('#cells').innerHTML = cell('Flour', g('flour')) + cell('Water', g('water')) + cell('Salt', g('salt')) + cell('Yeast', g('yeast'), 'yeast');
+  $('#scalefoot').textContent = `${st.pizzas} × ${rec.ballWeight} g · ${Math.round(rec.totalDough)} g dough`;
+  $('#pane').innerHTML = pane(); $('#pane').setAttribute('aria-labelledby', 't-' + tab);
+  for (const k of Object.keys(F)) { const o = $('#o-' + k), y = $('#y-' + k); if (o) o.textContent = F[k].text(F[k].get()); if (y) y.textContent = F[k].say(); }
+  for (const k of ['d', 'w', 'l']) { const c = $('#c-' + k); if (c) c.textContent = D.fmtLen(st[k], st.units); }
+  $('#c-pizzas').textContent = st.pizzas;
+  $('#finesub').textContent = `Salt ${pc(st.salt)} · yeast ${(+st.yeast).toFixed(2)}% · oil ${pc(st.oil)}`;
+  $('#prefsub').textContent = st.pref.type === 'none' ? 'None' : `${D.PREF_NAMES[st.pref.type]} · ${st.pref.pct}% of flour`;
+}
+function setField(k, v) {
+  const f = F[k], [min, max, s] = f.range();
+  v = +Math.min(max, Math.max(min, Math.round(v / s) * s)).toFixed(2); f.set(v);
+  const i = $('#r-' + k); if (i) i.style.setProperty('--p', (v - min) / (max - min) * 100 + '%');
+  paint();
+}
+document.addEventListener('input', (e) => { if (e.target.dataset.k) setField(e.target.dataset.k, +e.target.value); });
+document.addEventListener('click', (e) => {
+  const t = e.target.closest('button'); if (!t) return; const d = t.dataset;
+  if (d.tab) { tab = d.tab; $$('.tabs button').forEach((b) => b.setAttribute('aria-selected', b === t)); return paint(); }
+  if (t.id === 'jump') return $('#recipe').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (t.id === 'copy') {
+    const done = (ok) => { t.textContent = ok ? 'Copied' : 'Copy failed'; setTimeout(() => { const c = $('#copy'); if (c) c.textContent = 'Copy recipe'; }, 1800); };
+    return void Promise.resolve().then(() => navigator.clipboard.writeText(D.copyText(st, rec))).then(() => done(true), () => done(false));
+  }
+  if (d.style) { st = D.setStyle(st, d.style); return build(); }
+  if (d.shape) { st = { ...st, shape: d.shape }; return build(); }
+  if (d.units) { st = { ...st, units: d.units }; return build(); }
+  if (d.ytype) { st = D.setYeastType(st, d.ytype); return build(); }
+  if (d.pref) { st = D.setPreferment(st, d.pref); return build(); }
+  if (d.nudge) {
+    const k = d.nudge, dir = +d.dir, [min, max] = D.RANGES[k];
+    st = { ...st, [k]: k === 'pizzas' ? Math.min(max, Math.max(min, st.pizzas + dir)) : Math.min(max, Math.max(min, D.fromDisp(Math.round(D.toDisp(st[k], st.units)) + dir, st.units))) };
+    paint();
+  }
+});
+build();
+</script>
+</body>
+</html>

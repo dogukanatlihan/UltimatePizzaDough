@@ -1,0 +1,150 @@
+<title>Pizza Dough Concepts</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: a quiet gallery. One concept at a time: its live phone view beside its live desktop view, notes above. */
+:root {
+  --bg: #F3F4F1; --panel: #FFFFFF; --ink: #171A16; --ink-2: #5B6259; --line: #D6DAD3; --accent: #B8331F; --accent-soft: #F6E2DD; --bezel: #1B1E1A;
+  --display: "Space Grotesk", "Avenir Next", system-ui, sans-serif;
+  --text: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #131512; --panel: #1C1F1B; --ink: #ECEEE8; --ink-2: #A3AA9F; --line: #32372F; --accent: #F0806C; --accent-soft: #3A1E19; --bezel: #000000; color-scheme: dark; } }
+:root[data-theme="dark"] { --bg: #131512; --panel: #1C1F1B; --ink: #ECEEE8; --ink-2: #A3AA9F; --line: #32372F; --accent: #F0806C; --accent-soft: #3A1E19; --bezel: #000000; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.55 var(--text); }
+.wrap { max-width: 1500px; margin: 0 auto; padding-block: 28px 56px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3, p { margin: 0; }
+h1 { font: 700 clamp(26px, 4vw, 38px)/1.1 var(--display); letter-spacing: -.02em; text-wrap: balance; }
+.lede { margin-top: 10px; max-width: 68ch; color: var(--ink-2); }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.tabs { display: flex; gap: 8px; margin: 24px 0 0; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; }
+.tab { flex: none; display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 16px 0 8px; border: 1px solid var(--line); border-radius: 999px; background: var(--panel); font: 600 15px/1 var(--display); transition: background .15s, border-color .15s, color .15s; }
+.tab i { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--bg); font: 600 13px/1 var(--display); font-style: normal; }
+.tab[aria-selected="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+.tab[aria-selected="true"] i { background: var(--accent); color: #fff; }
+
+.about { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px 40px; margin-top: 22px; }
+@media (min-width: 900px) { .about { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) minmax(0, 1fr); align-items: start; } }
+.about h2 { font: 700 clamp(24px, 3vw, 32px)/1.1 var(--display); letter-spacing: -.02em; }
+.about .idea { margin-top: 6px; font-size: 17px; }
+.about .by { margin-top: 10px; font-size: 13px; color: var(--ink-2); }
+.k { font: 600 12px/1 var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2); margin-bottom: 6px; }
+.about p + .k { margin-top: 14px; }
+
+.stage { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; margin-top: 24px; align-items: start; }
+@media (min-width: 1000px) { .stage { grid-template-columns: 414px minmax(0, 1fr); } }
+.cap { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 8px; font: 600 13px/1.2 var(--display); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); }
+.cap a { color: var(--accent); text-transform: none; letter-spacing: 0; font: 500 14px/1.2 var(--text); }
+.phone { width: 100%; max-width: 414px; margin: 0 auto; padding: 12px; border-radius: 40px; background: var(--bezel); }
+.phone iframe { display: block; width: 100%; height: min(780px, 78vh); border: 0; border-radius: 28px; background: #fff; }
+.desk { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--panel); }
+.deskbar { display: flex; gap: 6px; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+.deskbar span { width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
+.scaler { position: relative; width: 100%; overflow: hidden; }
+.scaler iframe { position: absolute; left: 0; top: 0; width: 1280px; height: 860px; border: 0; transform-origin: 0 0; background: #fff; }
+.deskwrap { display: none; }
+@media (min-width: 1000px) { .deskwrap { display: block; } }
+.narrow { margin-top: 12px; font-size: 14px; color: var(--ink-2); }
+@media (min-width: 1000px) { .narrow { display: none; } }
+.blocked { padding: 18px; border: 1px dashed var(--line); border-radius: 12px; background: var(--panel); }
+
+.glance { margin-top: 40px; }
+.glance h2 { font: 700 22px/1.2 var(--display); letter-spacing: -.01em; margin-bottom: 12px; }
+.scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }
+table { border-collapse: collapse; width: 100%; min-width: 760px; }
+th, td { text-align: left; vertical-align: top; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+tr:last-child td { border-bottom: 0; }
+th { font: 600 12px/1.2 var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); }
+td:first-child { font: 600 15px/1.3 var(--display); white-space: nowrap; }
+.note { margin-top: 28px; padding: 14px 16px; border-radius: 12px; background: var(--accent-soft); max-width: 78ch; }
+</style>
+
+<div class="wrap">
+  <h1>Five directions for Make Better Pizza</h1>
+  <p class="lede">Each one is a working mockup with the real dough maths. Use them: pick a style, change the size, add a preferment. They differ in how you use the calculator, not only in colour. Throwaway code, built to choose a direction.</p>
+
+  <div class="tabs" role="tablist" aria-label="Concepts" id="tabs"></div>
+  <section id="view" role="tabpanel" aria-live="polite"></section>
+
+  <section class="glance">
+    <h2>At a glance</h2>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Concept</th><th>How you use it</th><th>Recipe on a phone</th><th>Look</th><th>Taps to a new recipe</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <p class="note"><strong>Chosen: Tre Passi.</strong> The mockups also showed that the live app gave a 30&nbsp;cm Neapolitan a 186&nbsp;g dough ball. That preset is now 248&nbsp;g, here and on the live site.</p>
+  </section>
+</div>
+
+<script>
+const C = [
+  { id: 'ricetta', file: 'concept-1-ricetta.html', name: 'Ricetta', idea: 'The recipe is the page.',
+    use: 'Read the sentence at the top. Tap any underlined value and a small editor opens. The card rewrites itself as you move the slider.',
+    best: 'People who want the answer first. There is almost no interface to learn.', watch: 'Changing several values takes several taps. Fine-tuning is spread over the card, not in one place.',
+    by: 'Built by Claude', phone: 'Always on screen. The editor is a half-height sheet with flour and water repeated inside it.', look: 'Index card: white paper, navy ink, red margin line. Serif sentence, mono numbers.', taps: '2: tap the style, pick one' },
+  { id: 'tre-passi', file: 'concept-2-tre-passi.html', name: 'Tre Passi', idea: 'Three steps: style, size, recipe.',
+    use: 'One decision per screen on a phone. A bar at the bottom keeps the result and the next step in reach. On a desktop the three steps sit side by side.',
+    best: 'First-time bakers. The hardest one to get lost in.', watch: 'A regular passes two screens before the recipe on each visit. Step tabs let them jump, but it is still a step.',
+    by: 'Built by Claude', phone: 'Step 3. Before that, the bottom bar shows balls and total dough.', look: 'Basil green, white, a tomato-red main button. Rounded, friendly, big photos.', taps: '2: tap a photo, tap See recipe' },
+  { id: 'bancone', file: 'concept-3-bancone.html', name: 'Bancone', idea: 'A kitchen scale that never leaves the screen.',
+    use: 'Flour, water, salt and yeast stay pinned at the top while you change anything below. Fine-tune and preferment are folded stations.',
+    best: 'Bakers who change many values and watch the numbers move.', watch: 'The most tool-like and the least warm. More on screen at once than the others.',
+    by: 'Built by Claude', phone: 'Four key weights pinned to the top. Full recipe one tap below.', look: 'Marble grey, charcoal scale, semolina-yellow digits, gingham trim. Wide grotesque type.', taps: '1: tap a style chip' },
+  { id: 'menu', file: 'concept-4-menu.html', name: 'Il Menù', idea: 'Order from a pizzeria menu board. The recipe prints as a ticket.',
+    use: 'Pick a style from the menu, set the order, pull up the ticket. Method and bake are on the ticket too.',
+    best: 'The strongest character of the five. Light and fast: no large photos.', watch: 'On a phone the full ticket sits in a drawer. The dark green board is a bold look for a utility.',
+    by: 'Built by Codex, order controls reworked by Claude', phone: 'One-line ticket strip pinned to the bottom. Pull up for the full ticket.', look: 'Bottle-green board, saffron accent, white paper ticket. Condensed poster caps, mono figures.', taps: '1: tap a menu row' },
+  { id: 'forno', file: 'concept-5-forno.html', name: 'Forno', idea: 'The photo leads. Big numerals, ingredient tiles.',
+    use: 'Swipe or tap the photo strip to change style. Three large controls, one hero slider for water, tiles for the recipe. Fine-tune opens a sheet.',
+    best: 'Looks the most premium. Food first.', watch: 'The longest page on a phone. It depends on good photography. The size field is a plain number box.',
+    by: 'Built by Codex', phone: 'Sticky bar with balls, flour and water. Tap it to jump to the recipe.', look: 'Warm espresso ground, bone-white type, ember gradient on the active control. Didone numerals.', taps: '1: swipe or tap a style' },
+];
+const $ = (s) => document.querySelector(s);
+let scaleObs;
+
+$('#tabs').innerHTML = C.map((c, i) => `<button type="button" class="tab" role="tab" id="tab-${c.id}" data-id="${c.id}" aria-selected="false" aria-controls="view"><i>${i + 1}</i>${c.name}</button>`).join('');
+$('#rows').innerHTML = C.map((c) => `<tr><td>${c.name}</td><td>${c.idea}</td><td>${c.phone}</td><td>${c.look}</td><td>${c.taps}</td></tr>`).join('');
+
+function show(id) {
+  const c = C.find((x) => x.id === id) || C[0];
+  document.querySelectorAll('.tab').forEach((t) => t.setAttribute('aria-selected', t.dataset.id === c.id));
+  $('#view').setAttribute('aria-labelledby', 'tab-' + c.id);
+  $('#view').innerHTML = `
+    <div class="about">
+      <div><h2>${c.name}</h2><p class="idea">${c.idea}</p><p class="by">${c.by}</p></div>
+      <div><p class="k">How you use it</p><p>${c.use}</p></div>
+      <div><p class="k">Best for</p><p>${c.best}</p><p class="k">Watch out</p><p>${c.watch}</p></div>
+    </div>
+    <div class="stage">
+      <div>
+        <div class="cap"><span>Phone · live</span><a href="${c.file}" target="_blank" rel="noopener">Open full page</a></div>
+        <div class="phone"><iframe id="f-phone" src="${c.file}" title="${c.name} on a phone"></iframe></div>
+        <p class="narrow">The desktop layout appears here on a wider screen.</p>
+      </div>
+      <div class="deskwrap">
+        <div class="cap"><span>Desktop · live, scaled</span></div>
+        <div class="desk"><div class="deskbar" aria-hidden="true"><span></span><span></span><span></span></div><div class="scaler" id="scaler"></div></div>
+      </div>
+    </div>`;
+  // Desktop preview: a real 1280px-wide page, scaled down to fit. Only made when there is room for it.
+  const sc = $('#scaler');
+  const fit = () => {
+    if (!sc.offsetWidth) return;
+    if (!sc.firstChild) sc.innerHTML = `<iframe src="${c.file}" title="${c.name} on a desktop" tabindex="-1"></iframe>`;
+    const k = sc.offsetWidth / 1280; sc.firstChild.style.transform = `scale(${k})`; sc.style.height = 860 * k + 'px';
+  };
+  if (scaleObs) scaleObs.disconnect();
+  scaleObs = new ResizeObserver(fit); scaleObs.observe(sc); fit();
+  // If this viewer refuses the embedded page, say so and leave the link.
+  const ph = $('#f-phone');
+  setTimeout(() => { let ok = false; try { ok = !!(ph.contentDocument && ph.contentDocument.body && ph.contentDocument.body.children.length); } catch (e) { ok = false; }
+    if (!ok && ph.isConnected) ph.closest('.phone').outerHTML = `<p class="blocked">The live preview could not load here. Use <a href="${c.file}" target="_blank" rel="noopener">Open full page</a>.</p>`; }, 5000);
+}
+$('#tabs').addEventListener('click', (e) => { const t = e.target.closest('.tab'); if (!t) return; if (location.hash.slice(1) === t.dataset.id) show(t.dataset.id); else location.hash = t.dataset.id; });
+addEventListener('hashchange', () => show(location.hash.slice(1)));
+show(location.hash.slice(1));
+</script>

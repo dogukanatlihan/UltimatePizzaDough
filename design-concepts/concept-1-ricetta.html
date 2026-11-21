@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ricetta — concept 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Layout: one handwritten-style index card that IS the recipe; every underlined value opens a small editor. */
+:root {
+  --desk: #E4E9EF;        /* cool desk surface */
+  --paper: #FFFFFF;
+  --ink: #17233B;         /* fountain-pen navy */
+  --ink-2: #55617A;
+  --rule: #CFDCF0;        /* index-card ruling */
+  --margin: #D8362B;      /* the red margin line, also the one accent */
+  --margin-soft: #FCEBE9;
+  --serif: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+  --sans: "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "DM Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --row: 56px;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--desk); color: var(--ink); font: 16px/1.5 var(--sans); }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; border-radius: 4px; }
+
+.top { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; max-width: 1120px; margin: 0 auto; padding: 20px 20px 0; }
+.brand { font: 400 22px/1 var(--serif); letter-spacing: .01em; }
+.brand em { color: var(--margin); }
+.top small { font: 500 12px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); }
+
+.desk { max-width: 1120px; margin: 0 auto; padding: 20px 20px 48px; display: grid; gap: 28px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 940px) { .desk { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); align-items: start; padding-top: 28px; } }
+
+/* The card */
+.card { position: relative; background: var(--paper); border-radius: 6px; padding: 28px 22px 22px 22px; box-shadow: 0 1px 0 #fff inset, 0 1px 2px rgba(23,35,59,.08), 0 18px 40px -18px rgba(23,35,59,.28); }
+@media (min-width: 560px) { .card { padding: 36px 36px 28px 76px; } .card::before { content: ""; position: absolute; top: 0; bottom: 0; left: 54px; width: 2px; background: var(--margin); opacity: .55; } }
+.eyebrow { margin: 0 0 10px; font: 500 12px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--margin); }
+h1 { margin: 0; font: 400 clamp(30px, 6.2vw, 46px)/1.14 var(--serif); letter-spacing: -.005em; text-wrap: balance; }
+.hintline { margin: 12px 0 0; color: var(--ink-2); font-size: 14px; }
+
+/* An editable value: reads as handwriting on a dotted line, behaves as a button */
+.tok { appearance: none; border: 0; background: linear-gradient(var(--margin-soft), var(--margin-soft)) 0 100% / 100% 0 no-repeat; padding: 0 .08em; margin: 0 -.08em; border-radius: 3px;
+  font: inherit; color: inherit; text-decoration: underline dotted var(--margin); text-decoration-thickness: 2px; text-underline-offset: .18em; transition: background-size .18s ease; }
+/* Inline values keep the text flow; the tap area is padded out to 44px+ invisibly. */
+.tok { position: relative; }
+.tok::after { content: ""; position: absolute; inset: -9px -3px; }
+.tok:hover, .tok[aria-expanded="true"] { background-size: 100% 100%; }
+h1 .tok { font-style: italic; }
+
+.list { margin-top: 22px; border-top: 1px solid var(--rule); }
+.row { display: grid; grid-template-columns: minmax(0, 1fr) auto 76px; align-items: center; gap: 12px; min-height: var(--row); border-bottom: 1px solid var(--rule); }
+.row .nm { font-weight: 500; }
+.row .g { font: 500 19px/1 var(--mono); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.row .g small { display: block; margin-top: 5px; font: 400 12px/1 var(--mono); color: var(--ink-2); }
+.row .pc { text-align: right; font: 500 15px/1 var(--mono); font-variant-numeric: tabular-nums; color: var(--ink-2); }
+.row .pc .tok { color: var(--ink); min-height: 44px; min-width: 56px; text-align: right; }
+.row.total { border-bottom: 0; font-weight: 700; }
+.row.total .g { font-weight: 500; }
+
+.adds { display: flex; flex-wrap: wrap; gap: 8px; padding: 14px 0 4px; }
+.adds span { width: 100%; font-size: 13px; color: var(--ink-2); }
+.add { min-height: 44px; padding: 0 14px; border: 1.5px dashed var(--rule); border-radius: 999px; background: transparent; font-size: 14px; font-weight: 500; transition: border-color .15s, background .15s; }
+.add:hover { border-color: var(--ink); background: #F6F9FD; }
+
+.pref { margin: 18px 0 0; padding: 14px 16px; background: #F6F9FD; border-radius: 6px; font-size: 15px; }
+.pref .tok { min-height: 28px; font-weight: 600; }
+.warn { margin: 12px 0 0; padding: 12px 14px; border-left: 3px solid var(--margin); background: var(--margin-soft); font-size: 14px; border-radius: 0 6px 6px 0; }
+.stage { margin-top: 18px; }
+.stage h3 { margin: 0 0 2px; font: italic 400 22px/1.2 var(--serif); }
+.stage .row { min-height: 44px; grid-template-columns: minmax(0, 1fr) auto; }
+.stage .row .g { font-size: 16px; }
+
+.cardfoot { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
+.cardfoot p { margin: 0; font-size: 14px; color: var(--ink-2); }
+.btn { min-height: 48px; padding: 0 22px; border: 0; border-radius: 999px; background: var(--ink); color: #fff; font-weight: 600; transition: transform .12s, background .15s; }
+.btn:hover { background: #0E1728; } .btn:active { transform: scale(.98); }
+.btn.ok { background: #1F6B45; }
+
+/* Notes column */
+.notes { display: grid; gap: 22px; }
+.note h2 { margin: 0 0 10px; font: 400 28px/1.15 var(--serif); }
+.note h3 { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin: 18px 0 8px; font: 600 15px/1.3 var(--sans); }
+.note h3 span { font: 400 12px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); white-space: nowrap; }
+.note ol { margin: 0; padding-left: 22px; display: grid; gap: 8px; max-width: 62ch; }
+.note li::marker { font: 500 13px var(--mono); color: var(--margin); }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0; margin: 0 0 14px; border: 1px solid #C9D2DE; border-radius: 6px; background: var(--paper); }
+.facts div { padding: 12px 14px; }
+.facts div + div { border-left: 1px solid #DCE3EC; }
+.facts dt { font: 500 11px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-2); }
+.facts dd { margin: 6px 0 0; font: 500 16px/1.25 var(--mono); font-variant-numeric: tabular-nums; }
+.tip { margin: 0 0 12px; font-size: 15px; color: var(--ink-2); max-width: 62ch; }
+
+/* The editor: bottom sheet on phones, floating panel on wide screens. Never modal: the card stays live behind it. */
+.sheet { position: fixed; z-index: 20; left: 0; right: 0; bottom: 0; max-height: 72vh; overflow: auto; background: var(--paper); border-radius: 18px 18px 0 0;
+  padding: 10px 20px calc(20px + env(safe-area-inset-bottom, 0px)); box-shadow: 0 -12px 40px rgba(23,35,59,.22); animation: up .22s ease; }
+@keyframes up { from { transform: translateY(24px); opacity: 0; } }
+@media (min-width: 940px) { .sheet { left: auto; right: 28px; bottom: 28px; width: 400px; border-radius: 14px; box-shadow: 0 20px 60px -10px rgba(23,35,59,.35), 0 0 0 1px rgba(23,35,59,.08); } }
+@media (prefers-reduced-motion: reduce) { .sheet { animation: none; } * { transition: none !important; } }
+.sheet[hidden] { display: none; }
+.grab { width: 40px; height: 4px; margin: 0 auto 10px; border-radius: 4px; background: #D5DCE6; }
+@media (min-width: 940px) { .grab { display: none; } }
+.live { display: flex; gap: 14px; flex-wrap: wrap; margin: 0 0 14px; padding: 10px 12px; border-radius: 8px; background: var(--ink); color: #fff; font: 500 13px/1.2 var(--mono); font-variant-numeric: tabular-nums; }
+.live b { font-weight: 500; opacity: .65; margin-right: 4px; }
+.sheethead { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+.sheethead h2:focus { outline: none; }
+.sheethead h2 { margin: 0; font: 400 28px/1.1 var(--serif); }
+.done { min-height: 44px; padding: 0 18px; border: 1.5px solid var(--ink); border-radius: 999px; background: transparent; font-weight: 600; }
+.done:hover { background: var(--ink); color: #fff; }
+.fld { padding: 12px 0; }
+.fld + .fld { border-top: 1px solid #E6EBF2; }
+.fldtop { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.fld label, .fld .lab { font-weight: 600; }
+.fld output { font: 500 22px/1 var(--mono); font-variant-numeric: tabular-nums; }
+.sl { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; gap: 10px; margin-top: 8px; }
+.pm { width: 44px; height: 44px; border: 1.5px solid #C9D2DE; border-radius: 50%; background: #fff; font-size: 22px; line-height: 1; }
+.pm:hover { border-color: var(--ink); }
+input[type=range] { width: 100%; height: 44px; margin: 0; background: transparent; appearance: none; -webkit-appearance: none; }
+input[type=range]::-webkit-slider-runnable-track { height: 6px; border-radius: 6px; background: linear-gradient(to right, var(--ink) var(--p, 0%), #D5DCE6 var(--p, 0%)); }
+input[type=range]::-moz-range-track { height: 6px; border-radius: 6px; background: #D5DCE6; }
+input[type=range]::-moz-range-progress { height: 6px; border-radius: 6px; background: var(--ink); }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; margin-top: -10px; border-radius: 50%; background: #fff; border: 2px solid var(--ink); box-shadow: 0 2px 6px rgba(23,35,59,.25); }
+input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 2px solid var(--ink); }
+.help { margin: 6px 0 0; font-size: 14px; color: var(--ink-2); }
+.pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.pill { min-height: 44px; padding: 0 16px; border: 1.5px solid #C9D2DE; border-radius: 999px; background: #fff; font-weight: 500; transition: background .15s, border-color .15s, color .15s; }
+.pill[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: #fff; }
+.styles { display: grid; gap: 8px; margin-top: 8px; }
+.sty { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 12px; align-items: center; min-height: 64px; padding: 6px 12px 6px 6px; text-align: left; border: 1.5px solid #DCE3EC; border-radius: 10px; background: #fff; transition: border-color .15s, background .15s; }
+.sty img { width: 56px; height: 56px; border-radius: 8px; object-fit: cover; display: block; }
+.sty b { display: block; font: 400 21px/1.1 var(--serif); }
+.sty span { font-size: 13px; color: var(--ink-2); }
+.sty[aria-pressed="true"] { border-color: var(--ink); background: #F6F9FD; }
+body.editing { padding-bottom: 46vh; }
+@media (min-width: 940px) { body.editing { padding-bottom: 0; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">Make Better <em>Pizza</em></div>
+  <small>Dough calculator</small>
+</header>
+
+<main class="desk">
+  <article class="card" aria-labelledby="sentence">
+    <p class="eyebrow">Ricetta · your dough</p>
+    <h1 id="sentence"></h1>
+    <p class="hintline">Tap anything underlined to change it. The recipe rewrites itself.</p>
+    <div class="list" id="ings"></div>
+    <div class="adds" id="adds"></div>
+    <div id="pref"></div>
+    <div class="cardfoot">
+      <p id="foot"></p>
+      <button class="btn" id="copy" type="button">Copy recipe</button>
+    </div>
+  </article>
+
+  <aside class="notes">
+    <section class="note" id="method" aria-label="Method"></section>
+    <section class="note" id="bake" aria-label="Baking"></section>
+  </aside>
+</main>
+
+<div class="sheet" id="sheet" role="dialog" aria-modal="false" aria-labelledby="sheet-title" hidden></div>
+
+<script src="calc.js"></script>
+<script>
+const D = Dough, $ = (s, r = document) => r.querySelector(s);
+let st = D.defaults('neapolitan'), rec, openKind = null, trigger = null;
+
+const feel = (h) => h < 60 ? 'Firm dough, easy to shape.' : h <= 68 ? 'Classic and balanced.' : h <= 75 ? 'Soft, airy, a little sticky.' : 'Very wet. Best baked in a pan.';
+const crust = (tf) => tf <= 0.06 ? 'thin' : tf <= 0.09 ? 'medium' : tf <= 0.12 ? 'thick' : 'extra-thick';
+const EDIT_OF = { water: 'hydration', salt: 'salt', yeast: 'yeast', oil: 'oil', sugar: 'sugar', malt: 'malt', enhancer: 'enhancer' };
+const pct = (v) => (+v).toFixed(v % 1 ? (String(v).split('.')[1] || '').length : 0) + '%';
+// One definition per slider: label, state getter, setter, range, value text, help text.
+const F = {
+  pizzas:   { label: 'Pizzas', get: () => st.pizzas, set: (v) => st = { ...st, pizzas: v }, range: () => D.RANGES.pizzas, text: (v) => v },
+  d:        { label: 'Diameter', get: () => st.d, set: (v) => st = { ...st, d: v }, range: () => D.RANGES.d, text: (v) => D.fmtLen(v, st.units) },
+  w:        { label: 'Pan width', get: () => st.w, set: (v) => st = { ...st, w: v }, range: () => D.RANGES.w, text: (v) => D.fmtLen(v, st.units) },
+  l:        { label: 'Pan length', get: () => st.l, set: (v) => st = { ...st, l: v }, range: () => D.RANGES.l, text: (v) => D.fmtLen(v, st.units) },
+  tf:       { label: 'Crust thickness', get: () => st.tf, set: (v) => st = { ...st, tf: v }, range: () => D.RANGES.tf, text: (v) => crust(v), help: () => `Each dough ball weighs ${D.ballWeight(st)} g.` },
+  hydration:{ label: 'Water', get: () => st.hydration, set: (v) => st = { ...st, hydration: v }, range: () => D.RANGES.hydration, text: pct, help: () => feel(st.hydration) },
+  salt:     { label: 'Salt', get: () => st.salt, set: (v) => st = { ...st, salt: v }, range: () => D.RANGES.salt, text: pct, help: () => 'Most pizza dough sits between 2% and 3%.' },
+  yeast:    { label: 'Yeast', get: () => st.yeast, set: (v) => st = { ...st, yeast: v }, range: () => st.yeastType === 'fresh' ? D.RANGES.yeastFresh : D.RANGES.yeast, text: (v) => (+v).toFixed(2) + '%', help: () => 'Less yeast means a slower rise and more flavour.' },
+  oil:      { label: 'Olive oil', get: () => st.oil, set: (v) => st = { ...st, oil: v }, range: () => D.RANGES.oil, text: pct, help: () => 'Makes the crumb softer. Neapolitan uses none.' },
+  sugar:    { label: 'Sugar', get: () => st.sugar, set: (v) => st = { ...st, sugar: v }, range: () => D.RANGES.sugar, text: pct, help: () => 'Helps browning in a home oven.' },
+  malt:     { label: 'Diastatic malt', get: () => st.malt, set: (v) => st = { ...st, malt: v }, range: () => D.RANGES.malt, text: pct, help: () => 'Optional. Improves colour on long ferments.' },
+  enhancer: { label: 'Dough enhancer', get: () => st.enhancer, set: (v) => st = { ...st, enhancer: v }, range: () => D.RANGES.enhancer, text: pct, help: () => 'Optional.' },
+  prefPct:  { label: 'Share of the flour', get: () => st.pref.pct, set: (v) => st = { ...st, pref: { ...st.pref, pct: v } }, range: () => D.RANGES.prefPct, text: pct },
+  prefHyd:  { label: 'Preferment water', get: () => st.pref.hyd, set: (v) => st = { ...st, pref: { ...st.pref, hyd: v } }, range: () => D.RANGES.prefHyd, text: pct, help: () => 'Poolish about 100%, biga 50–60%, sponge 65–80%.' },
+};
+const TITLES = { style: 'Which pizza?', pizzas: 'How many?', size: 'How big?', tf: 'How thick?', hydration: 'How much water?', salt: 'Salt', yeast: 'Yeast', oil: 'Olive oil', sugar: 'Sugar', malt: 'Diastatic malt', enhancer: 'Dough enhancer', pref: 'Preferment' };
+
+const tok = (kind, text) => `<button type="button" class="tok" data-edit="${kind}" aria-haspopup="dialog" aria-expanded="${openKind === kind}">${text}</button>`;
+const row = (name, g, key, right) => `<div class="row"><span class="nm">${name}</span><span class="g">${D.fmtG(g, key)}<small>${D.fmtOz(g)}</small></span>${right === undefined ? '' : `<span class="pc">${right}</span>`}</div>`;
+
+function paint() {
+  rec = D.calc(st);
+  const s = D.style(st.style), n = st.pizzas;
+  $('#sentence').innerHTML = `${tok('style', s.name)} dough for ${tok('pizzas', n + (n === 1 ? ' pizza' : ' pizzas'))}, ${st.shape === 'rect' ? 'in a ' + tok('size', D.sizeLabel(st)) + ' pan' : tok('size', D.sizeLabel(st)) + ' wide'}, with a ${tok('tf', crust(st.tf))} crust.`;
+  $('#ings').innerHTML = rec.ingredients.map((i) => row(i.key === 'yeast' ? tok('yeast', i.name) : i.name, i.g, i.key, i.key === 'flour' ? '100%' : tok(EDIT_OF[i.key], i.key === 'yeast' ? (+i.pct).toFixed(2) + '%' : pct(i.pct)))).join('')
+    + `<div class="row total"><span class="nm">Total dough</span><span class="g">${Math.round(rec.totalDough)} g<small>${D.fmtOz(rec.totalDough)}</small></span><span class="pc"></span></div>`;
+  const missing = ['oil', 'sugar', 'malt', 'enhancer'].filter((k) => !st[k]);
+  $('#adds').innerHTML = missing.length ? '<span>Not in this recipe:</span>' + missing.map((k) => `<button type="button" class="add" data-edit="${k}" aria-haspopup="dialog">+ ${F[k].label}</button>`).join('') : '';
+  $('#pref').innerHTML = rec.stages
+    ? `<p class="pref">Made in two stages with a ${tok('pref', rec.stages.name.toLowerCase() + ' of ' + st.pref.pct + '% of the flour')}.</p>${rec.warnWater ? '<p class="warn">The preferment holds more water than the whole dough. Lower its share or its water, or add water to the recipe.</p>' : ''}
+       <div class="stage"><h3>First, the ${rec.stages.name.toLowerCase()}</h3><div class="list">${rec.stages.first.map((x) => row(x.name, x.g, x.key)).join('')}</div></div>
+       <div class="stage"><h3>Then, the main dough</h3><div class="list">${rec.stages.main.map((x) => row(x.name, x.g, x.key)).join('')}</div></div>`
+    : `<p class="pref">Made in one stage. ${tok('pref', 'Add a preferment')} for deeper flavour.</p>`;
+  $('#foot').textContent = `${n} × ${rec.ballWeight} g ${n === 1 ? 'piece' : 'balls'}`;
+  $('#method').innerHTML = '<h2>Method</h2>' + D.method(st, rec).map((m) => `<h3>${m.title}<span>${m.time}</span></h3><ol>${m.steps.map((x) => `<li>${x}</li>`).join('')}</ol>`).join('');
+  const b = D.bake(st);
+  $('#bake').innerHTML = `<h2>Bake</h2><dl class="facts"><div><dt>Oven</dt><dd>${b.temp}</dd></div><div><dt>Time</dt><dd>${b.time}</dd></div></dl><p class="tip"><strong>Flour:</strong> ${b.flour}</p><ol>${b.steps.map((x) => `<li>${x}</li>`).join('')}</ol>`;
+  const live = $('#live');
+  if (live) live.innerHTML = liveLine();
+}
+const liveLine = () => `<span><b>balls</b>${st.pizzas} × ${rec.ballWeight} g</span><span><b>flour</b>${D.fmtG(rec.flour)}</span><span><b>water</b>${D.fmtG(rec.flour * st.hydration / 100)}</span>`;
+
+const slider = (k) => { const f = F[k], [min, max, step] = f.range(), v = f.get();
+  return `<div class="fld"><div class="fldtop"><label for="e-${k}">${f.label}</label><output id="o-${k}" for="e-${k}">${f.text(v)}</output></div>
+    <div class="sl"><button type="button" class="pm" data-nudge="${k}" data-dir="-1" aria-label="Less ${f.label.toLowerCase()}">−</button>
+    <input type="range" id="e-${k}" data-k="${k}" min="${min}" max="${max}" step="${step}" value="${v}" style="--p:${(v - min) / (max - min) * 100}%">
+    <button type="button" class="pm" data-nudge="${k}" data-dir="1" aria-label="More ${f.label.toLowerCase()}">+</button></div>
+    ${f.help ? `<p class="help" id="h-${k}">${f.help()}</p>` : ''}</div>`; };
+const pills = (label, attr, options, current) => `<div class="fld"><span class="lab" id="l-${attr}">${label}</span><div class="pills" role="group" aria-labelledby="l-${attr}">${options.map(([v, t]) => `<button type="button" class="pill" data-${attr}="${v}" aria-pressed="${v === current}">${t}</button>`).join('')}</div></div>`;
+
+function body(kind) {
+  if (kind === 'style') return `<div class="styles">${D.STYLES.map((s) => `<button type="button" class="sty" data-style="${s.id}" aria-pressed="${s.id === st.style}"><img src="${s.img}" alt=""><span><b>${s.name}</b><span>${s.blurb}</span></span></button>`).join('')}</div>`;
+  if (kind === 'size') return (D.style(st.style).shape === 'both' ? pills('Shape', 'shape', [['rect', 'Rectangular pan'], ['round', 'Round']], st.shape) : '')
+    + (st.shape === 'rect' ? slider('w') + slider('l') : slider('d')) + pills('Units', 'units', [['cm', 'Centimetres'], ['in', 'Inches']], st.units);
+  if (kind === 'yeast') return slider('yeast') + pills('Type of yeast', 'ytype', Object.entries(D.YEAST_NAMES), st.yeastType);
+  if (kind === 'pref') return pills('Type', 'pref', Object.entries(D.PREF_NAMES), st.pref.type) + (st.pref.type === 'none' ? '<p class="help">A preferment is part of the flour and water, fermented the day before. Optional.</p>' : slider('prefPct') + slider('prefHyd'));
+  return slider(kind);
+}
+function openEditor(kind, from) {
+  if (from) trigger = from;
+  openKind = kind;
+  const sh = $('#sheet');
+  sh.innerHTML = `<div class="grab"></div><p class="live" id="live" aria-live="off"></p><div class="sheethead"><h2 id="sheet-title" tabindex="-1">${TITLES[kind]}</h2><button type="button" class="done" data-close>Done</button></div>${body(kind)}`;
+  sh.hidden = false; document.body.classList.add('editing');
+  paint();
+  if (from) { $('#sheet-title').focus({ preventScroll: true }); from.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+}
+function closeEditor() {
+  const kind = openKind;
+  $('#sheet').hidden = true; document.body.classList.remove('editing'); openKind = null; paint();
+  // paint() redraws the card, so the old trigger node is gone: focus the fresh one for the same value.
+  const again = document.querySelector(`.card [data-edit="${kind}"]`); if (again) again.focus({ preventScroll: true }); trigger = null;
+}
+function setField(k, v) {
+  const f = F[k], [min, max, step] = f.range();
+  v = Math.min(max, Math.max(min, Math.round(v / step) * step)); v = +v.toFixed(2);
+  f.set(v);
+  const inp = $('#e-' + k); if (inp) { inp.value = v; inp.style.setProperty('--p', (v - min) / (max - min) * 100 + '%'); }
+  paint();
+  for (const key of Object.keys(F)) { const o = $('#o-' + key), h = $('#h-' + key); if (o) o.textContent = F[key].text(F[key].get()); if (h && F[key].help) h.textContent = F[key].help(); }
+}
+
+document.addEventListener('input', (e) => { if (e.target.dataset.k) setField(e.target.dataset.k, +e.target.value); });
+document.addEventListener('click', (e) => {
+  const t = e.target.closest('button'); if (!t) return;
+  const d = t.dataset;
+  if (d.edit) return openKind === d.edit ? closeEditor() : openEditor(d.edit, t);
+  if ('close' in d) return closeEditor();
+  if (d.nudge) return setField(d.nudge, F[d.nudge].get() + d.dir * F[d.nudge].range()[2]);
+  if (d.style) { st = D.setStyle(st, d.style); return openEditor('style'); }
+  if (d.shape) { st = { ...st, shape: d.shape }; return openEditor('size'); }
+  if (d.units) { st = { ...st, units: d.units }; return openEditor('size'); }
+  if (d.ytype) { st = D.setYeastType(st, d.ytype); return openEditor('yeast'); }
+  if (d.pref) { st = D.setPreferment(st, d.pref); return openEditor('pref'); }
+  if (t.id === 'copy') {
+    const done = (ok) => { t.textContent = ok ? 'Copied' : 'Copy failed'; t.classList.toggle('ok', ok); setTimeout(() => { t.textContent = 'Copy recipe'; t.classList.remove('ok'); }, 1800); };
+    Promise.resolve().then(() => navigator.clipboard.writeText(D.copyText(st, rec))).then(() => done(true), () => done(false));
+  }
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && openKind) closeEditor(); });
+paint();
+</script>
+</body>
+</html>
