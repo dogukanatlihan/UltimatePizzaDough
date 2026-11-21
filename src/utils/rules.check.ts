@@ -4,6 +4,7 @@ import type { DoughCalculatorInputs } from '../types';
 import { sizeBounds, usualBatch } from './ranges';
 import { formatGrams, formatOunces } from './format';
 import { parseSavedInputs, loadSavedInputs, saveInputs, clearSavedInputs } from './savedRecipe';
+import { translations } from '../context/translations';
 
 // ---- Weights read like a kitchen scale
 assert.equal(formatGrams(457.3), '457 g');
@@ -78,5 +79,23 @@ saveInputs(good, store);
 assert.deepEqual(loadSavedInputs(store), good);
 clearSavedInputs(store);
 assert.equal(loadSavedInputs(store), null);
+
+// ---- Strings: every key the screens use exists in both languages with the same placeholders
+const NEW_KEYS = `nav.steps step.style step.size step.recipe step.of s1.title
+  style.neapolitan.short style.ny.short style.sicilian.short style.detroit.short style.pan.short style.focaccia.short
+  s2.title chip.change size.pizzas size.diameter size.panWidth size.panLength size.shape size.rectPan size.measureIn
+  crust.label crust.thin crust.medium crust.thick crust.extraThick crust.ball a11y.less a11y.more
+  s3.title recipe.totalDough stage.dayBefore stage.bakingDay water.label water.firmer water.wetter
+  water.feel.firm water.feel.classic water.feel.soft water.feel.wet tune.title tune.sub form.doughEnhancer form.sponge form.sourdough
+  pref.sub.none pref.sub.on pref.type pref.share pref.water pref.hint pref.flourWater method.one method.two
+  bake.title bake.oven bake.time bake.flour unit.min unit.sec action.copy action.copied action.print copy.hydration
+  bar.next bar.see bar.back bar.dough bar.flour bar.water footer.startOver toast.startedOver toast.undo
+  a2hs.button a2hs.ios theme.toLight theme.toDark lang.toTurkish lang.toEnglish`.split(/\s+/);
+for (const key of NEW_KEYS) assert.ok(translations[key], `missing string: ${key}`);
+const placeholders = (text: string) => (text.match(/\{\w+\}/g) ?? []).sort().join();
+for (const [key, pair] of Object.entries(translations)) {
+  assert.ok(pair.en.trim() && pair.tr.trim(), `empty string: ${key}`);
+  assert.equal(placeholders(pair.en), placeholders(pair.tr), `placeholders differ: ${key}`);
+}
 
 console.log('rules checks passed');
