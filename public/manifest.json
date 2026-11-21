@@ -4,8 +4,8 @@
   "description": "Calculate the perfect pizza dough recipe for any style and size",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f5f5f7",
-  "theme_color": "#0071e3",
+  "background_color": "#F1F5EE",
+  "theme_color": "#1C5A3A",
   "icons": [
     {
       "src": "/pizza-icon.png",
@@ -40,4 +40,4 @@
   ],
   "orientation": "portrait",
   "prefer_related_applications": false
-} 
+}
