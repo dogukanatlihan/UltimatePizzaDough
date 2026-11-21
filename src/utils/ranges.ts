@@ -47,5 +47,8 @@ export const usualBatch = (styleId: string): number =>
 export const clamp = (value: number, min: number, max: number): number => Math.min(max, Math.max(min, value));
 
 // One press of a size counter: the next whole number in that direction, so 11.8 goes to 12 or 11 and never skips one.
-export const stepSize = (value: number, dir: 1 | -1, [min, max]: readonly [number, number]): number =>
-  clamp(dir > 0 ? Math.floor(value) + 1 : Math.ceil(value) - 1, min, max);
+// A unit switch and back leaves float noise (13.000000000000002), which must still count as 13.
+export const stepSize = (value: number, dir: 1 | -1, [min, max]: readonly [number, number]): number => {
+  const size = +value.toFixed(6);
+  return clamp(dir > 0 ? Math.floor(size) + 1 : Math.ceil(size) - 1, min, max);
+};

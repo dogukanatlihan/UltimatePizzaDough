@@ -13,8 +13,9 @@ const YEAST_CONVERSION_FACTORS = {
 };
 
 // Convert a baker's % of one yeast type into the equal-strength % of another, rounded to the slider step.
+// An amount above zero never rounds down to none (0.01% fresh is 0.003% instant).
 export const convertYeastPercent = (percent: number, from: YeastType, to: YeastType): number =>
-  Math.round(percent * YEAST_CONVERSION_FACTORS[to] / YEAST_CONVERSION_FACTORS[from] * 100) / 100;
+  Math.max(Math.round(percent * YEAST_CONVERSION_FACTORS[to] / YEAST_CONVERSION_FACTORS[from] * 100) / 100, percent > 0 ? 0.01 : 0);
 
 // Yeast display names for recipe output
 export const YEAST_TYPE_NAMES = {
@@ -214,7 +215,7 @@ const prefermentYeast = (type: PrefermentType, prefermentFlour: number, totalYea
 const splitStages = (inputs: DoughCalculatorInputs, totalFlour: number): Pick<DoughRecipe, 'prefermentType' | 'preferment' | 'mainDough'> => {
   const { preferment, yeastType } = inputs;
   const grams = (percentage: number) => (totalFlour * percentage) / 100;
-  const whenUsed = (percentage: number) => (percentage > 0 ? grams(percentage) : undefined);
+  const whenUsed = (percentage: number) => (grams(percentage) > 0 ? grams(percentage) : undefined);
   const flour = grams(preferment.percentage);
   const water = (flour * preferment.hydration) / 100;
   const yeast = prefermentYeast(preferment.type, flour, grams(inputs.yeast), yeastType);

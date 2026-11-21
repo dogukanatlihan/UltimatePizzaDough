@@ -701,6 +701,22 @@ export const translations: Record<string, Record<Language, string>> = {
     en: 'Press the cold dough into a well-oiled pan. If it springs back, let it rest for 20-30 minutes, then stretch it to the edges. Cover and let it rise in the pan for 1-3 hours, until puffy and bubbly.',
     tr: 'Soğuk hamuru iyice yağlanmış tavaya bastırarak yayın. Geri çekiliyorsa 20-30 dakika dinlendirin, sonra kenarlara kadar açın. Üzerini örtün ve kabarıp gözeneklenene kadar tavada 1-3 saat mayalandırın.'
   },
+  'preferment.step1.sourdough': {
+    en: 'Mix {flour}g ({flourOz}oz) flour and {water}g ({waterOz}oz) water with a spoonful of ripe sourdough starter until no dry flour remains.',
+    tr: '{flour}g ({flourOz}oz) un ve {water}g ({waterOz}oz) suyu bir kaşık olgun ekşi maya ile kuru un kalmayana kadar karıştırın.'
+  },
+  'preferment.step2.sourdough': {
+    en: 'Cover and let it ferment at room temperature until it has doubled. How long this takes depends on your starter.',
+    tr: 'Kapatın ve iki katına çıkana kadar oda sıcaklığında mayalanmaya bırakın. Süre ekşi mayanıza bağlıdır.'
+  },
+  'time.sourdough': {
+    en: 'until doubled',
+    tr: 'iki katına çıkana kadar'
+  },
+  'mainDough.step2.neapolitan': {
+    en: 'Add {flour}g ({flourOz}oz) flour a little at a time and mix until no dry flour remains.',
+    tr: '{flour}g ({flourOz}oz) unu azar azar ekleyin ve kuru un kalmayana kadar karıştırın.'
+  },
   'time.dough.neapolitan': {
     en: 'Same day · 6–8 h rise',
     tr: 'Aynı gün · 6–8 sa mayalanma'
@@ -1048,8 +1064,8 @@ export const translations: Record<string, Record<Language, string>> = {
     tr: '3–5 sa'
   },
   'time.dough': {
-    en: '30 min + proof',
-    tr: '30 dk + mayalanma'
+    en: '1–3 days in the fridge',
+    tr: '1–3 gün buzdolabında'
   },
 };
 

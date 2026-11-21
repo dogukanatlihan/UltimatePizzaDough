@@ -66,18 +66,19 @@ export const sizeText = (inputs: DoughCalculatorInputs, locale: string): string 
 };
 
 // First key that has a string: a style's own wording, then the shared one.
-const pick = (t: Translate, ...keys: string[]): string => t(keys.find((key) => t(key) !== key) ?? keys[keys.length - 1]);
+const pickKey = (t: Translate, ...keys: string[]): string => keys.find((key) => t(key) !== key) ?? keys[keys.length - 1];
+const pick = (t: Translate, ...keys: string[]): string => t(pickKey(t, ...keys));
 
 const IN_PAN = new Set(['sicilian', 'detroit', 'pan', 'focaccia']);
 
 // How each style goes from mixed dough to oven-ready, as its sources prescribe:
 // Neapolitan — AVPN/EU direct method, risen at room temperature, no refrigerator.
 // New York — Lehmann: balled straight after mixing, then 1-3 days cold.
-// Pan styles — one piece per pan, cold ferment, then a final rise in the oiled pan.
+// Pan styles — folds, one piece per pan, 1-3 days cold, then a final rise in the oiled pan.
 const finishKeys = (styleId: string): string[] => {
   if (styleId === 'neapolitan') return ['knead', 'rest', 'balls', 'proof'].map((k) => `method.neapolitan.${k}`);
   if (styleId === 'ny') return ['knead', 'balls', 'cold', 'temper'].map((k) => `method.ny.${k}`);
-  if (IN_PAN.has(styleId)) return ['mainDough.step4', 'mainDough.step5', 'method.pan.piece', 'method.pan.cold', `method.pan.proof.${styleId}`];
+  if (IN_PAN.has(styleId)) return ['mainDough.step4', 'method.pan.piece', 'method.pan.cold', `method.pan.proof.${styleId}`];
   return [4, 5, 6, 7, 8].map((n) => `mainDough.step${n}`);
 };
 
@@ -103,20 +104,20 @@ export const methodStages = (recipe: DoughRecipe, t: Translate, locale: string, 
     }];
   }
 
-  const sponge = recipe.prefermentType === 'sponge';
-  const kind = sponge ? 'sponge' : 'poolish';
+  // Poolish and biga share their wording; a sponge is quicker; a sourdough is built from a ripe starter.
+  const kind = recipe.prefermentType === 'sponge' || recipe.prefermentType === 'sourdough' ? recipe.prefermentType : 'poolish';
   const part = (name: string, g: number | undefined, yeast = false) => (g !== undefined && g > 0.004 ? t(`mainDough.step3.${name}`, w(name, g, yeast)) : '');
   return [
     {
       title: t('preferment.instructions'),
-      time: t(sponge ? 'time.sponge' : 'time.poolish'),
+      time: t(`time.${kind}`),
       steps: [
-        t('preferment.step1', {
+        t(pickKey(t, `preferment.step1.${kind}`, 'preferment.step1'), {
           ...w('flour', first.flour), ...w('water', first.water),
           yeast: first.yeast !== undefined && first.yeast > 0.004 ? t('preferment.step1.yeast', w('yeast', first.yeast, true)) : '',
         }),
         t(`preferment.step2.${kind}`),
-        t(`preferment.step3.${kind}`),
+        pick(t, `preferment.step3.${kind}`, 'preferment.step3.poolish'),
       ],
     },
     {
@@ -124,7 +125,8 @@ export const methodStages = (recipe: DoughRecipe, t: Translate, locale: string, 
       time,
       steps: [
         t('mainDough.step1', w('water', main.water)),
-        t('mainDough.step2', w('flour', main.flour)),
+        // Neapolitan stays a direct dough: no autolyse rest, with or without a preferment.
+        t(pickKey(t, `mainDough.step2.${styleId}`, 'mainDough.step2'), w('flour', main.flour)),
         t('mainDough.step3.start', w('salt', main.salt)) + part('yeast', main.yeast, true) + part('oil', main.oil) + part('sugar', main.sugar)
           + part('malt', main.diastaticMalt) + part('enhancer', main.doughEnhancer) + t('mainDough.step3.end'),
         ...finish,

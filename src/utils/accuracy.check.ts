@@ -3,9 +3,10 @@
 // (yeast, preferments); Modernist Pizza, K. López-Alt, S. Randazzo (Detroit); T. Gemignani, King Arthur, ATK (Sicilian);
 // S. Nosrat, King Arthur (focaccia); BAKERpedia (sponge).
 import assert from 'node:assert/strict';
-import { calculateDoughRecipe, calculateDoughBallWeight, convertYeastPercent, PIZZA_STYLES, styleSize } from './doughCalculator';
-import { RANGES, yeastRange } from './ranges';
-import { STORAGE_KEY, loadSavedInputs } from './savedRecipe';
+import { calculateDoughRecipe, calculateDoughBallWeight, convertYeastPercent, PIZZA_STYLES, styleSize, cmToInches, inchesToCm } from './doughCalculator';
+import { RANGES, yeastRange, stepSize, sizeBounds } from './ranges';
+import { applyStyle, prefermentDefaults } from './styleChange';
+import { STORAGE_KEY, loadSavedInputs, saveInputs, parseSavedInputs } from './savedRecipe';
 import { translate } from '../context/translations';
 import { methodStages, bakeInfo } from '../design/recipeText';
 import { BAKE_TIME } from '../design/styleMeta';
@@ -118,12 +119,16 @@ for (const s of PIZZA_STYLES) for (const t of [tEn, tTr]) {
 
 // ---- Baking: the card and the step text give the same figures
 const digits = (text: string) => text.replace(/[–-]/g, '-');
-for (const s of PIZZA_STYLES) {
-  const bake = bakeInfo(s.id, tEn);
+const hasNumber = (text: string, n: string) => new RegExp(`(^|\\D)${n}(\\D|$)`).test(text);
+for (const s of PIZZA_STYLES) for (const [t, lang] of [[tEn, 'en'], [tTr, 'tr']] as const) {
+  const bake = bakeInfo(s.id, t);
   const time = BAKE_TIME[s.id];
-  assert.ok(digits(bake.steps[3]).includes(`${time.from}-${time.to}`), `${s.id}: card says ${bake.time}, step says "${bake.steps[3]}"`);
-  const fahrenheit = bake.temp.match(/(\d+)°F/)![1];
-  assert.ok(bake.steps[0].includes(fahrenheit), `${s.id}: card says ${bake.temp}, step says "${bake.steps[0]}"`);
+  assert.ok(digits(bake.steps[3]).includes(`${time.from}-${time.to}`), `${s.id} ${lang}: card says ${bake.time}, step says "${bake.steps[3]}"`);
+  // Every temperature on the card is in the oven step: both ends of a range, °C in both languages, °F in English.
+  const [celsius, fahrenheit] = bake.temp.split(' / ').map((part) => part.match(/\d+/g) ?? []);
+  for (const n of [...celsius, ...(lang === 'en' ? fahrenheit : [])]) {
+    assert.ok(hasNumber(bake.steps[0], n), `${s.id} ${lang}: card says ${bake.temp}, step says "${bake.steps[0]}"`);
+  }
 }
 // Neapolitan oven: AVPN and EU give 430–485 °C, not 500.
 assert.ok(!bakeInfo('neapolitan', tEn).temp.includes('500°C'));
@@ -132,11 +137,85 @@ assert.ok(!bakeInfo('neapolitan', tEn).temp.includes('500°C'));
 assert.equal(ouncesNumber(0.08), '0.003');
 assert.equal(ouncesNumber(7.2), '0.25');
 
+// ---- Preferment paths
+const stagesFor = (id: string, type: PrefermentType, t = tEn) => {
+  const pref = prefermentDefaults(id, type)!;
+  const inputs = inputsFor(id, { yeast: pref.yeast, preferment: { type, percentage: pref.percentage, hydration: pref.hydration } });
+  return methodStages(calculateDoughRecipe(inputs), t, 'en', id);
+};
+for (const s of PIZZA_STYLES) {
+  // Sourdough: the first stage is built from a ripe starter. Flour and water alone never rise.
+  for (const [t, word] of [[tEn, /starter/i], [tTr, /ekşi maya/i]] as const) {
+    const first = stagesFor(s.id, 'sourdough', t)[0];
+    assert.ok(word.test(first.steps[0]), `${s.id}: ${first.steps[0]}`);
+    assert.ok(!/12 (hours|saat|h\b|sa\b)/.test(`${first.steps.join(' ')} ${first.time}`), `${s.id}: a sourdough has no fixed time: ${first.steps[1]}`);
+  }
+  for (const type of ['poolish', 'biga', 'sponge', 'sourdough'] as const) for (const t of [tEn, tTr]) {
+    for (const stage of stagesFor(s.id, type, t)) for (const step of [stage.time, ...stage.steps]) assert.ok(step && !/[{}]|^[a-zA-Z]+\.[\w.]+$/.test(step), `${s.id} ${type}: ${step}`);
+  }
+}
+// Neapolitan has no autolyse with a preferment either.
+assert.ok(!/autolyse/i.test(stagesFor('neapolitan', 'poolish').flatMap((stage) => stage.steps).join('\n')));
+// Pan styles go from the folds to the refrigerator: no 2-4 h warm rise before 1-3 days cold.
+for (const id of ['sicilian', 'detroit', 'pan', 'focaccia']) assert.ok(!/bulk ferment/i.test(method(id)), id);
+// The time on the stage matches its steps: every style but Neapolitan spends 1-3 days in the refrigerator.
+for (const s of PIZZA_STYLES) {
+  const stage = methodStages(calculateDoughRecipe(inputsFor(s.id)), tEn, 'en', s.id)[0];
+  assert.equal(/days/.test(stage.time), /24-72 hours/.test(stage.steps.join(' ')), `${s.id}: "${stage.time}"`);
+}
+
+// ---- Changing style with a preferment on: the new style's amounts for that preferment, not its straight-dough yeast.
+{
+  const sourdough = inputsFor('neapolitan', { yeast: 0, preferment: { type: 'sourdough', percentage: 25, hydration: 100 } });
+  const toNy = applyStyle(sourdough, 'ny', 4);
+  assert.equal(toNy.preferment.type, 'sourdough');
+  assert.equal(toNy.yeast, 0);
+  const sponge = inputsFor('ny', { yeast: 0.5, preferment: { type: 'sponge', percentage: 60, hydration: 60 } });
+  const toNeapolitan = applyStyle(sponge, 'neapolitan', 4);
+  assert.deepEqual([toNeapolitan.yeast, toNeapolitan.preferment.percentage], [prefermentDefaults('neapolitan', 'sponge')!.yeast, prefermentDefaults('neapolitan', 'sponge')!.percentage]);
+  // Without a preferment the style's own yeast loads, in the yeast type in use.
+  assert.equal(applyStyle(inputsFor('neapolitan', { yeastType: 'fresh' }), 'ny', 4).yeast, 0.75);
+  assert.equal(applyStyle(inputsFor('neapolitan'), 'ny', 4).numberOfPizzas, 4);
+  assert.equal(applyStyle(inputsFor('neapolitan', { useInches: true }), 'ny', 4).pizzaDiameter, 18);
+  // An unknown style changes nothing.
+  assert.equal(applyStyle(sourdough, 'nope', 4), sourdough);
+}
+
+// ---- Size buttons after a unit switch: float noise from the conversion must not swallow a press.
+for (let cm = 10; cm <= 60; cm++) {
+  const back = inchesToCm(cmToInches(cm));
+  assert.equal(stepSize(back, 1, [10, 61]), cm + 1, `+ from ${back}`);
+  assert.equal(stepSize(back, -1, [9, 60]), cm - 1, `- from ${back}`);
+}
+for (let inches = 4; inches <= 24; inches++) {
+  const back = cmToInches(inchesToCm(inches));
+  assert.equal(stepSize(back, -1, [3, 24]), inches - 1, `- from ${back}`);
+  assert.equal(stepSize(back, 1, [4, 25]), inches + 1, `+ from ${back}`);
+}
+assert.equal(stepSize(11.8, 1, sizeBounds(true).diameter), 12);
+
+// ---- Yeast type switch: a small amount never becomes none.
+assert.equal(convertYeastPercent(0.01, 'fresh', 'instant'), 0.01);
+assert.equal(convertYeastPercent(0, 'fresh', 'instant'), 0);
+
+// ---- A dough weight that is not a number, or negative, never produces optional main-dough amounts.
+{
+  const r = calculateDoughRecipe(inputsFor('ny', { ballWeight: Number.NaN, preferment: { type: 'poolish', percentage: 40, hydration: 100 } }));
+  assert.equal(r.mainDough!.oil, undefined);
+}
+
 // ---- Saved recipes from before these corrections are dropped, so regulars get the corrected numbers.
 assert.notEqual(STORAGE_KEY, 'mbp.recipe.v1');
 {
+  // The old record is not read under any key, and the first save removes it.
   const old = JSON.stringify(inputsFor('ny'));
-  assert.equal(loadSavedInputs({ getItem: (key: string) => (key === 'mbp.recipe.v1' ? old : null) }), null);
+  assert.equal(loadSavedInputs({ getItem: (key: string) => (key === STORAGE_KEY ? null : old) }), null);
+  const removed: string[] = [];
+  saveInputs(inputsFor('ny'), { setItem() {}, removeItem: (key: string) => removed.push(key) } as unknown as Pick<Storage, 'setItem'>);
+  assert.deepEqual(removed, ['mbp.recipe.v1']);
+  // A preferment that is on always has a share on the slider.
+  const zero = JSON.stringify(inputsFor('ny', { preferment: { type: 'poolish', percentage: 0, hydration: 100 } }));
+  assert.equal(parseSavedInputs(zero)!.preferment.percentage, RANGES.prefermentPercentage[0]);
 }
 
 console.log('accuracy checks passed');

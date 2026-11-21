@@ -59,7 +59,8 @@ export const parseSavedInputs = (raw: string | null): DoughCalculatorInputs | nu
     panLength: num(r.panLength, size.pan),
     preferment: {
       type: pref.type as PrefermentType,
-      percentage: num(pref.percentage, [0, RANGES.prefermentPercentage[1]]), // "none" stores 0
+      // "none" stores 0; a preferment that is on always has a share the slider can show
+      percentage: num(pref.percentage, [pref.type === 'none' ? 0 : RANGES.prefermentPercentage[0], RANGES.prefermentPercentage[1]]),
       hydration: num(pref.hydration, RANGES.prefermentHydration),
     },
     useInches: r.useInches,
