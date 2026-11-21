@@ -13,9 +13,7 @@ declare global {
 
 // Initialize analytics (called when the app starts)
 export const initializeAnalytics = (): void => {
-  if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
-    console.log('Google Analytics initialized');
-  }
+  // gtag is configured in index.html; nothing to do here.
 };
 
 // Track a page view

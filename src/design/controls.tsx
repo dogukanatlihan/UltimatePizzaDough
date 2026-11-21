@@ -105,7 +105,8 @@ export function Segmented<T extends string>({ label, value, options, onChange }:
       <div className="seg" role="group" aria-labelledby={id} ref={box}>
         {pill && <span className="seg-pill" data-slide={pill.slide} aria-hidden="true" style={{ transform: `translate(${pill.x}px, ${pill.y}px)`, width: pill.w, height: pill.h }} />}
         {options.map((o) => (
-          <button type="button" key={o.value} aria-pressed={o.value === value} onClick={() => onChange(o.value)}>
+          // Pressing the chosen option changes nothing; some handlers reload presets on every call.
+          <button type="button" key={o.value} aria-pressed={o.value === value} onClick={() => { if (o.value !== value) onChange(o.value); }}>
             {o.label}
           </button>
         ))}

@@ -1,9 +1,10 @@
 // Assert-based self-checks for the rules around the dough maths. Run with `npm test`.
 import assert from 'node:assert/strict';
 import type { DoughCalculatorInputs } from '../types';
-import { sizeBounds, usualBatch } from './ranges';
+import { sizeBounds, usualBatch, stepSize } from './ranges';
+import { readFileSync } from 'node:fs';
 import { formatGrams, formatOunces } from './format';
-import { parseSavedInputs, loadSavedInputs, saveInputs, clearSavedInputs } from './savedRecipe';
+import { parseSavedInputs, loadSavedInputs, saveInputs, clearSavedInputs, sameInputs } from './savedRecipe';
 import { translations, translate } from '../context/translations';
 import { calculateDoughRecipe } from './doughCalculator';
 import { gramsNumber, formatPercent } from './format';
@@ -175,6 +176,56 @@ assert.equal(sizeText({ ...ny, isRectangular: true, panWidth: 25, panLength: 36 
   // Reduced motion: no transition is started.
   runTransition(() => calls.push('e'), 'forward', { documentElement: el, startViewTransition() { throw new Error('must not be called'); } }, true);
   assert.deepEqual(calls, ['a', 'b', 'c', 'd', 'e']);
+}
+
+// ---- Review fixes
+// Size counters: one press reaches the next whole number, never skips one (30 cm is 11.8 inches).
+assert.equal(stepSize(11.8, 1, [6, 24]), 12);
+assert.equal(stepSize(11.8, -1, [6, 24]), 11);
+assert.equal(stepSize(12, 1, [6, 24]), 13);
+assert.equal(stepSize(12, -1, [6, 24]), 11);
+assert.equal(stepSize(24, 1, [6, 24]), 24);
+assert.equal(stepSize(6.2, -1, [6, 24]), 6);
+
+// "Nothing to start over": the same recipe in a new object is the same recipe.
+assert.equal(sameInputs(good, JSON.parse(JSON.stringify(good))), true);
+assert.equal(sameInputs(good, { ...good, hydration: 66 }), false);
+assert.equal(sameInputs(good, { ...good, preferment: { ...good.preferment, type: 'biga' } }), false);
+
+// A saved record cannot carry a ball weight or a shape that its own style and sizes contradict.
+assert.equal(parseSavedInputs(JSON.stringify({ ...good, ballWeight: 20000 }))!.ballWeight, 558);
+assert.equal(parseSavedInputs(JSON.stringify({ ...good, pizzaStyle: 'neapolitan', isRectangular: true }))!.isRectangular, false);
+assert.equal(parseSavedInputs(JSON.stringify({ ...good, pizzaStyle: 'detroit', isRectangular: false }))!.isRectangular, true);
+assert.equal(parseSavedInputs(JSON.stringify({ ...good, pizzaStyle: 'focaccia', isRectangular: false }))!.isRectangular, false);
+
+// Words: no doubled verb in Turkish, and lower-casing that does not depend on the computer's language
+// (run once with LC_ALL=tr_TR: a Turkish system turned "Instant" into "ınstant").
+{
+  // Neapolitan with a poolish adds only salt to the main dough: the shortest form of that sentence.
+  const neapolitanPoolish = { ...good, pizzaStyle: 'neapolitan', yeast: 0.05, oil: 0, sugar: 0, diastaticMalt: 0, doughEnhancer: 0, preferment: { type: 'poolish' as const, percentage: 40, hydration: 100 } };
+  for (const inputs of [nyPoolish, neapolitanPoolish]) {
+    for (const stage of methodStages(calculateDoughRecipe(inputs), tTr, 'tr')) for (const step of stage.steps) assert.ok(!/ekleyin\s+ekleyin/.test(step), step);
+  }
+  assert.ok(methodStages(calculateDoughRecipe(ny), tEn, 'en')[0].steps.some((step) => step.includes('instant yeast')));
+}
+
+// Colours: text on its ground meets WCAG AA (4.5:1) in both themes.
+{
+  const css = readFileSync('src/index.css', 'utf8');
+  const tokens = (block: string) => Object.fromEntries([...block.matchAll(/--([\w-]+):\s*(#[0-9A-Fa-f]{6})/g)].map((m) => [m[1], m[2]]));
+  const light = tokens(css.slice(css.indexOf(':root {'), css.indexOf('[data-theme="dark"]')));
+  const dark = { ...light, ...tokens(css.slice(css.indexOf('[data-theme="dark"]'))) };
+  const lum = (hex: string) => {
+    const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const contrast = (a: string, b: string) => { const [hi, lo] = [lum(a), lum(b)].sort((x, y) => y - x); return (hi + 0.05) / (lo + 0.05); };
+  for (const [name, theme] of [['light', light], ['dark', dark]] as const) {
+    for (const [fg, bg] of [['ink', 'card'], ['ink', 'ground'], ['ink-2', 'card'], ['ink-2', 'ground'], ['on-tomato', 'tomato'], ['on-basil', 'basil'], ['warn-ink', 'warn-bg'], ['basil', 'card'], ['basil', 'ground']]) {
+      const ratio = contrast(theme[fg], theme[bg]);
+      assert.ok(ratio >= 4.5, `${name}: ${fg} on ${bg} is ${ratio.toFixed(2)}:1`);
+    }
+  }
 }
 
 console.log('rules checks passed');

@@ -97,32 +97,13 @@
     </script>
     
     <script>
-      // iOS web app full screen
-      (function() {
-        if(("standalone" in window.navigator) && window.navigator.standalone) {
-          // If you want to prevent links in standalone web apps opening Mobile Safari, change 'auto' to 'none'
-          var a = document.getElementsByTagName("a");
-          for(var i = 0, l = a.length; i < l; i++) {
-            a[i].addEventListener("click", function(e) {
-              var n = this.getAttribute("href");
-              var t = this.getAttribute("target");
-              var u = new URL(n || "", window.location.href).href;
-              
-              // Only handle links that don't have specific targets or are to the same origin
-              if(!t && u.indexOf(window.location.origin) === 0) {
-                e.preventDefault();
-                window.location = u;
-              }
-            }, false);
-          }
-        }
-        
-        // Attempt to hide the address bar on mobile browsers
-        window.addEventListener("load", function() {
-          setTimeout(function() {
-            window.scrollTo(0, 1);
-          }, 0);
-        });
+      // Set the theme before the first paint, so a dark-theme visitor never sees a light flash.
+      // ThemeContext reads the same key and takes over from here.
+      (function () {
+        var theme;
+        try { theme = localStorage.getItem('theme'); } catch (e) { /* no saved choice */ }
+        if (theme !== 'light' && theme !== 'dark') theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', theme);
       })();
     </script>
   </head>

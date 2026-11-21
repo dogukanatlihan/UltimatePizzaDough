@@ -28,8 +28,9 @@
   --font-body: "Figtree", "Figtree Fallback", system-ui, -apple-system, "Segoe UI", sans-serif;
   --ease-out: cubic-bezier(.22, 1, .36, 1);
   --spring: cubic-bezier(.3, 1.3, .5, 1);
-  --header-h: 62px;
+  --header-h: 116px;      /* two rows on phones: brand and tools, then the step tabs */
 }
+@media (min-width: 560px) { :root { --header-h: 62px; } }
 @supports (transition-timing-function: linear(0, 1)) {
   :root { --spring: linear(0, .006, .025 2.8%, .101 6.1%, .539 18.9%, .721 25.3%, .849 31.5%, .937 38.1%, .968 41.8%, .991 45.7%, 1.006 50.1%, 1.015 55%, 1.017 63.9%, 1.001 85.9%, 1); }
 }
@@ -45,7 +46,7 @@
   --basil-tint: #1E3327;
   --header: #0C2A1B;
   --on-basil: #07130C;
-  --tomato: #E5553F;
+  --tomato: #D43D2B;      /* white on the lighter #E5553F was 3.68:1; this is 4.67:1 */
   --on-tomato: #FFFFFF;
   --warn-bg: #3A1A15;
   --warn-ink: #FFB4A8;

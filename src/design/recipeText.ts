@@ -19,7 +19,8 @@ const LABEL_KEY: Record<IngredientKey, string> = {
 export const ingredientKey = (name: string): IngredientKey =>
   KEYS.find((k) => name.toLowerCase().includes(k)) ?? 'flour';
 
-const sentenceCase = (text: string) => text.charAt(0).toLocaleUpperCase() + text.slice(1).toLocaleLowerCase();
+// Plain toLowerCase on purpose: toLocaleLowerCase follows the computer's language, and a Turkish system turns "Instant" into "ınstant".
+const sentenceCase = (text: string) => text.charAt(0) + text.slice(1).toLowerCase();
 
 const yeastLabel = (recipe: DoughRecipe, t: Translate): string => {
   const name = recipe.ingredients.find((i) => ingredientKey(i.name) === 'yeast')?.name.toLowerCase() ?? '';
@@ -79,7 +80,7 @@ export const methodStages = (recipe: DoughRecipe, t: Translate, locale: string):
         t('dough.step1', { ...w('water', weightOf(recipe, 'water')), ...w('flour', weightOf(recipe, 'flour')) }),
         t('dough.step2'),
         t('dough.step3.salt', w('salt', weightOf(recipe, 'salt'))),
-        ...(weightOf(recipe, 'yeast') > 0 ? [t('dough.step3.yeast', { ...w('yeast', weightOf(recipe, 'yeast'), true), yeastName: yeastLabel(recipe, t).toLocaleLowerCase() })] : []),
+        ...(weightOf(recipe, 'yeast') > 0 ? [t('dough.step3.yeast', { ...w('yeast', weightOf(recipe, 'yeast'), true), yeastName: yeastLabel(recipe, t).toLowerCase() })] : []),
         ...extra('oil', 'oil'), ...extra('sugar', 'sugar'), ...extra('malt', 'malt'), ...extra('enhancer', 'enhancer'),
         ...finish,
       ],

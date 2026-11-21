@@ -4,7 +4,8 @@
 .app { min-height: 100dvh; padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
 
 /* ---- Header */
-.top { position: sticky; top: 0; z-index: 20; background: var(--header); color: #fff; }
+/* The inset keeps the header clear of the iPhone status bar in home-screen mode (viewport-fit=cover). */
+.top { position: sticky; top: 0; z-index: 20; padding-top: env(safe-area-inset-top, 0px); background: var(--header); color: #fff; }
 .flag { height: 5px; background: linear-gradient(90deg, #1C5A3A 0 33.33%, #fff 33.33% 66.66%, #D43D2B 66.66%); }
 .top-in { max-width: 1320px; margin: 0 auto; padding: 10px max(16px, env(safe-area-inset-right, 0px)) 10px max(16px, env(safe-area-inset-left, 0px));
   display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "brand tools" "tabs tabs"; align-items: center; gap: 8px 12px; }
@@ -27,11 +28,9 @@
 
 /* ---- Steps */
 .steps { max-width: 640px; margin: 0 auto; padding: 22px max(16px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px)); display: flex; flex-direction: column; gap: 12px; }
-.col3 { display: contents; }
 .step { display: none; min-width: 0; }
 .steps[data-step="1"] #s1, .steps[data-step="2"] #s2, .steps[data-step="3"] #card { display: block; }
 .steps[data-step="3"] #tune, .steps[data-step="3"] #guide { display: grid; gap: 12px; }
-#card { order: 1; } #tune { order: 2; } #guide { order: 3; }
 .step-head { margin-bottom: 16px; }
 .kicker { font: 700 13px/1 var(--font-display); letter-spacing: .08em; text-transform: uppercase; color: var(--basil); }
 .step-head h2 { margin-top: 6px; font: 800 clamp(28px, 7vw, 36px)/1.05 var(--font-display); letter-spacing: -.02em; }
@@ -145,6 +144,7 @@ input[type="range"]::-moz-range-thumb { width: 24px; height: 24px; border-radius
 .bar-sum b { display: block; font: 800 17px/1.2 var(--font-display); letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .bar-sum span { display: block; font-size: 13px; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .bar-go { flex: none; }
+@media (max-width: 400px) { .bar { gap: 8px; } .bar-go { padding: 0 14px; font-size: 15px; } .bar-back { width: 46px; } }
 
 /* ---- Footer */
 .foot { max-width: 640px; margin: 28px auto 0; padding: 0 16px 8px; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 12px; font-size: 14px; color: var(--ink-2); }
@@ -161,14 +161,19 @@ input[type="range"]::-moz-range-thumb { width: 24px; height: 24px; border-radius
 /* ---- Desktop: three columns, recipe pinned on the right */
 @media (min-width: 1040px) {
   .app { padding-bottom: 32px; }
-  .steps { max-width: 1320px; display: grid; grid-template-columns: 300px 340px minmax(0, 1fr); grid-template-rows: auto 1fr; gap: 12px 28px; align-items: start; padding-top: 28px; }
+  .steps { max-width: 1320px; display: grid; grid-template-columns: 300px 340px minmax(0, 1fr); grid-template-rows: auto auto auto; gap: 12px 28px; align-items: start; padding-top: 28px; }
   .steps[data-step] .step { display: block; }
   .steps[data-step] #tune, .steps[data-step] #guide { display: grid; gap: 12px; }
   #s1 { grid-column: 1; grid-row: 1 / span 2; }
   #s2 { grid-column: 2; grid-row: 1; }
   #tune { grid-column: 2; grid-row: 2; }
-  .col3 { grid-column: 3; grid-row: 1 / span 2; display: grid; gap: 12px; position: sticky; top: calc(var(--header-h) + 5px + 16px);
+  /* The recipe stays beside the controls while they scroll; a long recipe scrolls inside its own column. */
+  #card { grid-column: 3; grid-row: 1 / span 3; position: sticky; top: calc(var(--header-h) + 5px + 16px);
     max-height: calc(100dvh - var(--header-h) - 5px - 32px); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; padding: 2px; margin: -2px; }
+  /* Method and baking sit under the two control columns. The third column holds only the pinned recipe,
+     so nothing can scroll underneath it (a sticky grid item is held by the whole grid, not by its own rows). */
+  #guide { grid-column: 1 / span 2; grid-row: 3; margin-top: 16px; }
+  .how ol, .tip { max-width: 72ch; }
   .step-head h2 { font-size: 26px; }
   .pick { grid-template-columns: 1fr; gap: 8px; }
   .style-card { display: grid; grid-template-columns: 76px minmax(0, 1fr); align-items: center; border-radius: 16px; }
@@ -176,9 +181,6 @@ input[type="range"]::-moz-range-thumb { width: 24px; height: 24px; border-radius
   .style-text { padding: 8px 44px 8px 12px; }
   .style-check { top: 50%; margin-top: -15px; }
   .pair { grid-template-columns: minmax(0, 1fr); gap: 16px; }
-  /* All three steps are on screen, so no tab is "the current one". */
-  .tab[aria-current="step"] { background: rgba(255, 255, 255, .1); color: #D3E5D7; }
-  .tab[aria-current="step"] .tab-n { background: none; border-color: currentColor; color: inherit; }
   .chip, .bar { display: none; }
   .toasts { bottom: 24px; }
   .foot { max-width: 1320px; justify-content: flex-start; padding: 0 16px; }
@@ -251,8 +253,10 @@ html[data-dir="back"]::view-transition-new(root) { animation-name: vt-fade-in, v
 @media print {
   .top, .bar, .foot, .toasts, #s1, #s2, #tune, .actions, .kicker, .disc-icon { display: none !important; }
   .app { padding: 0; }
-  .steps, .col3 { display: block; max-width: none; max-height: none; overflow: visible; position: static; padding: 0; }
-  #card, #guide { display: block !important; }
+  /* Always print dark on white, whatever theme is on screen. */
+  :root, [data-theme="dark"] { --ground: #fff; --card: #fff; --ink: #000; --ink-2: #333; --line: #999; --basil: #1C5A3A; --basil-tint: #eee; --warn-bg: #fff; --warn-ink: #8A2114; }
+  .steps { display: block; max-width: none; padding: 0; }
+  #card, #guide { display: block !important; max-height: none; overflow: visible; position: static; }
   .recipe, .disc { box-shadow: none; border: 1px solid #999; margin-bottom: 12px; break-inside: avoid; }
   .recipe-head { background: none; color: #000; } .recipe-sub { color: #333; }
   .disc-panel { grid-template-rows: 1fr !important; }

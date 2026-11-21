@@ -4,9 +4,7 @@ import './index.css'
 import App from './App.tsx'
 import { initializeAnalytics } from './utils/analytics'
 
-console.log('Main.tsx is executing');
 const rootElement = document.getElementById('root');
-console.log('Root element:', rootElement);
 
 // Initialize Google Analytics
 initializeAnalytics();
@@ -15,13 +13,11 @@ initializeAnalytics();
 
 if (rootElement) {
   try {
-    console.log('Attempting to render App');
     createRoot(rootElement).render(
       <StrictMode>
         <App />
       </StrictMode>,
     );
-    console.log('App rendered successfully');
   } catch (error) {
     console.error('Error rendering App:', error);
     // Fallback content if App fails to render

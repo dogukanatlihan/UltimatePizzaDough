@@ -54,13 +54,17 @@ export function TrePassi() {
   };
 
   // After a step change: top of the page on phones, and focus on the new step's heading for keyboards and screen readers.
+  // Only a step change triggers this, never a resize across the breakpoint.
+  const wideNow = useRef(wide);
+  wideNow.current = wide;
   useEffect(() => {
     if (!moved.current) return;
+    moved.current = false;
     const heading = headings.current[step];
-    if (wide) heading?.scrollIntoView({ block: 'nearest' });
+    if (wideNow.current) heading?.scrollIntoView({ block: 'nearest' });
     else window.scrollTo({ top: 0 });
     heading?.focus({ preventScroll: true });
-  }, [step, wide]);
+  }, [step]);
 
   const pickStyle = (styleId: string) => {
     if (wide) {
@@ -97,8 +101,11 @@ export function TrePassi() {
   };
 
   const startOver = () => {
+    if (calc.pristine) return; // nothing to start over; also keeps a second press from replacing the Undo
     const previous = calc.startOver();
-    goTo(1);
+    // No heading focus here: focus goes to Undo inside the toast.
+    if (wide || step === 1) setStep(1);
+    else runTransition(() => flushSync(() => setStep(1)), 'back');
     showToast(t('toast.startedOver'), 'info', {
       duration: 7000,
       action: { label: t('toast.undo'), onAction: () => { calc.restore(previous); goTo(3); } },
@@ -117,7 +124,7 @@ export function TrePassi() {
 
   return (
     <div className="app">
-      <Header step={step} onStep={goTo} />
+      <Header step={wide ? null : step} onStep={goTo} />
 
       <main className="steps" data-step={step}>
         <section className="step" id="s1" aria-labelledby="h-1">
@@ -135,23 +142,23 @@ export function TrePassi() {
           <StepSize calc={calc} />
         </section>
 
+        {/* Reading order and Tab order are the same: recipe, then its controls, then how to make it. */}
+        <section className="step" id="card" aria-labelledby="h-3">
+          {head(3, t('s3.title'))}
+          <RecipeCard recipe={recipe} inputs={inputs} />
+        </section>
+
         <section className="step" id="tune" aria-label={t('tune.title')}>
           <Tuning calc={calc} recipe={recipe} />
         </section>
 
-        <div className="col3">
-          <section className="step" id="card" aria-labelledby="h-3">
-            {head(3, t('s3.title'))}
-            <RecipeCard recipe={recipe} inputs={inputs} />
-          </section>
-          <section className="step" id="guide" aria-label={t('method.title')}>
-            <Guide recipe={recipe} styleId={inputs.pizzaStyle} onCopy={copy} onPrint={print} />
-          </section>
-        </div>
+        <section className="step" id="guide" aria-label={t('method.title')}>
+          <Guide recipe={recipe} styleId={inputs.pizzaStyle} onCopy={copy} onPrint={print} />
+        </section>
       </main>
 
       <footer className="foot">
-        <button type="button" className="btn btn-quiet" onClick={startOver}>{t('footer.startOver')}</button>
+        {!calc.pristine && <button type="button" className="btn btn-quiet" onClick={startOver}>{t('footer.startOver')}</button>}
         <AddToHomeButton />
         <p>
           {t('app.footer')} · <a href="https://dogukanatlihan.com" target="_blank" rel="noopener noreferrer">Dogukan Atlihan</a>
@@ -161,15 +168,15 @@ export function TrePassi() {
       {step === 3 ? (
         <BottomBar
           line1={t('bar.flour', { g: grams(weightOf(recipe, 'flour')) })}
-          line2={`${t('bar.water', { g: grams(weightOf(recipe, 'water')) })} · ${balls}`}
+          line2={t('bar.water', { g: grams(weightOf(recipe, 'water')) })}
           primary={t('action.copy')}
           onPrimary={copy}
           onBack={() => goTo(2)}
         />
       ) : (
         <BottomBar
-          line1={`${styleName} · ${balls}`}
-          line2={`${t('bar.dough', { g: grams(totalDough(recipe)) })} · ${sizeText(inputs, language)}`}
+          line1={step === 1 ? styleName : balls}
+          line2={step === 1 ? `${balls} · ${sizeText(inputs, language)}` : t('bar.dough', { g: grams(totalDough(recipe)) })}
           primary={t(step === 1 ? 'bar.next' : 'bar.see')}
           onPrimary={() => goTo(step === 1 ? 2 : 3)}
           onBack={step === 2 ? () => goTo(1) : undefined}

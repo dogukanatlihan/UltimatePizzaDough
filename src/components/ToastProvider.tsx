@@ -39,7 +39,12 @@ export default function ToastProvider({ children }: { children: ReactNode }) {
     const id = nextId.current++;
     // One message at a time: a new toast replaces the old one, so they never stack over the controls.
     setToasts([{ id, message, type, ...options }]);
-    setTimeout(() => remove(id), options.duration ?? 4000);
+    const expire = () => {
+      // Do not take a toast away from under the keyboard: wait while its button has focus.
+      if (nodes.current.get(id)?.contains(document.activeElement)) setTimeout(expire, 1500);
+      else remove(id);
+    };
+    setTimeout(expire, options.duration ?? 4000);
   }, [remove]);
 
   return (
@@ -50,7 +55,8 @@ export default function ToastProvider({ children }: { children: ReactNode }) {
           <div key={toast.id} className={`toast toast-${toast.type}`} ref={(node) => { if (node) nodes.current.set(toast.id, node); else nodes.current.delete(toast.id); }}>
             <span>{toast.message}</span>
             {toast.action && (
-              <button type="button" onClick={() => { toast.action?.onAction(); remove(toast.id); }}>{toast.action.label}</button>
+              // Focus goes to the action (Undo), so a keyboard user reaches it at once and not 20 Tab presses later.
+              <button type="button" ref={(button) => button?.focus({ preventScroll: true })} onClick={() => { toast.action?.onAction(); remove(toast.id); }}>{toast.action.label}</button>
             )}
           </div>
         ))}

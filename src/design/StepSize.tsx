@@ -1,6 +1,6 @@
 import { PIZZA_STYLES } from '../utils/doughCalculator';
 import { useTranslation } from '../context/TranslationContext';
-import { RANGES, clamp, sizeBounds } from '../utils/ranges';
+import { RANGES, clamp, sizeBounds, stepSize } from '../utils/ranges';
 import { formatGrams } from '../utils/format';
 import type { Calc } from './TrePassi';
 import { Counter, RangeField, Segmented } from './controls';
@@ -15,8 +15,8 @@ export function StepSize({ calc }: { calc: Calc }) {
   const bounds = sizeBounds(inputs.useInches);
   const unit = inputs.useInches ? '″' : ' cm';
   const len = (v: number) => <Num value={v} digits={1} suffix={unit} />;
-  // One press moves a size by 1 in the unit on screen (11.8″ goes to 12″, then 13″).
-  const nudge = (v: number, dir: number, [min, max]: readonly [number, number]) => clamp(Math.round(v) + dir, min, max);
+  // One press moves a size to the next whole number in the unit on screen (11.8″ goes to 12″, then 13″).
+  const nudge = stepSize;
   const labels = { lessLabel: t('a11y.less'), moreLabel: t('a11y.more') };
   const [minPizzas, maxPizzas] = RANGES.numberOfPizzas;
   const w = inputs.panWidth ?? bounds.pan[0];

@@ -3,6 +3,9 @@ import { useTranslation } from '../context/TranslationContext';
 import { gramsDigits } from '../utils/format';
 import { useSliding } from './motion';
 
+// Within the 300 ms the design allows for a transition (the library's own default is 900 ms).
+const ROLL = { duration: 300, easing: 'cubic-bezier(.22, 1, .36, 1)' };
+
 interface NumProps {
   value: number;
   /** Decimals to show at most. */
@@ -22,6 +25,9 @@ export function Num({ value, digits = 0, suffix }: NumProps) {
       format={{ maximumFractionDigits: digits, useGrouping: false }}
       suffix={suffix}
       animated={!sliding}
+      transformTiming={ROLL}
+      spinTiming={ROLL}
+      opacityTiming={{ duration: 200, easing: 'ease-out' }}
     />
   );
 }

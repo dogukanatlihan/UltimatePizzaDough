@@ -1,5 +1,5 @@
 import type { DoughCalculatorInputs, PrefermentType, YeastType } from '../types';
-import { PIZZA_STYLES } from './doughCalculator';
+import { PIZZA_STYLES, calculateDoughBallWeight } from './doughCalculator';
 import { RANGES, clamp, sizeBounds } from './ranges';
 
 export const STORAGE_KEY = 'mbp.recipe.v1';
@@ -23,7 +23,8 @@ export const parseSavedInputs = (raw: string | null): DoughCalculatorInputs | nu
   const r = data as Record<string, unknown>;
   const pref = r.preferment as Record<string, unknown> | null | undefined;
 
-  if (!PIZZA_STYLES.some((s) => s.id === r.pizzaStyle)) return null;
+  const style = PIZZA_STYLES.find((s) => s.id === r.pizzaStyle);
+  if (!style) return null;
   if (typeof r.yeastType !== 'string' || !YEAST_TYPES.includes(r.yeastType)) return null;
   if (typeof pref !== 'object' || pref === null || typeof pref.type !== 'string' || !PREFERMENT_TYPES.includes(pref.type)) return null;
   if (typeof r.useInches !== 'boolean' || typeof r.isRectangular !== 'boolean') return null;
@@ -59,10 +60,19 @@ export const parseSavedInputs = (raw: string | null): DoughCalculatorInputs | nu
       hydration: num(pref.hydration, RANGES.prefermentHydration),
     },
     useInches: r.useInches,
-    isRectangular: r.isRectangular,
+    // The shape follows the style; only a style that allows both keeps the saved choice.
+    isRectangular: style.isRectangular === 'both' ? r.isRectangular : style.isRectangular === true,
   };
+  // The ball weight is a result, not an input: work it out again so it always fits the sizes above.
+  inputs.ballWeight = inputs.isRectangular
+    ? calculateDoughBallWeight(inputs.pizzaStyle, 0, inputs.panWidth, inputs.panLength, inputs.thicknessFactor, inputs.useInches)
+    : calculateDoughBallWeight(inputs.pizzaStyle, inputs.pizzaDiameter, undefined, undefined, inputs.thicknessFactor, inputs.useInches);
   return ok ? inputs : null;
 };
+
+/** True when two recipes are the same recipe (field by field, whatever object they live in). */
+export const sameInputs = (a: DoughCalculatorInputs, b: DoughCalculatorInputs): boolean =>
+  JSON.stringify(parseSavedInputs(JSON.stringify(a))) === JSON.stringify(parseSavedInputs(JSON.stringify(b)));
 
 // Storage throws in private windows and when full. The app works without memory then.
 const safeStorage = (): Storage | undefined => {

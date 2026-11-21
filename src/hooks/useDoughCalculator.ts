@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { DoughCalculatorInputs, DoughRecipe, PrefermentType, YeastType } from '../types';
+import { DoughCalculatorInputs, PrefermentType, YeastType } from '../types';
 import { 
-  calculateDoughRecipe, 
   PIZZA_STYLES, 
   calculateDoughBallWeight,
   calculateThicknessFactor,
@@ -19,7 +18,7 @@ import {
   trackShapeToggled,
   trackRecipeAdjustment
 } from '../utils/analytics';
-import { loadSavedInputs, saveInputs, clearSavedInputs } from '../utils/savedRecipe';
+import { loadSavedInputs, saveInputs, clearSavedInputs, sameInputs } from '../utils/savedRecipe';
 import { usualBatch } from '../utils/ranges';
 
 // Every yeast % in the presets below is an instant-yeast amount. The slider % means the yeast
@@ -59,16 +58,14 @@ export const useDoughCalculator = () => {
   const [saved] = useState(loadSavedInputs);
   const restored = saved !== null;
   const [inputs, setInputs] = useState<DoughCalculatorInputs>(saved ?? DEFAULT_INPUTS);
-  // Until the user sets the count themselves, a style change sets its usual batch.
-  const countTouched = useRef(restored);
+  // Until the user sets the count themselves, a style change sets its usual batch. A restored count that
+  // still is the style's usual batch counts as untouched, so a returning visitor does not get 4 pans.
+  const countTouched = useRef(saved !== null && saved.numberOfPizzas !== usualBatch(saved.pizzaStyle));
   const mounted = useRef(false);
-  const [recipe, setRecipe] = useState<DoughRecipe | null>(null);
+  // Nothing to start over from: the recipe is the starting recipe.
+  const pristine = sameInputs(inputs, DEFAULT_INPUTS);
 
-  // Update recipe whenever inputs change
   useEffect(() => {
-    const newRecipe = calculateDoughRecipe(inputs);
-    setRecipe(newRecipe);
-
     // Save only after the first change: every change after mount comes from a user action,
     // so a visitor who only looks does not get a saved recipe.
     if (mounted.current) saveInputs(inputs);
@@ -670,7 +667,7 @@ export const useDoughCalculator = () => {
 
   // Put a recipe back (Undo after Start over).
   const restore = (previous: DoughCalculatorInputs) => {
-    countTouched.current = true;
+    countTouched.current = previous.numberOfPizzas !== usualBatch(previous.pizzaStyle);
     setInputs(previous);
   };
 
@@ -680,7 +677,7 @@ export const useDoughCalculator = () => {
 
   return {
     inputs,
-    recipe,
+    pristine,
     handleInputChange,
     handlePizzaStyleChange,
     handlePrefermentTypeChange,

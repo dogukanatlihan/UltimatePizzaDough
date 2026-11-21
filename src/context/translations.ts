@@ -455,7 +455,7 @@ export const translations: Record<string, Record<Language, string>> = {
   },
   'mainDough.step3.start': {
     en: 'Add {salt}g ({saltOz}oz) salt',
-    tr: '{salt}g ({saltOz}oz) tuz ekleyin'
+    tr: '{salt}g ({saltOz}oz) tuz'
   },
   'mainDough.step3.yeast': {
     en: ', {yeast}g ({yeastOz}oz) yeast',
@@ -758,12 +758,12 @@ export const translations: Record<string, Record<Language, string>> = {
     tr: 'Toplam hamur'
   },
   'stage.dayBefore': {
-    en: 'Day before · {name}',
-    tr: 'Bir gün önce · {name}'
+    en: 'First · {name}',
+    tr: 'Önce · {name}'
   },
   'stage.bakingDay': {
-    en: 'Baking day · main dough',
-    tr: 'Pişirme günü · ana hamur'
+    en: 'Then · main dough',
+    tr: 'Sonra · ana hamur'
   },
   'water.label': {
     en: 'Water in the dough',
