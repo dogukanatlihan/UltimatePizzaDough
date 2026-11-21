@@ -20,7 +20,8 @@ export const formatGrams = (g: number, opts?: WeightOptions): string => `${grams
 
 export const ouncesNumber = (g: number, locale?: string): string => {
   const oz = Number.isFinite(g) ? gramsToOunces(g) : 0;
-  return number(oz, Math.abs(oz) < 1 ? 2 : 1, locale);
+  // Under a tenth of an ounce (a pinch of yeast) two decimals round to 0: show three.
+  return number(oz, Math.abs(oz) < 0.1 ? 3 : Math.abs(oz) < 1 ? 2 : 1, locale);
 };
 
 export const formatOunces = (g: number, locale?: string): string => `${ouncesNumber(g, locale)} oz`;

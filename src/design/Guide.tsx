@@ -15,7 +15,7 @@ interface Props {
 export function Guide({ recipe, styleId, onCopy, onPrint }: Props) {
   const { t, language } = useTranslation();
   const [copied, setCopied] = useState(false);
-  const stages = methodStages(recipe, t, language);
+  const stages = methodStages(recipe, t, language, styleId);
   const bake = bakeInfo(styleId, t);
 
   const copy = async () => {

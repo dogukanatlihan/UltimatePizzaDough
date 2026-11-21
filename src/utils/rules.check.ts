@@ -145,10 +145,10 @@ assert.equal(sizeText({ ...ny, isRectangular: true, panWidth: 25, panLength: 36 
 {
   const bake = bakeInfo('neapolitan', tEn);
   assert.equal(bake.time, '60–90 s');
-  assert.equal(bake.temp, '500°C / 932°F');
+  assert.equal(bake.temp, '430–485°C / 805–905°F');
   assert.equal(bake.steps.length, 4);
   assert.ok(bake.flour);
-  assert.equal(bakeInfo('ny', tTr).time, '8–10 dk');
+  assert.equal(bakeInfo('ny', tTr).time, '5–8 dk');
 }
 
 // ---- Step transitions: the update runs exactly once on every path

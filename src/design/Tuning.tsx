@@ -1,6 +1,6 @@
 import type { DoughRecipe, PrefermentType, YeastType } from '../types';
 import { useTranslation } from '../context/TranslationContext';
-import { RANGES } from '../utils/ranges';
+import { RANGES, yeastRange } from '../utils/ranges';
 import { formatGrams, formatPercent } from '../utils/format';
 import type { Calc } from './TrePassi';
 import { Disclosure, RangeField, Segmented } from './controls';
@@ -36,7 +36,7 @@ export function Tuning({ calc, recipe }: { calc: Calc; recipe: DoughRecipe }) {
 
       <Disclosure title={t('tune.title')} subtitle={t('tune.sub')}>
         <RangeField label={t('form.salt')} value={inputs.salt} range={RANGES.salt} onChange={set('salt')} valueText={both(inputs.salt, 'salt')} />
-        <RangeField label={t('form.yeast')} value={inputs.yeast} range={inputs.yeastType === 'fresh' ? RANGES.yeastFresh : RANGES.yeast}
+        <RangeField label={t('form.yeast')} value={inputs.yeast} range={yeastRange(inputs.yeastType)}
           onChange={set('yeast')} valueText={both(inputs.yeast, 'yeast')} />
         <Segmented<YeastType>
           label={t('form.yeastType')}

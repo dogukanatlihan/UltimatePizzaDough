@@ -3,6 +3,8 @@ export type PizzaStyle = {
   name: string;
   defaultHydration: number;
   defaultThicknessFactor: number;
+  preset: { salt: number; yeast: number; oil: number; sugar: number }; // baker's %, yeast as instant dry
+  size: { cm: [number, number, number]; in: [number, number, number] }; // [diameter, pan width, pan length]
   description: string;
   isRectangular?: boolean | 'both'; // Flag for rectangular pizzas like Detroit, or 'both' for styles that can be either
 };

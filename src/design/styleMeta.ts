@@ -27,20 +27,24 @@ export const STYLE_TINT: Record<string, string> = {
   focaccia: '#a7835d',
 };
 
+// Oven and time per style, the same figures the baking steps give (checked in accuracy.check.ts).
+// Neapolitan: AVPN floor 380-430 °C / dome 485 °C, EU 485 / 430. New York: Lehmann, deck at 525-550 °F.
+// Sicilian: King Arthur, ATK 450 °F, 20-30 min. Detroit: Modernist Pizza 525 °F, Randazzo 500 °F, 12-15 min.
+// Pan: López-Alt 550 °F, 12-15 min. Focaccia: King Arthur, Nosrat 450 °F, 20-25 min.
 export const BAKE_TEMP: Record<string, string> = {
-  neapolitan: '500°C / 932°F',
+  neapolitan: '430–485°C / 805–905°F',
   ny: '290°C / 550°F',
-  sicilian: '250°C / 480°F',
-  detroit: '260°C / 500°F',
-  pan: '240°C / 465°F',
-  focaccia: '230°C / 445°F',
+  sicilian: '230°C / 450°F',
+  detroit: '260–275°C / 500–525°F',
+  pan: '290°C / 550°F',
+  focaccia: '230°C / 450°F',
 };
 
 export const BAKE_TIME: Record<string, { from: number; to: number; unit: 'min' | 'sec' }> = {
   neapolitan: { from: 60, to: 90, unit: 'sec' },
-  ny: { from: 8, to: 10, unit: 'min' },
-  sicilian: { from: 15, to: 20, unit: 'min' },
-  detroit: { from: 12, to: 14, unit: 'min' },
+  ny: { from: 5, to: 8, unit: 'min' },
+  sicilian: { from: 20, to: 30, unit: 'min' },
+  detroit: { from: 12, to: 15, unit: 'min' },
   pan: { from: 12, to: 15, unit: 'min' },
-  focaccia: { from: 18, to: 22, unit: 'min' },
+  focaccia: { from: 20, to: 25, unit: 'min' },
 };

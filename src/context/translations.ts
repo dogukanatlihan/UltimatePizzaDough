@@ -428,12 +428,12 @@ export const translations: Record<string, Record<Language, string>> = {
     tr: ' ve {yeast}g ({yeastOz}oz) maya'
   },
   'preferment.step2.sponge': {
-    en: 'Cover and let ferment at room temperature (68-72°F/20-22°C) for 3-5 hours.',
-    tr: 'Kapatın ve oda sıcaklığında (20-22°C) 3-5 saat mayalanmaya bırakın.'
+    en: 'Cover and let ferment in a warm place (75-84°F/24-29°C) for 3-5 hours.',
+    tr: 'Kapatın ve ılık bir yerde (24-29°C) 3-5 saat mayalanmaya bırakın.'
   },
   'preferment.step2.poolish': {
-    en: 'Cover and let ferment at room temperature (68-72°F/20-22°C) for 12-16 hours.',
-    tr: 'Kapatın ve oda sıcaklığında (20-22°C) 12-16 saat mayalanmaya bırakın.'
+    en: 'Cover and let ferment at room temperature (68-72°F/20-22°C) for about 12 hours.',
+    tr: 'Kapatın ve oda sıcaklığında (20-22°C) yaklaşık 12 saat mayalanmaya bırakın.'
   },
   'preferment.step3.sponge': {
     en: 'The preferment is ready when it has a domed surface with many small bubbles.',
@@ -568,20 +568,20 @@ export const translations: Record<string, Record<Language, string>> = {
     tr: 'Fırınınızı en yüksek sıcaklığa (ideal olarak 260-290°C) ısıtın ve pizza taşı veya çeliğini en az 1 saat önceden ısıtın.'
   },
   'baking.step1.neapolitan': {
-    en: 'For authentic Neapolitan pizza, a wood-fired oven at 800-900°F (425-485°C) is ideal. For home ovens, preheat to maximum (500-550°F/260-290°C) with a pizza stone or steel for at least 1 hour.',
-    tr: 'Otantik Neapolitan pizza için 425-485°C odun ateşli fırın idealdir. Ev fırınları için pizza taşı veya çeliği ile en yüksek sıcaklığa (260-290°C) en az 1 saat önceden ısıtın.'
+    en: 'For authentic Neapolitan pizza, a wood-fired oven at 805-905°F (430-485°C) is ideal. For home ovens, preheat to maximum (500-550°F/260-290°C) with a pizza stone or steel for at least 1 hour.',
+    tr: 'Otantik Neapolitan pizza için 430-485°C odun ateşli fırın idealdir. Ev fırınları için pizza taşı veya çeliği ile en yüksek sıcaklığa (260-290°C) en az 1 saat önceden ısıtın.'
   },
   'baking.step1.detroit': {
-    en: 'Preheat your oven to 500-550°F (260-290°C). Use a well-oiled Detroit-style steel pan or dark-colored deep pan.',
-    tr: 'Fırınınızı 260-290°C\'ye ısıtın. İyi yağlanmış Detroit tarzı çelik tava veya koyu renkli derin tava kullanın.'
+    en: 'Preheat your oven to 500-525°F (260-275°C). The pizza bakes in the well-oiled Detroit-style steel pan (or dark deep pan) it has risen in.',
+    tr: 'Fırınınızı 260-275°C\'ye ısıtın. Pizza, içinde mayalandığı iyice yağlanmış Detroit tarzı çelik tavada (veya koyu renkli derin tavada) pişer.'
   },
   'baking.step1.sicilian': {
-    en: 'Preheat your oven to 450-500°F (230-260°C). Use a well-oiled sheet pan and let the dough proof in the pan before baking.',
-    tr: 'Fırınınızı 230-260°C\'ye ısıtın. İyi yağlanmış tepsi kullanın ve pişirmeden önce hamurun tepsinde kabarmasını bekleyin.'
+    en: 'Preheat your oven to 450°F (230°C). The pizza bakes in the well-oiled sheet pan it has risen in.',
+    tr: 'Fırınınızı 230°C\'ye ısıtın. Pizza, içinde mayalandığı iyice yağlanmış tepside pişer.'
   },
   'baking.step1.pan': {
-    en: 'Preheat your oven to 500°F (260°C). Generously oil a deep round pan or cast iron skillet — the oil fries the bottom for that signature crispy crust.',
-    tr: 'Fırınınızı 260°C\'ye ısıtın. Derin yuvarlak tava veya döküm demir tavayı bol yağlayın — yağ, tabanı kızartarak o karakteristik çıtır kabuğu oluşturur.'
+    en: 'Preheat your oven to 550°F (290°C). The pizza bakes in the generously oiled deep round pan or cast iron skillet it has risen in — the oil fries the bottom for that signature crispy crust.',
+    tr: 'Fırınınızı 290°C\'ye ısıtın. Pizza, içinde mayalandığı bol yağlanmış derin yuvarlak tavada veya döküm tavada pişer — yağ, tabanı kızartarak o karakteristik çıtır kabuğu oluşturur.'
   },
   'baking.step2': {
     en: 'Gently stretch the dough to your desired size without deflating it too much.',
@@ -620,8 +620,8 @@ export const translations: Record<string, Record<Language, string>> = {
     tr: 'Tepsideki hamura sos ve malzemeleri ekleyin. Peynir genellikle pişirdikten sonra veya son birkaç dakikada eklenir.'
   },
   'baking.step4.sicilian': {
-    en: 'Bake for 25-30 minutes until the bottom is crispy and the crust is deep golden. Add cheese after removing from the oven if desired.',
-    tr: '25-30 dakika, alt kısmı çıtır ve kenar koyu altın rengi olana kadar pişirin. İsterseniz fırından çıkardıktan sonra peynir ekleyin.'
+    en: 'Bake for 20-30 minutes until the bottom is crispy and the crust is deep golden. Add cheese after removing from the oven if desired.',
+    tr: '20-30 dakika, alt kısmı çıtır ve kenar koyu altın rengi olana kadar pişirin. İsterseniz fırından çıkardıktan sonra peynir ekleyin.'
   },
   'baking.step3.detroit': {
     en: 'Add brick cheese or a blend of cheeses to the edges of the pan first, then add sauce in racing stripes on top.',
@@ -630,6 +630,96 @@ export const translations: Record<string, Record<Language, string>> = {
   'baking.step4.detroit': {
     en: 'Bake for 12-15 minutes until the cheese edges are deeply caramelized and crispy. The cheese touching the pan creates the signature frico crust.',
     tr: '12-15 dakika, peynir kenarları iyice karamelize olana ve çıtır olana kadar pişirin. Tavaya dokunan peynir karakteristik frico kabuğu oluşturur.'
+  },
+
+  // Method and baking steps that follow each style's sources (AVPN/EU, Lehmann, pan-pizza formulas)
+  'dough.direct.step1': {
+    en: 'Pour {water}g ({waterOz}oz) water into a large bowl and dissolve {salt}g ({saltOz}oz) salt in it.',
+    tr: '{water}g ({waterOz}oz) suyu büyük bir kaba dökün ve içinde {salt}g ({saltOz}oz) tuzu eritin.'
+  },
+  'dough.direct.step2': {
+    en: 'Add about a tenth of the {flour}g ({flourOz}oz) flour and mix.',
+    tr: '{flour}g ({flourOz}oz) unun yaklaşık onda birini ekleyip karıştırın.'
+  },
+  'dough.direct.step3': {
+    en: 'Add the rest of the flour a little at a time, over about 10 minutes.',
+    tr: 'Kalan unu yaklaşık 10 dakika içinde azar azar ekleyin.'
+  },
+  'method.neapolitan.knead': {
+    en: 'Knead for about 20 minutes (mixer on low speed) until the dough is smooth, soft and elastic.',
+    tr: 'Hamur pürüzsüz, yumuşak ve elastik olana kadar yaklaşık 20 dakika yoğurun (mikserde düşük hızda).'
+  },
+  'method.neapolitan.rest': {
+    en: 'Cover with a damp cloth and let the dough rest for 2 hours.',
+    tr: 'Üzerini nemli bir bezle örtün ve hamuru 2 saat dinlendirin.'
+  },
+  'method.neapolitan.balls': {
+    en: 'Divide the dough into balls and place them in a covered proofing box.',
+    tr: 'Hamuru toplara bölün ve kapaklı bir mayalama kutusuna dizin.'
+  },
+  'method.neapolitan.proof': {
+    en: 'Let the balls rise for 4-6 hours at room temperature. Use them within the next 6 hours.',
+    tr: 'Topları oda sıcaklığında 4-6 saat mayalandırın. Sonraki 6 saat içinde kullanın.'
+  },
+  'method.ny.knead': {
+    en: 'Knead until the dough is smooth and elastic.',
+    tr: 'Hamur pürüzsüz ve elastik olana kadar yoğurun.'
+  },
+  'method.ny.balls': {
+    en: 'Divide the dough into balls straight after kneading and place them in covered containers.',
+    tr: 'Yoğurduktan hemen sonra hamuru toplara bölün ve kapaklı kaplara yerleştirin.'
+  },
+  'method.ny.cold': {
+    en: 'Refrigerate for 24-72 hours.',
+    tr: '24-72 saat buzdolabında bekletin.'
+  },
+  'method.ny.temper': {
+    en: 'Take the balls out of the refrigerator 2-3 hours before baking.',
+    tr: 'Topları pişirmeden 2-3 saat önce buzdolabından çıkarın.'
+  },
+  'method.pan.piece': {
+    en: 'Keep the dough for each pan in one piece and place it in a lightly oiled, covered container.',
+    tr: 'Her tava için hamuru tek parça bırakın ve hafifçe yağlanmış, kapaklı bir kaba koyun.'
+  },
+  'method.pan.cold': {
+    en: 'Refrigerate for 24-72 hours.',
+    tr: '24-72 saat buzdolabında bekletin.'
+  },
+  'method.pan.proof.sicilian': {
+    en: 'Press the cold dough into a well-oiled sheet pan. If it springs back, let it rest for 20-30 minutes, then stretch it to the corners. Cover and let it rise in the pan for 1.5-2 hours, until puffy.',
+    tr: 'Soğuk hamuru iyice yağlanmış tepsiye bastırarak yayın. Geri çekiliyorsa 20-30 dakika dinlendirin, sonra köşelere kadar açın. Üzerini örtün ve kabarana kadar tepside 1,5-2 saat mayalandırın.'
+  },
+  'method.pan.proof.detroit': {
+    en: 'Press the cold dough into a well-oiled pan. If it springs back, let it rest for 20-30 minutes, then stretch it to the corners. Cover and let it rise in the pan for 2-3 hours, until puffy.',
+    tr: 'Soğuk hamuru iyice yağlanmış tavaya bastırarak yayın. Geri çekiliyorsa 20-30 dakika dinlendirin, sonra köşelere kadar açın. Üzerini örtün ve kabarana kadar tavada 2-3 saat mayalandırın.'
+  },
+  'method.pan.proof.pan': {
+    en: 'Press the cold dough into a generously oiled pan. If it springs back, let it rest for 20-30 minutes, then stretch it to the edge. Cover and let it rise in the pan for about 2 hours, until puffy.',
+    tr: 'Soğuk hamuru bol yağlanmış tavaya bastırarak yayın. Geri çekiliyorsa 20-30 dakika dinlendirin, sonra kenarlara kadar açın. Üzerini örtün ve kabarana kadar tavada yaklaşık 2 saat mayalandırın.'
+  },
+  'method.pan.proof.focaccia': {
+    en: 'Press the cold dough into a well-oiled pan. If it springs back, let it rest for 20-30 minutes, then stretch it to the edges. Cover and let it rise in the pan for 1-3 hours, until puffy and bubbly.',
+    tr: 'Soğuk hamuru iyice yağlanmış tavaya bastırarak yayın. Geri çekiliyorsa 20-30 dakika dinlendirin, sonra kenarlara kadar açın. Üzerini örtün ve kabarıp gözeneklenene kadar tavada 1-3 saat mayalandırın.'
+  },
+  'time.dough.neapolitan': {
+    en: 'Same day · 6–8 h rise',
+    tr: 'Aynı gün · 6–8 sa mayalanma'
+  },
+  'baking.step1.focaccia': {
+    en: 'Preheat your oven to 450°F (230°C). Focaccia bakes in the well-oiled pan it has risen in.',
+    tr: 'Fırınınızı 230°C\'ye ısıtın. Focaccia, içinde mayalandığı iyice yağlanmış tavada pişer.'
+  },
+  'baking.step2.inPan': {
+    en: 'The dough has already risen in the pan: do not press the air out of it.',
+    tr: 'Hamur tavada zaten mayalandı: havasını söndürmeyin.'
+  },
+  'baking.step2.focaccia': {
+    en: 'The dough has already risen in the pan and should look puffy and bubbly.',
+    tr: 'Hamur tavada zaten mayalandı; kabarık ve gözenekli görünmelidir.'
+  },
+  'baking.step3.pan': {
+    en: 'Add sauce, cheese and toppings to the dough in the pan.',
+    tr: 'Tavadaki hamurun üzerine sos, peynir ve malzemeleri ekleyin.'
   },
 
   // Tre Passi screens
@@ -834,8 +924,8 @@ export const translations: Record<string, Record<Language, string>> = {
     tr: 'Ön mayadaki su'
   },
   'pref.hint': {
-    en: 'Poolish about 100%, biga 50–60%, sponge 65–80%.',
-    tr: 'Poolish yaklaşık %100, biga %50–60, sünger %65–80.'
+    en: 'Poolish about 100%, biga 50–60%, sponge 60–65%.',
+    tr: 'Poolish yaklaşık %100, biga %50–60, sünger %60–65.'
   },
   'pref.flourWater': {
     en: '{flour} flour · {water} water',
@@ -950,8 +1040,8 @@ export const translations: Record<string, Record<Language, string>> = {
     tr: 'İngilizceye geç'
   },
   'time.poolish': {
-    en: '12–16 h',
-    tr: '12–16 sa'
+    en: 'about 12 h',
+    tr: 'yaklaşık 12 sa'
   },
   'time.sponge': {
     en: '3–5 h',

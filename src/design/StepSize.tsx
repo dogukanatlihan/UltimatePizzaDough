@@ -6,7 +6,8 @@ import type { Calc } from './TrePassi';
 import { Counter, RangeField, Segmented } from './controls';
 import { Num } from './Num';
 
-export const crustKey = (tf: number) => (tf <= 0.06 ? 'crust.thin' : tf <= 0.09 ? 'crust.medium' : tf <= 0.12 ? 'crust.thick' : 'crust.extraThick');
+// Neapolitan 0.08 reads thin, New York 0.10 medium, Detroit 0.13 thick, Sicilian 0.16 and focaccia 0.20 extra thick.
+export const crustKey = (tf: number) => (tf <= 0.08 ? 'crust.thin' : tf <= 0.11 ? 'crust.medium' : tf <= 0.15 ? 'crust.thick' : 'crust.extraThick');
 
 export function StepSize({ calc }: { calc: Calc }) {
   const { t, language } = useTranslation();

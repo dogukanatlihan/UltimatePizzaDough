@@ -65,25 +65,40 @@ export const sizeText = (inputs: DoughCalculatorInputs, locale: string): string 
   return inputs.isRectangular ? `${n(inputs.panWidth)} × ${n(inputs.panLength)}${unit}` : `${n(inputs.pizzaDiameter)}${unit}`;
 };
 
-export const methodStages = (recipe: DoughRecipe, t: Translate, locale: string): Stage[] => {
+// First key that has a string: a style's own wording, then the shared one.
+const pick = (t: Translate, ...keys: string[]): string => t(keys.find((key) => t(key) !== key) ?? keys[keys.length - 1]);
+
+const IN_PAN = ['sicilian', 'detroit', 'pan', 'focaccia'];
+
+// How each style goes from mixed dough to oven-ready, as its sources prescribe:
+// Neapolitan — AVPN/EU direct method, risen at room temperature, no refrigerator.
+// New York — Lehmann: balled straight after mixing, then 1-3 days cold.
+// Pan styles — one piece per pan, cold ferment, then a final rise in the oiled pan.
+const finishKeys = (styleId: string): string[] =>
+  styleId === 'neapolitan' ? ['knead', 'rest', 'balls', 'proof'].map((k) => `method.neapolitan.${k}`)
+  : styleId === 'ny' ? ['knead', 'balls', 'cold', 'temper'].map((k) => `method.ny.${k}`)
+  : IN_PAN.includes(styleId) ? ['mainDough.step4', 'mainDough.step5', 'method.pan.piece', 'method.pan.cold', `method.pan.proof.${styleId}`]
+  : [4, 5, 6, 7, 8].map((n) => `mainDough.step${n}`);
+
+export const methodStages = (recipe: DoughRecipe, t: Translate, locale: string, styleId = ''): Stage[] => {
   // {flour} and {flourOz} style placeholders: the strings already carry the "g" and "oz" units.
   const w = (name: string, g: number, yeast = false) => ({ [name]: gramsNumber(g, { yeast, locale }), [`${name}Oz`]: ouncesNumber(g, locale) });
-  const finish = [4, 5, 6, 7, 8].map((n) => t(`mainDough.step${n}`));
+  const finish = finishKeys(styleId).map((key) => t(key));
+  const time = pick(t, `time.dough.${styleId}`, 'time.dough');
   const { preferment: first, mainDough: main } = recipe;
 
   if (!first || !main) {
     const extra = (key: IngredientKey, name: string) => (weightOf(recipe, key) > 0 ? [t(`dough.step3.${name}`, w(name, weightOf(recipe, key)))] : []);
+    const yeast = weightOf(recipe, 'yeast') > 0 ? [t('dough.step3.yeast', { ...w('yeast', weightOf(recipe, 'yeast'), true), yeastName: yeastLabel(recipe, t).toLowerCase() })] : [];
+    const extras = [...extra('oil', 'oil'), ...extra('sugar', 'sugar'), ...extra('malt', 'malt'), ...extra('enhancer', 'enhancer')];
+    const vars = { ...w('water', weightOf(recipe, 'water')), ...w('flour', weightOf(recipe, 'flour')), ...w('salt', weightOf(recipe, 'salt')) };
     return [{
       title: t('dough.instructions'),
-      time: t('time.dough'),
-      steps: [
-        t('dough.step1', { ...w('water', weightOf(recipe, 'water')), ...w('flour', weightOf(recipe, 'flour')) }),
-        t('dough.step2'),
-        t('dough.step3.salt', w('salt', weightOf(recipe, 'salt'))),
-        ...(weightOf(recipe, 'yeast') > 0 ? [t('dough.step3.yeast', { ...w('yeast', weightOf(recipe, 'yeast'), true), yeastName: yeastLabel(recipe, t).toLowerCase() })] : []),
-        ...extra('oil', 'oil'), ...extra('sugar', 'sugar'), ...extra('malt', 'malt'), ...extra('enhancer', 'enhancer'),
-        ...finish,
-      ],
+      time,
+      // AVPN's direct method: salt dissolved in the water, a tenth of the flour, the yeast, then the rest of the flour. No autolyse.
+      steps: styleId === 'neapolitan'
+        ? [t('dough.direct.step1', vars), t('dough.direct.step2', vars), ...yeast, ...extras, t('dough.direct.step3'), ...finish]
+        : [t('dough.step1', vars), t('dough.step2'), t('dough.step3.salt', vars), ...yeast, ...extras, ...finish],
     }];
   }
 
@@ -105,7 +120,7 @@ export const methodStages = (recipe: DoughRecipe, t: Translate, locale: string):
     },
     {
       title: t('mainDough.instructions'),
-      time: t('time.dough'),
+      time,
       steps: [
         t('mainDough.step1', w('water', main.water)),
         t('mainDough.step2', w('flour', main.flour)),
@@ -124,7 +139,8 @@ export const bakeInfo = (styleId: string, t: Translate): { temp: string; time: s
     temp: BAKE_TEMP[styleId] ?? '',
     time: time ? `${time.from}–${time.to} ${t(`unit.${time.unit}`)}` : '',
     flour: has(`flour.${styleId}`) ? t(`flour.${styleId}`) : null,
-    steps: [1, 2, 3, 4].map((n) => (has(`baking.step${n}.${styleId}`) ? t(`baking.step${n}.${styleId}`) : t(`baking.step${n}`))),
+    // A style's own step, then the step shared by the styles that rise in their pan, then the general one.
+    steps: [1, 2, 3, 4].map((n) => pick(t, `baking.step${n}.${styleId}`, ...(IN_PAN.includes(styleId) ? [`baking.step${n}.inPan`] : []), `baking.step${n}`)),
   };
 };
 

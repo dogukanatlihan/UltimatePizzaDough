@@ -4,11 +4,12 @@ import { DoughCalculatorInputs, DoughRecipe, DoughIngredient, PizzaStyle, YeastT
 const OUNCES_TO_GRAMS = 28.349523125; // exact: the international avoirdupois ounce
 const GRAMS_TO_OUNCES = 1 / OUNCES_TO_GRAMS;
 
-// Yeast conversion factors relative to active dry yeast (equal leavening power)
+// Equal leavening power, by weight: fresh 1 : active dry 0.4 : instant 1/3.
+// Source: Hamelman, "Bread" (repeated by King Arthur Pro); AVPN 2024 also gives dry = 1/3 of fresh.
 const YEAST_CONVERSION_FACTORS = {
-  active_dry: 1,      // Base reference
-  instant: 0.75,      // Use 25% less than active dry
-  fresh: 3            // Use 3x more than active dry
+  fresh: 1,
+  active_dry: 0.4,
+  instant: 1 / 3
 };
 
 // Convert a baker's % of one yeast type into the equal-strength % of another, rounded to the slider step.
@@ -40,54 +41,76 @@ export const inchesToCm = (inches: number): number => inches * 2.54;
 // Convert cm to inches
 export const cmToInches = (cm: number): number => cm / 2.54;
 
-// Pizza styles with their default hydration levels and thickness factors
+// Style defaults. Baker's %; yeast is instant dry. Every number sits inside the range its sources give
+// (checked in accuracy.check.ts). No style adds diastatic malt or a dough enhancer: no cited formula uses an
+// enhancer, and Lehmann (PMQ) finds no benefit from malt on flour that is already malted.
+// `size` is the trade size in each unit: [diameter, pan width, pan length].
 export const PIZZA_STYLES: PizzaStyle[] = [
   {
     id: 'neapolitan',
     name: 'Neapolitan',
-    defaultHydration: 60, // 55.5-62.5% (AVPN standard)
+    defaultHydration: 60, // AVPN 55.6-62.5%
     defaultThicknessFactor: 0.08, // 248 g ball at 30 cm; AVPN balls are 200-280 g
+    preset: { salt: 2.8, yeast: 0.05, oil: 0, sugar: 0 }, // AVPN: salt 2.2-3.75%, dry yeast up to 0.06%, no fat or sugar
+    size: { cm: [30, 30, 40], in: [12, 12, 16] },
     description: 'Traditional Italian style with a thin center and puffy, airy crust.'
   },
   {
     id: 'ny',
     name: 'New York',
-    defaultHydration: 65, // 62-66% (sweet spot: 65%)
-    defaultThicknessFactor: 0.08, // Medium-thin crust in oz/in²
+    defaultHydration: 65, // Lehmann 58-65%
+    defaultThicknessFactor: 0.1, // Lehmann's 14" recipe is 0.100; 699 g at 45 cm (sources: 635-721 g for 18")
+    preset: { salt: 1.75, yeast: 0.25, oil: 2, sugar: 1.5 }, // Lehmann: salt 1.75%, IDY 0.17-0.5%, oil 1-2%, sugar optional
+    size: { cm: [45, 30, 40], in: [18, 12, 16] },
     description: 'Thin, foldable slices with a crispy exterior and chewy interior.'
   },
   {
     id: 'sicilian',
     name: 'Sicilian',
-    defaultHydration: 70, // 65-70% (high hydration for thick, airy crust)
-    defaultThicknessFactor: 0.12, // Thick crust in oz/in²
+    defaultHydration: 70, // Gemignani 70%, King Arthur 73.5%
+    defaultThicknessFactor: 0.16, // Gemignani 990 g in 12x18" is 0.162; King Arthur 0.145, ATK 0.166
+    preset: { salt: 2.2, yeast: 0.5, oil: 3.5, sugar: 0.5 }, // salt 2.0-2.22%, IDY 0.46-1.1%, oil 0-6.1%, sugar 0-0.8%
+    size: { cm: [30, 30, 46], in: [12, 12, 18] },
     description: 'Thick, rectangular pizza with a fluffy, airy interior and crispy bottom.',
     isRectangular: true
   },
   {
     id: 'detroit',
     name: 'Detroit',
-    defaultHydration: 68, // 65-75% (airy, focaccia-like crumb)
-    defaultThicknessFactor: 0.10, // Medium-thick crust in oz/in²
+    defaultHydration: 68, // 64.6-80%; Modernist Pizza 70.4%
+    defaultThicknessFactor: 0.13, // 500 g in 10x14" is 0.126 (Modernist Pizza, Randazzo); Lopez-Alt 0.135
+    preset: { salt: 2.25, yeast: 0.5, oil: 2, sugar: 1.5 }, // oil 0-2% in most formulas; IDY 0.5% needs the cold ferment
+    size: { cm: [30, 25, 36], in: [12, 10, 14] },
     description: 'Rectangular pan pizza with a thick, airy crust and crispy cheese edges.',
     isRectangular: true
   },
   {
     id: 'pan',
     name: 'Pan',
-    defaultHydration: 65, // 60-70% (fluffy, oil-enriched dough)
-    defaultThicknessFactor: 0.11, // Thick crust in oz/in²
+    defaultHydration: 68, // Lopez-Alt 68.75%, King Arthur 70.8%
+    defaultThicknessFactor: 0.12, // Lehmann: 14 oz for a 12" pan is 0.124
+    preset: { salt: 2.25, yeast: 0.6, oil: 5, sugar: 0 }, // King Arthur: IDY ~0.65% with a cold ferment; neither source adds sugar
+    size: { cm: [30, 30, 40], in: [12, 12, 16] },
     description: 'Pizza Hut-style thick, fluffy crust with a crispy, oil-fried bottom baked in a deep round pan.'
   },
   {
     id: 'focaccia',
     name: 'Focaccia',
-    defaultHydration: 80, // 75-85% (sweet spot: 80%)
-    defaultThicknessFactor: 0.14, // Very thick crust in oz/in²
+    defaultHydration: 80, // high-hydration pan focaccia: Nosrat 75%, King Arthur 79% (focaccia genovese is 50-55%)
+    defaultThicknessFactor: 0.2, // King Arthur's dough in a 9x13" pan is 0.205; Nosrat 0.224
+    preset: { salt: 2.5, yeast: 0.4, oil: 6, sugar: 0.5 },
+    size: { cm: [30, 23, 33], in: [12, 9, 13] },
     description: 'Italian flatbread with a high hydration for an open, airy crumb.',
     isRectangular: 'both'
   }
 ];
+
+// A style's trade size in the unit on screen.
+export const styleSize = (styleId: string, useInches: boolean): { diameter: number; panWidth: number; panLength: number } => {
+  const size = (PIZZA_STYLES.find((style) => style.id === styleId) ?? PIZZA_STYLES[0]).size;
+  const [diameter, panWidth, panLength] = useInches ? size.in : size.cm;
+  return { diameter, panWidth, panLength };
+};
 
 // Calculate the total dough weight
 const calculateTotalDoughWeight = (numberOfPizzas: number, ballWeight: number): number => {
@@ -189,20 +212,18 @@ const calculateFlourWeight = (
 
 // Calculate preferment amounts
 const calculatePreferment = (
-  flourWeight: number, 
-  prefermentPercentage: number, 
+  flourWeight: number,
+  prefermentPercentage: number,
   prefermentHydration: number,
-  _yeast: number,
   yeastType: YeastType
 ) => {
   const prefermentFlour = (flourWeight * prefermentPercentage) / 100;
   const prefermentWater = (prefermentFlour * prefermentHydration) / 100;
-  
-  // For poolish and biga, we add a small amount of yeast to the preferment
-  // For sourdough, we don't add commercial yeast
-  const basePrefermentYeast = prefermentPercentage > 0 ? (flourWeight * 0.1) / 100 : 0;
-  const prefermentYeast = basePrefermentYeast * YEAST_CONVERSION_FACTORS[yeastType];
-  
+
+  // Poolish and biga: 0.1% instant yeast on the preferment's own flour, the amount for about 12 hours at
+  // room temperature (King Arthur Pro: "as little as 0.1% of the biga flour"; Modernist Bread: 0.1-0.2% for 12 h).
+  const prefermentYeast = prefermentFlour * 0.001 * YEAST_CONVERSION_FACTORS[yeastType] / YEAST_CONVERSION_FACTORS.instant;
+
   return {
     flour: prefermentFlour,
     water: prefermentWater,
@@ -356,13 +377,14 @@ export const calculateDoughRecipe = (inputs: DoughCalculatorInputs): DoughRecipe
       totalFlour,
       preferment.percentage,
       preferment.hydration,
-      yeast,
       yeastType
     );
 
-    // Sourdough takes no commercial yeast. Other preferments never take more than the recipe total,
-    // so the two stages always add up to the ingredient list.
-    const prefermentYeast = preferment.type === 'sourdough' ? 0 : Math.min(basePrefermentYeast, yeastWeight);
+    // Sourdough takes no commercial yeast. A sponge takes all of it (sponge-and-dough method, BAKERpedia).
+    // Poolish and biga never take more than the recipe total, so the two stages always add up to the ingredient list.
+    const prefermentYeast = preferment.type === 'sourdough' ? 0
+      : preferment.type === 'sponge' ? yeastWeight
+      : Math.min(basePrefermentYeast, yeastWeight);
 
     // Add preferment type to the recipe
     recipe.prefermentType = preferment.type;

@@ -1,8 +1,11 @@
 import type { DoughCalculatorInputs, PrefermentType, YeastType } from '../types';
 import { PIZZA_STYLES, calculateDoughBallWeight } from './doughCalculator';
-import { RANGES, clamp, storedSizeBounds } from './ranges';
+import { RANGES, clamp, storedSizeBounds, yeastRange } from './ranges';
 
-export const STORAGE_KEY = 'mbp.recipe.v1';
+// Raise the version whenever a style preset or a conversion changes: a saved recipe carries the old numbers,
+// and a returning visitor would keep them without knowing. Older records are then ignored and removed.
+export const STORAGE_KEY = 'mbp.recipe.v2';
+const OLD_KEYS = ['mbp.recipe.v1'];
 
 const YEAST_TYPES: readonly string[] = ['active_dry', 'instant', 'fresh'] satisfies YeastType[];
 const PREFERMENT_TYPES: readonly string[] = ['none', 'poolish', 'biga', 'sponge', 'sourdough'] satisfies PrefermentType[];
@@ -44,7 +47,7 @@ export const parseSavedInputs = (raw: string | null): DoughCalculatorInputs | nu
     pizzaStyle: r.pizzaStyle as string,
     hydration: num(r.hydration, RANGES.hydration),
     salt: num(r.salt, RANGES.salt),
-    yeast: num(r.yeast, r.yeastType === 'fresh' ? RANGES.yeastFresh : RANGES.yeast),
+    yeast: num(r.yeast, yeastRange(r.yeastType as YeastType)),
     yeastType: r.yeastType as YeastType,
     oil: num(r.oil, RANGES.oil),
     sugar: num(r.sugar, RANGES.sugar),
@@ -94,6 +97,7 @@ export const loadSavedInputs = (storage: Pick<Storage, 'getItem'> | undefined = 
 export const saveInputs = (inputs: DoughCalculatorInputs, storage: Pick<Storage, 'setItem'> | undefined = safeStorage()): void => {
   try {
     storage?.setItem(STORAGE_KEY, JSON.stringify(inputs));
+    for (const key of OLD_KEYS) (storage as Partial<Storage> | undefined)?.removeItem?.(key);
   } catch {
     // nothing to do: the recipe just is not remembered
   }

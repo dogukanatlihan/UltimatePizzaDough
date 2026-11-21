@@ -41,10 +41,10 @@ near(run(base.preferment).recipe.ingredients.reduce((s, i) => s + i.weight, 0), 
   near(recipe.preferment!.yeast! + recipe.mainDough!.yeast, totalYeast);
 }
 
-// Enough yeast: the preferment keeps its 0.1%-of-flour share (instant = x0.75), the rest goes to the main dough.
+// Enough yeast: the preferment takes 0.1% instant yeast on its own flour, the rest goes to the main dough.
 {
   const { recipe, totalYeast } = run({ type: 'poolish', percentage: 40, hydration: 100 }, { yeast: 0.3 });
-  near(recipe.preferment!.yeast!, recipe.totalFlour * 0.001 * 0.75);
+  near(recipe.preferment!.yeast!, recipe.preferment!.flour * 0.001);
   near(recipe.preferment!.yeast! + recipe.mainDough!.yeast, totalYeast);
 }
 
@@ -68,10 +68,10 @@ near(run(base.preferment).recipe.ingredients.reduce((s, i) => s + i.weight, 0), 
   near(totalYeast, recipe.totalFlour * 0.004);
 }
 
-// Switching yeast type keeps the leavening power (instant 0.75 : active dry 1 : fresh 3).
-assert.equal(convertYeastPercent(0.3, 'instant', 'active_dry'), 0.4);
-assert.equal(convertYeastPercent(0.3, 'instant', 'fresh'), 1.2);
-assert.equal(convertYeastPercent(0.2, 'fresh', 'instant'), 0.05);
+// Switching yeast type keeps the leavening power (fresh 1 : active dry 0.4 : instant 1/3).
+assert.equal(convertYeastPercent(0.3, 'instant', 'active_dry'), 0.36);
+assert.equal(convertYeastPercent(0.3, 'instant', 'fresh'), 0.9);
+assert.equal(convertYeastPercent(0.15, 'fresh', 'instant'), 0.05);
 
 // Neapolitan preset: a 30 cm pizza gets a ball inside the AVPN range (200-280 g).
 {

@@ -1,15 +1,17 @@
 import { PIZZA_STYLES } from './doughCalculator';
+import type { YeastType } from '../types';
 
 export type Range = readonly [min: number, max: number, step: number];
 
 // One source for every slider and for checking a saved recipe.
 export const RANGES = {
   numberOfPizzas: [1, 20, 1],
-  thicknessFactor: [0.03, 0.15, 0.01],
+  thicknessFactor: [0.05, 0.3, 0.01], // sourced doughs run from 0.06 (cracker-thin) to 0.30 (King Arthur focaccia)
   hydration: [50, 85, 1],
   salt: [1, 4, 0.1],
   yeast: [0, 2, 0.01],
-  yeastFresh: [0, 6, 0.01], // fresh yeast needs about 3x the dry amount
+  yeastActiveDry: [0, 2.4, 0.01], // 1.2x the instant amount
+  yeastFresh: [0, 6, 0.01], // 3x the instant amount
   oil: [0, 10, 0.5],
   sugar: [0, 5, 0.5],
   diastaticMalt: [0, 2, 0.1],
@@ -17,6 +19,10 @@ export const RANGES = {
   prefermentPercentage: [10, 100, 5],
   prefermentHydration: [50, 125, 5],
 } as const satisfies Record<string, Range>;
+
+// The yeast slider's range follows the yeast type, so an amount converted to another type still fits.
+export const yeastRange = (type: YeastType): Range =>
+  type === 'fresh' ? RANGES.yeastFresh : type === 'active_dry' ? RANGES.yeastActiveDry : RANGES.yeast;
 
 // Sizes are kept in the unit on screen, so the bounds depend on it: 15–60cm ≈ 6–24″, 10–60cm ≈ 4–24″.
 export const sizeBounds = (useInches: boolean) =>
