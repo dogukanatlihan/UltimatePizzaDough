@@ -3,6 +3,9 @@
   // Serves the Vite build output in ./dist from Cloudflare's edge.
   "name": "makebetter-pizza",
   "compatibility_date": "2026-07-27",
+  // workers.dev preview addresses for branch builds. Cloudflare adds "X-Robots-Tag: noindex" to them,
+  // so search engines do not index a second copy of the site.
+  "preview_urls": true,
   // Custom domains. Cloudflare manages the DNS records and the certificates.
   "routes": [
     {
