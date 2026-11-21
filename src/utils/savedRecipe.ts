@@ -1,6 +1,6 @@
 import type { DoughCalculatorInputs, PrefermentType, YeastType } from '../types';
 import { PIZZA_STYLES, calculateDoughBallWeight } from './doughCalculator';
-import { RANGES, clamp, sizeBounds } from './ranges';
+import { RANGES, clamp, storedSizeBounds } from './ranges';
 
 export const STORAGE_KEY = 'mbp.recipe.v1';
 
@@ -37,7 +37,7 @@ export const parseSavedInputs = (raw: string | null): DoughCalculatorInputs | nu
     }
     return clamp(value, min, max);
   };
-  const size = sizeBounds(r.useInches);
+  const size = storedSizeBounds(r.useInches);
   const inputs: DoughCalculatorInputs = {
     numberOfPizzas: Math.round(num(r.numberOfPizzas, RANGES.numberOfPizzas)),
     ballWeight: num(r.ballWeight, [1, 20000]),

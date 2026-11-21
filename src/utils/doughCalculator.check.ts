@@ -1,6 +1,6 @@
 // Assert-based self-check for the dough maths. Run with `npm test`.
 import assert from 'node:assert/strict';
-import { calculateDoughRecipe, calculateDoughBallWeight, convertYeastPercent, PIZZA_STYLES } from './doughCalculator';
+import { calculateDoughRecipe, calculateDoughBallWeight, convertYeastPercent, PIZZA_STYLES, cmToInches, inchesToCm } from './doughCalculator';
 import type { DoughCalculatorInputs, PrefermentConfig } from '../types';
 
 const base: DoughCalculatorInputs = {
@@ -78,6 +78,22 @@ assert.equal(convertYeastPercent(0.2, 'fresh', 'instant'), 0.05);
   const tf = PIZZA_STYLES.find((s) => s.id === 'neapolitan')!.defaultThicknessFactor;
   const ball = calculateDoughBallWeight('neapolitan', 30, undefined, undefined, tf);
   assert.ok(ball >= 200 && ball <= 280, `neapolitan ball ${ball} g`);
+}
+
+// Lengths convert exactly: switching units and back must give the same pizza.
+for (const cm of [15, 23, 25, 30, 33, 36, 45, 46, 60]) near(inchesToCm(cmToInches(cm)), cm);
+near(cmToInches(2.54), 1);
+
+// Ball weight is thickness x area with no rounding on the way (only the final gram).
+{
+  const OZ = 28.349523125;
+  const round = (d: number, tf: number) => Math.round(tf * Math.PI * (d / 2.54 / 2) ** 2 * OZ);
+  const rect = (w: number, l: number, tf: number) => Math.round(tf * (w / 2.54) * (l / 2.54) * OZ);
+  assert.equal(calculateDoughBallWeight('ny', 45, undefined, undefined, 0.08), round(45, 0.08));
+  assert.equal(calculateDoughBallWeight('focaccia', 0, 23, 33, 0.14), rect(23, 33, 0.14));
+  assert.equal(calculateDoughBallWeight('detroit', 0, 25, 36, 0.1), rect(25, 36, 0.1));
+  // The same pizza in inches or in centimetres weighs the same.
+  assert.equal(calculateDoughBallWeight('ny', 18, undefined, undefined, 0.08, true), calculateDoughBallWeight('ny', 45.72, undefined, undefined, 0.08, false));
 }
 
 console.log('doughCalculator checks passed');

@@ -34,7 +34,7 @@ assert.deepEqual(sizeBounds(false).pan, [10, 60]);
 
 // ---- Saved recipe
 const good: DoughCalculatorInputs = {
-  numberOfPizzas: 6, ballWeight: 558, pizzaStyle: 'ny', hydration: 65, salt: 2.25, yeast: 0.4, yeastType: 'instant',
+  numberOfPizzas: 6, ballWeight: 559, pizzaStyle: 'ny', hydration: 65, salt: 2.25, yeast: 0.4, yeastType: 'instant',
   oil: 2, sugar: 1.5, diastaticMalt: 0.75, doughEnhancer: 0.4, thicknessFactor: 0.08, pizzaDiameter: 45, panWidth: 30, panLength: 40,
   preferment: { type: 'none', percentage: 0, hydration: 100 }, useInches: false, isRectangular: false,
 };
@@ -59,6 +59,10 @@ assert.equal(parseSavedInputs(JSON.stringify({ ...good, numberOfPizzas: 0 }))!.n
 const inches = { ...good, useInches: true, pizzaDiameter: 17.7 };
 assert.equal(parseSavedInputs(JSON.stringify(inches))!.pizzaDiameter, 17.7);
 assert.equal(parseSavedInputs(JSON.stringify({ ...inches, pizzaDiameter: 45 }))!.pizzaDiameter, 24);
+
+// A size at the limit in one unit survives a unit switch and a reload (15 cm is 5.9 in; 24 in is 60.96 cm).
+assert.equal(parseSavedInputs(JSON.stringify({ ...good, useInches: true, pizzaDiameter: 15 / 2.54 }))!.pizzaDiameter, 15 / 2.54);
+assert.equal(parseSavedInputs(JSON.stringify({ ...good, pizzaDiameter: 24 * 2.54 }))!.pizzaDiameter, 24 * 2.54);
 
 // Fresh yeast has the wider range.
 assert.equal(parseSavedInputs(JSON.stringify({ ...good, yeastType: 'fresh', yeast: 4 }))!.yeast, 4);
@@ -131,7 +135,7 @@ const nyPoolish = { ...ny, yeast: 0.3, preferment: { type: 'poolish' as const, p
   const rec = calculateDoughRecipe(ny);
   assert.equal(methodStages(rec, tEn, 'en').length, 1);
   const lines = copyText(rec, ny, tEn, 'en').split('\n');
-  assert.equal(lines[0], 'New York — 4 × 558 g (45 cm)');
+  assert.equal(lines[0], 'New York — 4 × 559 g (45 cm)');
   assert.equal(lines[1], 'Hydration 65%');
   assert.ok(lines.includes(`• Flour: ${gramsNumber(rec.totalFlour)} g (100%)`));
 }
@@ -193,7 +197,7 @@ assert.equal(sameInputs(good, { ...good, hydration: 66 }), false);
 assert.equal(sameInputs(good, { ...good, preferment: { ...good.preferment, type: 'biga' } }), false);
 
 // A saved record cannot carry a ball weight or a shape that its own style and sizes contradict.
-assert.equal(parseSavedInputs(JSON.stringify({ ...good, ballWeight: 20000 }))!.ballWeight, 558);
+assert.equal(parseSavedInputs(JSON.stringify({ ...good, ballWeight: 20000 }))!.ballWeight, 559);
 assert.equal(parseSavedInputs(JSON.stringify({ ...good, pizzaStyle: 'neapolitan', isRectangular: true }))!.isRectangular, false);
 assert.equal(parseSavedInputs(JSON.stringify({ ...good, pizzaStyle: 'detroit', isRectangular: false }))!.isRectangular, true);
 assert.equal(parseSavedInputs(JSON.stringify({ ...good, pizzaStyle: 'focaccia', isRectangular: false }))!.isRectangular, false);

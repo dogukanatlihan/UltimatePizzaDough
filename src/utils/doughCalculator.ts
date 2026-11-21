@@ -1,8 +1,8 @@
 import { DoughCalculatorInputs, DoughRecipe, DoughIngredient, PizzaStyle, YeastType } from '../types';
 
 // Conversion constants
-const GRAMS_TO_OUNCES = 0.03527396;
-const OUNCES_TO_GRAMS = 28.3495;
+const OUNCES_TO_GRAMS = 28.349523125; // exact: the international avoirdupois ounce
+const GRAMS_TO_OUNCES = 1 / OUNCES_TO_GRAMS;
 
 // Yeast conversion factors relative to active dry yeast (equal leavening power)
 const YEAST_CONVERSION_FACTORS = {
@@ -33,10 +33,12 @@ export const ouncesToGrams = (ounces: number): number => {
 };
 
 // Convert inches to cm
-export const inchesToCm = (inches: number): number => Math.round(inches * 2.54 * 10) / 10;
+// Exact, with no rounding: lengths are rounded only where they are shown. Rounding here made the same
+// pizza a different size after a unit switch (23 cm became 23.1 cm) and shifted ball weights by up to 0.7%.
+export const inchesToCm = (inches: number): number => inches * 2.54;
 
 // Convert cm to inches
-export const cmToInches = (cm: number): number => Math.round(cm * 0.393701 * 10) / 10;
+export const cmToInches = (cm: number): number => cm / 2.54;
 
 // Pizza styles with their default hydration levels and thickness factors
 export const PIZZA_STYLES: PizzaStyle[] = [

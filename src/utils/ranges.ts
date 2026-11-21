@@ -24,6 +24,16 @@ export const sizeBounds = (useInches: boolean) =>
     ? ({ diameter: [6, 24], pan: [4, 24] } as const)
     : ({ diameter: [15, 60], pan: [10, 60] } as const);
 
+// What a stored size may be: the counters' bounds in either unit, so a size set at the limit in inches is
+// still valid after a switch to centimetres (24 in is 60.96 cm) and the other way round (15 cm is 5.9 in).
+export const storedSizeBounds = (useInches: boolean) => {
+  const k = useInches ? 1 / 2.54 : 1; // from cm to the unit in use
+  return {
+    diameter: [Math.min(15, 6 * 2.54) * k, Math.max(60, 24 * 2.54) * k],
+    pan: [Math.min(10, 4 * 2.54) * k, Math.max(60, 24 * 2.54) * k],
+  } as const;
+};
+
 // A home batch: four round pizzas, or one pan.
 export const usualBatch = (styleId: string): number =>
   PIZZA_STYLES.find((s) => s.id === styleId)?.isRectangular ? 1 : 4;
