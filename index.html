@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/pizza-icon.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/icons/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <!-- Color scheme meta tag - informs browser plugins like Dark Reader that we have native dark mode -->
     <meta name="color-scheme" content="light dark" />
@@ -23,25 +23,8 @@
     <!-- Web App Manifest -->
     <link rel="manifest" href="/manifest.json" />
     
-    <!-- iOS home screen icons - using PNG format which is required for iOS -->
-    <link rel="apple-touch-icon" href="/apple-icon.png" />
-    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152.png" />
-    <link rel="apple-touch-icon" sizes="167x167" href="/apple-icon-167.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180.png" />
-    
-    <!-- iOS splash screens -->
-    <link rel="apple-touch-startup-image" href="/splash.svg" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)" />
-    <link rel="apple-touch-startup-image" href="/splash.svg" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" />
-    <link rel="apple-touch-startup-image" href="/splash.svg" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3)" />
-    <link rel="apple-touch-startup-image" href="/splash.svg" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)" />
-    <link rel="apple-touch-startup-image" href="/splash.svg" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)" />
-    <link rel="apple-touch-startup-image" href="/splash.svg" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)" />
-    <link rel="apple-touch-startup-image" href="/splash.svg" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)" />
-    <link rel="apple-touch-startup-image" href="/splash.svg" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)" />
-    <link rel="apple-touch-startup-image" href="/splash.svg" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2)" />
-    <link rel="apple-touch-startup-image" href="/splash.svg" media="(device-width: 834px) and (device-height: 1112px) and (-webkit-device-pixel-ratio: 2)" />
-    <link rel="apple-touch-startup-image" href="/splash.svg" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2)" />
-    <link rel="apple-touch-startup-image" href="/splash.svg" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)" />
+    <!-- iOS home screen icon (iOS rounds the corners itself) -->
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -51,19 +34,12 @@
     <!-- Open Graph / Social Media Meta Tags -->
     <meta property="og:title" content="Make Better Pizza" />
     <meta property="og:description" content="Calculate the perfect pizza dough recipe for any style and size. Customize hydration, salt, and more for your ideal pizza." />
-    <!-- Primary image (PNG) -->
-    <meta property="og:image" content="https://makebetter.pizza/pizza-thumbnail.png" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:image:type" content="image/png" />
-    <meta property="og:image:alt" content="Pizza Dough Calculator with pizza icon" />
-    <!-- Additional image (JPG) for better Telegram compatibility -->
-    <meta property="og:image" content="https://makebetter.pizza/pizza-thumbnail.jpg" />
+    <meta property="og:image" content="https://makebetter.pizza/share.jpg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:type" content="image/jpeg" />
-    <meta property="og:image:alt" content="Pizza Dough Calculator with pizza icon" />
-    
+    <meta property="og:image:alt" content="Make Better Pizza: dough recipes by weight for six pizza styles, beside a Neapolitan margherita" />
+
     <meta property="og:url" content="https://makebetter.pizza" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Make Better Pizza" />
@@ -72,7 +48,7 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Make Better Pizza" />
     <meta name="twitter:description" content="Calculate the perfect pizza dough recipe for any style and size. Customize hydration, salt, and more for your ideal pizza." />
-    <meta name="twitter:image" content="https://makebetter.pizza/pizza-thumbnail.png" />
+    <meta name="twitter:image" content="https://makebetter.pizza/share.jpg" />
     
     <!-- General Meta Tags -->
     <meta name="description" content="Calculate the perfect pizza dough recipe for any style and size. Customize hydration, salt, and more for your ideal pizza." />
@@ -85,7 +61,7 @@
       "@type": "WebApplication",
       "name": "Make Better Pizza",
       "description": "Calculate the perfect pizza dough recipe for any style and size. Customize hydration, salt, and more for your ideal pizza.",
-      "image": "https://makebetter.pizza/pizza-thumbnail.jpg",
+      "image": "https://makebetter.pizza/share.jpg",
       "url": "https://makebetter.pizza",
       "applicationCategory": "UtilityApplication",
       "offers": {

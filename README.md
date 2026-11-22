@@ -2,7 +2,7 @@
 
 A modern, responsive web application for calculating perfect pizza dough recipes with precise baker's percentages.
 
-![Pizza Dough Calculator](public/pizza-thumbnail.png)
+![Make Better Pizza](public/share.jpg)
 
 ## 🍕 Live Demo
 

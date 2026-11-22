@@ -59,3 +59,6 @@ yarn-error.log*
 
 # SonarQube scanner work folder
 .scannerwork/
+
+# Full-size image masters from the graphics pass (about 30 MB): kept on disk, not in git
+design-concepts/graphics/
