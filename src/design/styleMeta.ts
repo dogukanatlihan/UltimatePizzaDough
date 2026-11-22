@@ -5,8 +5,9 @@ import detroitImg from '../assets/style-detroit.webp';
 import panImg from '../assets/style-pan.webp';
 import focacciaImg from '../assets/style-focaccia.webp';
 
-// 800x800 WebP, 60-120 KB each.
-export const STYLE_IMAGE_SIZE = 800;
+// 640x640 WebP, about 90 KB each: enough for a phone card at 3x. One top-down shoot on the same table,
+// so each style still reads in the 40 px chip.
+export const STYLE_IMAGE_SIZE = 640;
 
 export const STYLE_IMAGES: Record<string, string> = {
   neapolitan: neapolitanImg,
@@ -19,12 +20,12 @@ export const STYLE_IMAGES: Record<string, string> = {
 
 // Average colour of each photo: the ground it fades in over, so nothing pops.
 export const STYLE_TINT: Record<string, string> = {
-  neapolitan: '#8b603d',
-  ny: '#8e603a',
-  sicilian: '#936842',
-  detroit: '#5f3e29',
-  pan: '#6b472b',
-  focaccia: '#a7835d',
+  neapolitan: '#8b512f',
+  ny: '#a26434',
+  sicilian: '#864e2c',
+  detroit: '#824325',
+  pan: '#8d4922',
+  focaccia: '#8a562c',
 };
 
 // Oven and time per style, the same figures the baking steps give (checked in accuracy.check.ts).
