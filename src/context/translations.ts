@@ -604,8 +604,8 @@ export const translations: Record<string, Record<Language, string>> = {
     tr: 'Kenarda leopar benekli yanık noktalar oluşana kadar pişirin (odun fırında 60-90 saniye, ev fırınında 5-7 dakika).'
   },
   'baking.step4.pan': {
-    en: 'Bake on the lowest rack for 12-15 minutes until the crust is deep golden and the cheese is bubbly. The oiled pan creates a crispy, fried bottom.',
-    tr: 'En alt rafta 12-15 dakika, kenar koyu altın rengi olana ve peynir köpürene kadar pişirin. Yağlı tava çıtır, kızarmış bir taban oluşturur.'
+    en: 'Bake on the lowest rack for 12-15 minutes until the crust is deep golden and the cheese is bubbly. The oiled pan creates a crispy, fried bottom. If your oven does not reach 550°F (290°C), bake at 450°F (230°C) for 18-24 minutes.',
+    tr: 'En alt rafta 12-15 dakika, kenar koyu altın rengi olana ve peynir köpürene kadar pişirin. Yağlı tava çıtır, kızarmış bir taban oluşturur. Fırınınız 290°C\'ye çıkmıyorsa 230°C\'de 18-24 dakika pişirin.'
   },
   'baking.step3.focaccia': {
     en: 'Dimple the dough with your fingers, drizzle generously with olive oil, and sprinkle with flaky salt.',
@@ -628,8 +628,8 @@ export const translations: Record<string, Record<Language, string>> = {
     tr: 'Önce tavanın kenarlarına tuğla peyniri veya karışık peynir ekleyin, ardından üzerine şeritler halinde sos ekleyin.'
   },
   'baking.step4.detroit': {
-    en: 'Bake for 12-15 minutes until the cheese edges are deeply caramelized and crispy. The cheese touching the pan creates the signature frico crust.',
-    tr: '12-15 dakika, peynir kenarları iyice karamelize olana ve çıtır olana kadar pişirin. Tavaya dokunan peynir karakteristik frico kabuğu oluşturur.'
+    en: 'Bake for 12-15 minutes until the cheese edges are deeply caramelized and crispy. The cheese touching the pan creates the signature frico crust. If your oven stops at 480°F (250°C), use its highest setting and bake for 15-17 minutes.',
+    tr: '12-15 dakika, peynir kenarları iyice karamelize olana ve çıtır olana kadar pişirin. Tavaya dokunan peynir karakteristik frico kabuğu oluşturur. Fırınınız en fazla 250°C\'ye çıkıyorsa en yüksek ayarda 15-17 dakika pişirin.'
   },
 
   // Method and baking steps that follow each style's sources (AVPN/EU, Lehmann, pan-pizza formulas)

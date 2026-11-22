@@ -130,6 +130,12 @@ for (const s of PIZZA_STYLES) for (const [t, lang] of [[tEn, 'en'], [tTr, 'tr']]
     assert.ok(hasNumber(bake.steps[0], n), `${s.id} ${lang}: card says ${bake.temp}, step says "${bake.steps[0]}"`);
   }
 }
+// Pan and Detroit ask for more heat than many home ovens have (about 250 °C in Europe): the bake step gives the
+// cooler-oven figures too. Pan: King Arthur, 230 °C for 18-24 min. Detroit: the long end of the sourced 12-17 min.
+for (const t of [tEn, tTr]) {
+  assert.ok(/230°C/.test(bakeInfo('pan', t).steps[3]) && /18-24/.test(bakeInfo('pan', t).steps[3]), bakeInfo('pan', t).steps[3]);
+  assert.ok(/250°C/.test(bakeInfo('detroit', t).steps[3]) && /15-17/.test(bakeInfo('detroit', t).steps[3]), bakeInfo('detroit', t).steps[3]);
+}
 // Neapolitan oven: AVPN and EU give 430–485 °C, not 500.
 assert.ok(!bakeInfo('neapolitan', tEn).temp.includes('500°C'));
 
